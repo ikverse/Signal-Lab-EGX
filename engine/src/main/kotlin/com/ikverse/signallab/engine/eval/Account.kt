@@ -3,6 +3,7 @@ package com.ikverse.signallab.engine.eval
 import com.ikverse.signallab.engine.Candles
 import com.ikverse.signallab.engine.EngineConfig
 import com.ikverse.signallab.engine.Indicators
+import com.ikverse.signallab.engine.Markets
 import java.time.LocalDate
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -110,7 +111,7 @@ object Account {
         val perYear: Double,
         /** The deepest fall from a high, as a negative fraction. */
         val worstFall: Double,
-        /** Daily Sharpe ratio, annualised over 365 days. */
+        /** Daily Sharpe ratio, annualised over the market's sessions a year. */
         val sharpe: Double,
         /** Each calendar year's return, oldest first. */
         val byYear: List<Pair<Int, Double>>,
@@ -118,7 +119,8 @@ object Account {
         val maxHeld: Double,
     )
 
-    fun summarize(days: List<Day>, start: Double = 10_000.0): Summary? {
+    /** [sessionsPerYear] annualises the growth and the Sharpe ratio: the market's own count, never an assumed 365. */
+    fun summarize(days: List<Day>, start: Double = 10_000.0, sessionsPerYear: Int = Markets.CRYPTO.sessionsPerYear): Summary? {
         if (days.size < 2) return null
         var peak = start
         var worst = 0.0
@@ -137,8 +139,8 @@ object Account {
         }
         val end = days.last().equity
         return Summary(
-            start = start, end = end, perYear = if (end > 0) (end / start).pow(365.0 / days.size) - 1 else -1.0, worstFall = worst,
-            sharpe = if (sd > 0) mean / sd * sqrt(365.0) else 0.0, byYear = byYear,
+            start = start, end = end, perYear = if (end > 0) (end / start).pow(sessionsPerYear.toDouble() / days.size) - 1 else -1.0, worstFall = worst,
+            sharpe = if (sd > 0) mean / sd * sqrt(sessionsPerYear.toDouble()) else 0.0, byYear = byYear,
             avgHeld = days.sumOf { it.held } / days.size, maxHeld = days.maxOf { it.held },
         )
     }

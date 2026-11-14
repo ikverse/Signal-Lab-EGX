@@ -452,3 +452,28 @@ asking is logged here.
   `research/data/egx/`, which is already gitignored, so a temp-folder cleanup cannot lose them.
 - The plan, the build list and the scripts were committed first, before any engine change, so the side sessions' worktrees
   start with them.
+- Item 3: `engine/.../Market.kt` holds each market's settings (sessions a year, round trip by rank, cash rate, dividend
+  tax, price limit, locked move, price step). `Account.summarize` takes the market's sessions a year (crypto keeps 365).
+  The EGX price step is taken as 0.01 pounds for every price: an assumption to check against Thndr.
+- Items 4 to 9: the Egyptian rules hold stocks in slots, so they live in a new package `engine/.../egx/` (`Board`,
+  `Dividends`, `Slots`, `Rules`, `Yardsticks`) instead of the crypto `Strategy` interface. `Slots.run` is a line-by-line
+  port of the research's `run_levels`.
+- Month ends: the evening pass cannot see tomorrow's candle, so a month ends when the next session day (weekdays less
+  the exchange's published holidays) is in another month. Guessing from weekdays alone put 24 of 201 month ends a session
+  late and moved results up to 50%; with a holiday list the engine matches the research. The research takes the holidays
+  from the weekdays the market did not open; the app will keep a table the owner can correct.
+- Quarterly re-picks (Low-risk formula, holding the 30 busiest) follow the research's test: when the next session opens a
+  new quarter. This matters only around long closures (27 Jan to 23 Mar 2011).
+- Item 5: a buy blocked by a lock or a session without trades waits up to 5 sessions, until the rule decides again (the
+  research dropped it). This leaves 2023-26 unchanged and moves 2015-22 by up to 16% (walk-forward picks), under 3% for
+  fixed settings. `buysWait = false` reproduces the research.
+- Item 8: the entry range fills at the last close or below, as tested; its lower edge (half a move below) is shown only.
+- Item 10: random twins buy on the rule's own buying days from its own pool and sell alongside it, 20 counter-based draws.
+  Tier rule: 12 months live before any change; a rule on Today drops to Watch behind cash and the EGX30, or below the
+  random tenth percentile; Watch rises after 24 months ahead of all three and the random ninetieth percentile.
+- Items 11 and 12: `tools/egx/export.py` writes dividends.csv and cash.csv; `gradlew :research:run --args="egx"` re-makes
+  the plan's table. Every comparable line matches the research within 0.5% (output in `research/data/egx/out_engine.txt`;
+  with waiting buys in `out_engine_wait.txt`).
+- Item 13: 26 engine tests (`engine/src/test/.../egx/`) with a synthetic board in `testFixtures/EgxSynth.kt`; every
+  registered rule gives the same decisions on history cut at, or scrambled after, four points on three seeds.
+- Item 2: `docs/egx-research.md`.

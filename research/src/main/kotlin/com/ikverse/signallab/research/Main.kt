@@ -23,6 +23,7 @@ import java.util.Locale
  *     python tools/download_history.py funding         (reads research/data/top12.txt)
  *     gradlew :research:run                            (the test)
  *     gradlew :research:run --args="timer"             (Trend timer at other settings and fees)
+ *     gradlew :research:run --args="egx"               (the Egyptian rules against the research; add "wait" for the engine's fill rule)
  */
 private const val DAY = 86_400_000L
 private val FROM = LocalDate.parse("2020-01-01").toEpochDay() * DAY
@@ -71,6 +72,9 @@ private fun pct(x: Double) = String.format(Locale.US, "%+.2f%%", 100 * x)
 private fun year(t: Long) = LocalDate.ofEpochDay(t / DAY).year
 
 fun main(args: Array<String>) {
+    if (args.firstOrNull() == "egx") {
+        return egxMain(File(args.getOrNull(1)?.takeIf { it != "wait" } ?: "research/data/egx/data_typical"), buysWait = "wait" in args)
+    }
     val dir = File(args.firstOrNull { it.contains('/') || it.contains('\\') } ?: "research/data")
     val mode = args.firstOrNull { it == "top12" || it == "timer" }
     val coins = load(dir)
