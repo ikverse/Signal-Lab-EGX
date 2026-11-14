@@ -717,3 +717,13 @@ widget, and the AI analyst through the PC host.
 - "Analyst" is the menu's fourth item, before Settings; the menu's items are 3 dp narrower each so five fit folded.
   Not checked on the Fold's cover screen.
 - The host's error messages show in English under a translated line, as the update card does.
+
+### Release 0.2.0 (approved 2026-11-14)
+
+- The release workflow built the crypto app (`:app`, checked against `app/build.gradle.kts` 2.5.0), so the `v0.1.0` and
+  `v0.1.1` runs failed and those releases were uploaded by hand from a signed local build. It now releases the EGX app:
+  the tag is checked against `egx/build.gradle.kts`, the tests are `:engine:test :egx:testDebugUnitTest`, the APK is
+  `:egx:assembleRelease` signed with the existing secrets, and the notes come from `egx/CHANGELOG.md`.
+- New step: the APK's signing certificate must match the previous release's APK, or nothing is published. The 0.1.x
+  APKs were signed on the owner's PC; a different key in the secrets would leave every install unable to update.
+- Final release, not a pre-release. None of the five features had been tried on the Fold when it was tagged.

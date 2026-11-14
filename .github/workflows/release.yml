@@ -1,8 +1,9 @@
 name: release
 
 # A release is published only when a version tag is pushed (`git push origin vX.Y.Z`). A plain push to main
-# runs ci.yml and publishes nothing. The phone's updater reads the newest release, so what this uploads is
-# what every install is offered: the build is tested again, signed, and checked to carry a signature first.
+# runs ci.yml and publishes nothing. This repository releases Signal Lab EGX (egx/): the phone's updater reads the
+# newest release, so what this uploads is what every install is offered. The build is tested again, signed, checked to
+# carry a signature, and checked to carry the same signature as the release before it.
 on:
   push:
     tags: ["v*"]
@@ -19,14 +20,15 @@ jobs:
       - name: Check the tag is the app's version
         run: |
           tag="${GITHUB_REF_NAME#v}"
-          built=$(grep -oP 'val appVersionName = "\K[^"]+' app/build.gradle.kts)
+          built=$(grep -oP 'val appVersionName = "\K[^"]+' egx/build.gradle.kts)
           if [ "$tag" != "$built" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match appVersionName $built in app/build.gradle.kts"
+            echo "::error::Tag $GITHUB_REF_NAME does not match appVersionName $built in egx/build.gradle.kts"
             exit 1
           fi
 
-      - name: Write the release notes from CHANGELOG.md
-        run: bash .github/scripts/release-notes.sh "$GITHUB_REF_NAME" > "$RUNNER_TEMP/release-notes.md"
+      - name: Write the release notes from egx/CHANGELOG.md
+        working-directory: egx
+        run: bash ../.github/scripts/release-notes.sh "$GITHUB_REF_NAME" > "$RUNNER_TEMP/release-notes.md"
 
       - uses: actions/setup-java@v4
         with:
@@ -36,7 +38,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Test
-        run: ./gradlew :engine:test :analyst-host:test :app:testDebugUnitTest --no-daemon
+        run: ./gradlew :engine:test :egx:testDebugUnitTest --no-daemon
 
       - name: Restore the signing key
         env:
@@ -50,18 +52,36 @@ jobs:
         env:
           SIGNAL_LAB_KEYSTORE_PASSWORD: ${{ secrets.SIGNAL_LAB_KEYSTORE_PASSWORD }}
           SIGNAL_LAB_KEY_ALIAS: ${{ secrets.SIGNAL_LAB_KEY_ALIAS }}
-        run: ./gradlew :app:assembleRelease --no-daemon
+        run: ./gradlew :egx:assembleRelease --no-daemon
 
       # Without the key the build still succeeds, with an unsigned file that cannot be installed.
       # Refuse to publish that.
       - name: Check the APK is signed
         run: |
-          apks=(app/build/outputs/apk/release/*.apk)
+          apks=(egx/build/outputs/apk/release/*.apk)
           test "${#apks[@]}" -eq 1 || { echo "::error::Expected one release APK, found ${#apks[@]}"; exit 1; }
           case "${apks[0]}" in *unsigned*) echo "::error::The release APK is unsigned"; exit 1;; esac
           apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
           "$apksigner" verify --print-certs "${apks[0]}"
-          cp "${apks[0]}" "$RUNNER_TEMP/signal-lab-${GITHUB_REF_NAME#v}.apk"
+          echo "APKSIGNER=$apksigner" >> "$GITHUB_ENV"
+          cp "${apks[0]}" "$RUNNER_TEMP/signal-lab-egx-${GITHUB_REF_NAME#v}.apk"
+
+      # Android refuses an update signed by another key than the installed copy. The previous releases were signed on
+      # the owner's PC; if these secrets held a different key, every install would be offered an update it cannot take.
+      - name: Check the signature is the previous release's
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/previous"
+          if ! gh release download --repo "$GITHUB_REPOSITORY" --pattern '*.apk' --dir "$RUNNER_TEMP/previous"; then
+            echo "No earlier release with an APK: nothing to compare."
+            exit 0
+          fi
+          old=$(ls "$RUNNER_TEMP"/previous/*.apk | head -1)
+          digest() { "$APKSIGNER" verify --print-certs "$1" | grep -m1 'certificate SHA-256 digest' | awk '{print $NF}'; }
+          was=$(digest "$old"); now=$(digest "$RUNNER_TEMP/signal-lab-egx-${GITHUB_REF_NAME#v}.apk")
+          echo "previous: $was"; echo "this one: $now"
+          test -n "$was" && test "$was" = "$now" || { echo "::error::This APK is signed by a different key than $(basename "$old"); installed copies could not update"; exit 1; }
 
       - name: Publish the release
         env:
@@ -70,8 +90,8 @@ jobs:
           # A CHANGELOG heading that ends in "(pre-release)" publishes a pre-release: installed copies' updaters ask
           # GitHub for the latest release, which never returns one, so nobody is offered it until it is marked final.
           pre=()
-          if grep -qE "^## v?${GITHUB_REF_NAME#v}( |$).*\(pre-release\)" CHANGELOG.md; then pre=(--prerelease); fi
-          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP/signal-lab-${GITHUB_REF_NAME#v}.apk" \
-            --title "Signal Lab ${GITHUB_REF_NAME#v}" \
+          if grep -qE "^## v?${GITHUB_REF_NAME#v}( |$).*\(pre-release\)" egx/CHANGELOG.md; then pre=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP/signal-lab-egx-${GITHUB_REF_NAME#v}.apk" \
+            --title "Signal Lab EGX ${GITHUB_REF_NAME#v}" \
             --notes-file "$RUNNER_TEMP/release-notes.md" \
             --verify-tag "${pre[@]}"
