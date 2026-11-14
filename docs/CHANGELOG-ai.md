@@ -560,3 +560,20 @@ rows). The owner reads both before the install (item 41).
   holidays). Item 27: four notifications (tomorrow's plan, the month-end list, targets and stops reached, dividend dates).
 - Item 37's format decided here: every text is written in English in the code and looked up by that exact English in
   `strings_ar.tsv` (D's table), so no key list has to be kept in step; a missing text shows in English and is listed.
+
+### E4: screens (part 1: the theme and Today)
+
+- Item 28: `view/Theme.kt` carries every colour of the accepted mockup, light and dark, and the mint and sky wash. Readex
+  Pro is not in the app yet: its font file must be downloaded from Google Fonts, which waits on the owner's OK; the
+  phone's sans-serif stands in (`Type.Family` is the one place to change).
+- Item 29: Today as in the mockup: the plan's date and the market pill, the one sentence, swipeable call cards tinted for
+  buy or sell with "placed the order", the paper-account tile against the EGX30 and cash, the free-orders tile, and the
+  floating pill menu. `todayView` builds every text without Android, so tests read them.
+- Items 35 and 36 started: folded, unfolded (a window 600 dp wide or more: sentence and tiles on one side, cards on the
+  other) and half-folded (a horizontal crease: sentence and tiles above, cards below), from the window and Jetpack
+  WindowManager's fold; the four pages swipe sideways and the pill menu jumps between them. Strategies, Ledger and
+  Settings show a placeholder until the owner accepts their design in session C (items 31 to 34).
+- Texts follow session D's English exactly ("EGX30 %1$s", "%1$d shares", "EGP %1$s"), with Arabic's counted forms
+  (1, 2, 3 to 10, 11 and more) and " و" to join the sentence's parts. One row was missing and is added, marked for the
+  owner: "Plan for %1$s" = "خطة %1$s" (the mockup's wording). A test holds Today's and the notifications' texts to
+  having an Arabic row.

@@ -23,11 +23,17 @@ object NotificationTexts {
         val sells = calls.count { it.action == "sell" }
         if (buys == 0 && sells == 0) return if (calls.any { it.action == "keep" }) tr.t("Tomorrow: keep what you hold.") else tr.t("Tomorrow: nothing to do.")
         if (buys == 2 && sells == 1) return tr.t("Tomorrow: buy two, sell one.")
-        val parts = listOfNotNull(
-            if (buys > 0) tr.t(if (buys == 1) "buy one" else "buy %1\$d", buys) else null,
-            if (sells > 0) tr.t(if (sells == 1) "sell one" else "sell %1\$d", sells) else null,
-        )
-        return tr.t("Tomorrow: %1\$s.", parts.joinToString(tr.t(", ")))
+        val parts = listOfNotNull(if (buys > 0) counted("buy", buys, tr) else null, if (sells > 0) counted("sell", sells, tr) else null)
+        // Arabic joins the parts with " و" (the table's note); English with " and ".
+        return tr.t("Tomorrow: %1\$s.", parts.joinToString(if (tr.isArabic) " و" else " and "))
+    }
+
+    /** "buy one", "buy two", "buy 5": Arabic's counted noun changes at 1, 2, 3 to 10, and 11 and more. */
+    private fun counted(verb: String, n: Int, tr: Tr): String = when {
+        n == 1 -> tr.t("$verb one")
+        n == 2 -> tr.t("$verb two")
+        n <= 10 || !tr.isArabic -> tr.t("$verb %1\$d", n)
+        else -> tr.t("$verb %1\$d (11+)", n)
     }
 
     fun plan(calls: List<CallRow>, names: (String) -> String, tr: Tr): List<String> = calls.filter { it.action != "keep" }.map { c ->
