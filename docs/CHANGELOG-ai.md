@@ -698,3 +698,22 @@ widget, and the AI analyst through the PC host.
   (the call sits in `EveningWorker` in `Schedule.kt`, not in `EveningPass.kt` as the list said, because the worker is
   where the pass's outcome is handled), and whenever the app sees a change of settings or of tonight's calls.
 - The widget's layout direction follows the phone's language, not the app's; its texts follow the app's.
+
+**AI analyst through the PC host**
+- `analyst-host` needed no change: the phone sends its own model, system prompt, history and tool list with each run, and
+  the host bridges any tool named in lower case letters and underscores. The crypto app is not touched.
+- `egx/analyst/EgxHost.kt` copies the crypto app's host client and pairing (HTTPS pinned to the PC's certificate, the code
+  sent with every request). The address and pin are in the EGX app's own SharedPreferences; the code is sealed with an
+  AES-GCM key in Android's Keystore under the EGX app's own alias, in the no-backup folder.
+- Five read-only tools, run on the phone: `ledger`, `calls`, `stock`, `dividends`, `research`. They answer in JSON, dates
+  as yyyy-mm-dd, money in pounds. Nothing the analyst can call writes anything.
+- Model `claude-opus-5-5`, as the crypto app's default; no model choice on this screen. A run's budget ceiling is $3 at
+  API prices, as Claude Code measures it (on the owner's plan it only stops a runaway run).
+- The analyst runs in the app's own scope, so swiping to another page does not stop it; Stop cancels it on the PC too.
+  A conversation keeps its turns until "New conversation". The system prompt asks for Egyptian Arabic when the app is in
+  Arabic.
+- Answers are kept in a new Room table `analyst_answer`; the ledger database goes to version 2 by a migration that only
+  creates that table (tested on a file built from Room's own version-1 schema, with a saved copy kept).
+- "Analyst" is the menu's fourth item, before Settings; the menu's items are 3 dp narrower each so five fit folded.
+  Not checked on the Fold's cover screen.
+- The host's error messages show in English under a translated line, as the update card does.

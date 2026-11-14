@@ -578,3 +578,28 @@ Shown in	محسوب بـ	real-terms ledger; added by the lead, to check
 The dollar is Yahoo's official rate, not the parallel market's. Gold is the front gold future in dollars.	الدولار بسعر Yahoo الرسمي، مش سعر السوق الموازية. الدهب هو أقرب عقد دهب آجل بالدولار.	real-terms ledger; added by the lead, to check
 The dollar is known up to %1$s.	سعر الدولار معروف لحد %1$s.	real-terms ledger; added by the lead, to check
 Buy %1$d · Sell %2$d	شراء %1$d · بيع %2$d	home-screen widget; added by the lead, to check
+Address	العنوان	analyst; added by the lead, to check
+Ask	اسأل	analyst; added by the lead, to check
+Ask about your strategies, calls and stocks. Claude answers on your PC, from this phone's own numbers.	اسأل عن الاستراتيجيات والتوصيات والأسهم. Claude بيرد من على الكمبيوتر بتاعك، من أرقام التليفون ده نفسه.	analyst; added by the lead, to check
+Could not pair.	الربط ما نجحش.	analyst; added by the lead, to check
+Does the PC's window show a fingerprint ending in %1$s?	شباك الكمبيوتر بيبيّن بصمة آخرها %1$s؟	analyst; added by the lead, to check
+Earlier answers	ردود قبل كده	analyst; added by the lead, to check
+Explain tomorrow's calls.	اشرحلي توصيات بكرة.	analyst; added by the lead, to check
+Find the PC	دوّر على الكمبيوتر	analyst; added by the lead, to check
+Fingerprint ends	آخر البصمة	analyst; added by the lead, to check
+Forget this PC	انسى الكمبيوتر ده	analyst; added by the lead, to check
+How are my strategies doing against cash and the EGX30?	الاستراتيجيات بتاعتي عاملة إيه قصاد الكاش وEGX30؟	analyst; added by the lead, to check
+Looking for the PC…	بيدوّر على الكمبيوتر…	analyst; added by the lead, to check
+New conversation	محادثة جديدة	analyst; added by the lead, to check
+No	لأ	analyst; added by the lead, to check
+Pair with your PC	اربط مع الكمبيوتر بتاعك	analyst; added by the lead, to check
+Start the analyst host on the PC (start-analyst-host.cmd in the tools folder). Type the address and code its window shows.	شغّل برنامج المحلل على الكمبيوتر (start-analyst-host.cmd في فولدر tools). اكتب العنوان والكود اللي بيظهروا في الشباك بتاعه.	analyst; added by the lead, to check
+Stop	وقّف	analyst; added by the lead, to check
+The analyst could not answer.	المحلل ماقدرش يرد.	analyst; added by the lead, to check
+The analyst only reads. It cannot place, change or delete anything. Not financial advice.	المحلل بيقرا بس. مايقدرش يحط أو يغيّر أو يمسح أي حاجة. ده مش نصيحة مالية.	analyst; added by the lead, to check
+Thinking on your PC…	بيفكر على الكمبيوتر بتاعك…	analyst; added by the lead, to check
+Which dividends are coming, and is there news on them?	إيه الكوبونات الجاية، وفيه أخبار عنها؟	analyst; added by the lead, to check
+Working: %1$s	شغال على: %1$s	analyst; added by the lead, to check
+Yes, pair	أيوه، اربط	analyst; added by the lead, to check
+Your PC	الكمبيوتر بتاعك	analyst; added by the lead, to check
+Your question	سؤالك	analyst; added by the lead, to check

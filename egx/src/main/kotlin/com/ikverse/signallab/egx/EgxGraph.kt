@@ -19,6 +19,7 @@ import com.ikverse.signallab.egx.update.AppVersion
 import com.ikverse.signallab.egx.update.UpdateChecker
 import com.ikverse.signallab.egx.update.UpdateController
 import com.ikverse.signallab.egx.update.UpdateMemory
+import kotlinx.coroutines.flow.first
 
 /** Everything Signal Lab EGX is made of, built once by the application. */
 class EgxGraph(context: Context) {
@@ -52,6 +53,35 @@ class EgxGraph(context: Context) {
     }
 
     val notifier = Notifier(app, ::tr, ::name)
+
+    /** The analyst host pairing: the address and certificate in the app's preferences, the code sealed in the no-backup folder. */
+    val pairing = com.ikverse.signallab.egx.analyst.HostPairing(
+        app.getSharedPreferences("egx-analyst", Context.MODE_PRIVATE),
+        java.io.File(app.noBackupFilesDir, com.ikverse.signallab.egx.analyst.HostPairing.FILE_NAME),
+        com.ikverse.signallab.egx.analyst.KeystoreCipher(),
+    )
+
+    /** What the analyst's tools read: this phone's ledger and prices. */
+    private val analystData = object : com.ikverse.signallab.egx.analyst.EgxAnalystData {
+        private val dao get() = ledger.dao()
+        override suspend fun latestCalls() = dao.latestCalls().first()
+        override suspend fun callsSince(day: Long) = dao.callsSince(day)
+        override suspend fun days(record: String) = dao.allDays(record).first()
+        override suspend fun yardsticks() = dao.yardsticks().first()
+        override suspend fun fills() = dao.fills(com.ikverse.signallab.egx.ledger.Records.LEVELS).first()
+        override suspend fun copies() = dao.copies().first()
+        override suspend fun daily(code: String) = store.daily(code)
+        override suspend fun dividends() = store.dividends()
+        override suspend fun egx30() = store.egx30().map { it.day to it.close }
+        override fun prefs() = settings.value
+        override fun name(code: String) = stocks[code]?.let { "${it.nameEn}${it.nameAr?.let { a -> " · $a" } ?: ""}" }
+        override fun today() = com.ikverse.signallab.egx.data.EgxTime.today(System.currentTimeMillis())
+    }
+
+    val analyst = com.ikverse.signallab.egx.analyst.EgxAnalyst(
+        pairing, com.ikverse.signallab.egx.analyst.EgxAnalystTools(analystData),
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Default),
+    ) { q, a, ending -> ledger.dao().addAnswer(com.ikverse.signallab.egx.ledger.AnalystAnswerRow(at = System.currentTimeMillis(), question = q, answer = a, ending = ending)) }
 
     /** Updates from the newest release of ikverse/Signal-Lab-EGX on GitHub; Android's installer always asks first. */
     val updates = UpdateController(

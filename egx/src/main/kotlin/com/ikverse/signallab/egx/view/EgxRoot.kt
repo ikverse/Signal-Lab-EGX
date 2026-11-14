@@ -40,7 +40,7 @@ import com.ikverse.signallab.egx.pass.Schedule
 import kotlinx.coroutines.launch
 
 /** The pages under the pill menu, in order. */
-val PAGES = listOf("Today", "Strategies", "Ledger", "Settings")
+val PAGES = listOf("Today", "Strategies", "Ledger", "Analyst", "Settings")
 
 @Composable
 fun EgxRoot(graph: EgxGraph) {
@@ -129,6 +129,16 @@ fun EgxRoot(graph: EgxGraph) {
                                 val real = realTerms(prefs.liveStart, end, prefs.money, lv.withTargets, lv.accountBars[1].value, lv.accountBars[2].value, usd, gold, tr)
                                 LedgerPage(lv, posture, tr, onStock = { stock = it }, real = real)
                             }
+                            3 -> {
+                                val asking by graph.analyst.state.collectAsState()
+                                val answers by dao.answers().collectAsState(initial = emptyList())
+                                var paired by androidx.compose.runtime.remember { mutableStateOf(graph.pairing.paired()) }
+                                AnalystPage(asking, paired, answers, graph.analyst.conversation.isNotEmpty(), posture, tr,
+                                    onProbe = { a, c -> graph.pairing.probe(a, c) },
+                                    onConfirm = { graph.pairing.confirm(it); paired = graph.pairing.paired() },
+                                    onForget = { graph.pairing.forget(); paired = null },
+                                    onAsk = { graph.analyst.ask(it, tr.isArabic) }, onStop = { graph.analyst.stop() }, onNew = { graph.analyst.newConversation() })
+                            }
                             else -> {
                                 val update by graph.updates.state.collectAsState()
                                 androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { graph.updates.checkIfDue() } }
@@ -161,7 +171,7 @@ private fun Dock(tr: Tr, current: Int, modifier: Modifier, onPick: (Int) -> Unit
             val on = i == current
             Text(tr.t(p), style = Type.menu, color = if (on) c.actionInk else c.muted,
                 modifier = Modifier.clip(RoundedCornerShape(100)).background(if (on) c.action else androidx.compose.ui.graphics.Color.Transparent)
-                    .clickable(role = Role.Tab) { onPick(i) }.padding(horizontal = 14.dp, vertical = 9.dp))
+                    .clickable(role = Role.Tab) { onPick(i) }.padding(horizontal = 11.dp, vertical = 9.dp))
         }
     }
 }

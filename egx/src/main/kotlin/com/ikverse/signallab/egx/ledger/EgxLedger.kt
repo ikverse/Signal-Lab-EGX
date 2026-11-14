@@ -126,8 +126,25 @@ data class PassRow(
     val message: String,
 )
 
+/** One answer from the analyst, kept so the owner can read it again. */
+@Entity(tableName = "analyst_answer")
+data class AnalystAnswerRow(
+    @androidx.room.PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val at: Long,
+    val question: String,
+    val answer: String,
+    /** How the PC host ended the run ("done", "cut short", ...). */
+    val ending: String,
+)
+
 @Dao
 interface EgxLedgerDao {
+    @Insert
+    suspend fun addAnswer(row: AnalystAnswerRow): Long
+
+    @Query("SELECT * FROM analyst_answer ORDER BY at DESC LIMIT 50")
+    fun answers(): Flow<List<AnalystAnswerRow>>
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addFills(rows: List<PaperFillRow>)
 
@@ -188,17 +205,24 @@ interface EgxLedgerDao {
 }
 
 @Database(
-    entities = [PaperFillRow::class, PaperDayRow::class, YardstickRow::class, CallRow::class, CopyRow::class, PassRow::class],
-    version = 1,
+    entities = [PaperFillRow::class, PaperDayRow::class, YardstickRow::class, CallRow::class, CopyRow::class, PassRow::class, AnalystAnswerRow::class],
+    version = 2,
 )
 abstract class EgxLedgerDatabase : RoomDatabase() {
     abstract fun dao(): EgxLedgerDao
 
     companion object {
+        /** Version 2 adds the analyst's answers; every ledger row stays as it was. */
+        val MIGRATION_1_2 = object : androidx.room.migration.Migration(1, 2) {
+            override fun migrate(db: androidx.sqlite.db.SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS `analyst_answer` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `at` INTEGER NOT NULL, `question` TEXT NOT NULL, `answer` TEXT NOT NULL, `ending` TEXT NOT NULL)")
+            }
+        }
+
         fun open(context: Context, name: String? = "egx-ledger.db"): EgxLedgerDatabase {
             val builder = if (name == null) Room.inMemoryDatabaseBuilder(context, EgxLedgerDatabase::class.java)
             else Room.databaseBuilder(context, EgxLedgerDatabase::class.java, name)
-            return builder.build()
+            return builder.addMigrations(MIGRATION_1_2).build()
         }
     }
 }
