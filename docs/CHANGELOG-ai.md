@@ -477,3 +477,55 @@ asking is logged here.
 - Item 13: 26 engine tests (`engine/src/test/.../egx/`) with a synthetic board in `testFixtures/EgxSynth.kt`; every
   registered rule gives the same decisions on history cut at, or scrambled after, four points on three seeds.
 - Item 2: `docs/egx-research.md`.
+
+### E2: Egyptian data (session B)
+
+- All code is in `app/.../data/egx/` (new files only); no Gradle or engine change. Plain `SQLiteOpenHelper` store in its own `egx.db` (like `CandleStore`), not Room, so no schema file lands outside the package.
+- Yahoo: daily by `CODE.CA` (`period1/period2`, `interval=1d`, `events=div,splits`), hourly by the ISIN symbol (`range`, `interval=1h`), browser User-Agent as the research used, 0.4 s between calls, 4 attempts, 404 = "no feed".
+- Session day = date of (timestamp + Yahoo's gmtoffset), as epoch ms of UTC midnight (the research's key). A session counts as closed from 15:00 Cairo time (java.time `Africa/Cairo`, so summer time is handled); open sessions are never stored.
+- Stored daily rows keep Yahoo's raw high/low/close/volume, never its open. The 21% flattening is applied when a series is built, so a new jump never rewrites the store. Turnover = raw close × volume, as in `prepare.py`. Friday/Saturday rows are dropped.
+- Real open = open of the session's first hourly bar that shows trading (volume > 0 OR high != low). Deviation from `fills.py`, which skipped zero-volume bars: Yahoo reports the 10:00 bar with zero volume every day though it has a range, so `fills.py` effectively used the ~11:00 price. Carried onto the daily scale by daily close / last hourly close (accepted between 0.2 and 5), held inside the day's range. Without hourly bars the open is the previous close held inside the range (the research's `prev` mode), flagged `realOpen = false`.
+- Calendar: a Sunday-to-Thursday day with at least 20 traded stocks (research), or a third of the stocks when fewer than 60 are stored. Days after the last known session are assumed to be Sunday-to-Thursday (future holidays are unknown).
+- Universe: listed >= 180 calendar days (first stored session), traded on >= 57 of the last 60 calendar sessions, top 80 by 30-session turnover, ties by code.
+- Incremental daily downloads re-read 40 days before the last stored session; a split newer than the one seen at the last full download triggers a full re-download (Yahoo re-scales history). A stock with no legacy feed is asked again after 7 days. Hourly: only the universe's stocks, `1mo` the first time then `5d`.
+- EGX30 = Yahoo `^CASE30` (the symbol in the research's `case30_1h.json`), hourly; `2y` on the first run (two years of history at once), `5d` after. Session = first open, max high, min low, last close.
+- Arab Finance feed = `https://www.arabfinance.com/ar/home/tagresult?slug=724` (from the research memory). Parser reads wording, not layout: ticker in brackets, "بواقع/بقيمة N جنيه|قرش", "اعتبارا من <date>" (d/m/yyyy, yyyy/m/d or "19 نوفمبر 2026"), "الجمعية العامة ... المنعقدة <date>"; Arabic-Indic digits and hamza/tanween variants normalised. A truncated date (the page prints "12/11/202" once) is left null, not guessed.
+- Last cum-day = payment day minus 3 sessions: on 9 real 2025-26 dividends Yahoo's ex-day was always 2 sessions before Arab Finance's payment day. When Yahoo records the ex-day, the last cum-day is taken from it (no longer estimated).
+- Yahoo check: a Yahoo dividend within 7 days of the expected ex-day; CONFIRMED within 2% of the amount, else AMOUNT_DIFFERS; NOT_ON_YAHOO once 5 sessions past the ex-day with nothing; WAITING otherwise.
+- Same dividend: same stock and payment days within 7 days, or anchors (payment, last cum-day, assembly, first news) within 120 days in a sensible order. Hand-set or corrected entries (`byHand`) are never changed by a refresh; cancelling marks, never deletes (and still absorbs later news of it, so it is not re-added).
+
+### E5: Arabic tables (session D)
+
+Item 38 of `docs/egx-build-list.md`, written 2026-11-14. Files: `app/src/main/assets/egx/names_ar.tsv` (220 codes, every
+row of EGX Analyzer's `yahoo_symbols.json`) and `app/src/main/assets/egx/strings_ar.tsv` (435 rows, of them 38 glossary
+rows). The owner reads both before the install (item 41).
+
+- **Key.** `strings_ar.tsv` is keyed by the English source text, as asked; the lead maps it to the final keys at item 37.
+  Kotlin templates are written with `%1$s` / `%1$d` placeholders in the English column, in the order the Arabic uses.
+- **Register.** Labels and buttons follow the accepted mockup (اشترِ، بِع، وضعتُ الأمر، الحساب الورقي، أوامر مجانية).
+  Sentences use light Egyptian spoken Arabic as Egyptian trading apps do (مفيش، دلوقتي، النهارده، بكرة، استنى). The
+  mockup has two Modern Standard words (غدًا، هذا الشهر); they are kept as written there. If the owner wants one register
+  throughout, this is the first thing to change.
+- **Counting.** Arabic plurals depend on the number, so the Today sentence is built from parts: one (سهمًا), two (سهمين),
+  3 to 10 (%1$d أسهم), 11 and more (%1$d سهمًا). The mockup's "غدًا: اشترِ سهمين وبِع سهمًا." is kept as a full row.
+  After a number on cards the app writes "390 سهم", as the mockup and Egyptian broker screens do.
+- **Market terms.** كوبون for dividend; تاريخ نهاية الحق for the last day that carries it; صرف الكوبون for payment;
+  وقف الخسارة; الهدف الأول / الهدف الثاني; نطاق الدخول; الحد السعري for the price limit; وحدة تغيّر السعر for the tick;
+  قيمة التداول for turnover; فرق السعر for spread; ضريبة الدمغة; الكاش for the cash yardstick (mockup) and صندوق النقد
+  for the fund; المؤشر for the EGX30 (mockup), with "EGX30" written in Latin where it is named in full.
+- **Strategy names.** Dividend run = قبل الكوبون (the mockup's card line; plainer than a literal "run"). Calm stocks =
+  الأسهم الهادئة (mockup). Dividend payers = الأسهم الموزّعة. Slow breakout = الاختراق البطيء; Fast breakout =
+  الاختراق السريع. Low-risk formula = معادلة المخاطرة القليلة.
+- **Tiers.** Proven مُثبتة, Promising واعدة, Watch تحت المراقبة, Testing تحت التجربة, Failing متعثّرة.
+- **Thndr.** ثاندر inside Arabic sentences; Latin "Thndr" is fine on a button with its logo. The app name "Signal Lab"
+  stays in Latin letters.
+- **Pounds.** ج after an amount on cards and tiles (mockup "12,500 ج"); جنيه in sentences.
+- **Dates.** Egyptian month names (يناير … ديسمبر), day before month ("15 نوفمبر").
+- **Crypto rows.** The crypto app's shared screens are included with note `crypto`, so it can get Arabic later; texts
+  that are only test tags, file names or code were left out.
+- **Company names.** Written as the exchange and the financial press write them, mostly the registered Arabic name, with
+  the brand after a dash where Egyptians use it (موبكو، سوديك، إيبيكو، كابو). Codes that share one company get the same
+  name: EFHI/EFIH, FAIT/FAITA (with بالجنيه / بالدولار), KRDI/NAKH, QNBA/QNBE, VLMR/VLMRA.
+- **Names I am not sure of** (best guess written; the owner or EGX's site should confirm): ACAMD, ACAP, ACTF, AIHC,
+  AMII, ASPI, CFGH, COPR, CPME, CRST, EGAS, GMCI, GPIM, GRCA, GTEX, GTWL, ICID, IDRE, LUTS, MBEG, NARE, NDRL, PHGC,
+  RREI, UEGC, VLMR/VLMRA, KRDI/NAKH (which of the two codes is current), EFHI (likely an old code of EFIH).
