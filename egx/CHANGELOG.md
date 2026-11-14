@@ -1,5 +1,13 @@
 # Signal Lab EGX: changes
 
+## 0.2.1
+
+- **Pair by scanning.** On the Analyst page, "Scan ClaudeIn's QR code" pairs the phone with ClaudeIn on your PC in one
+  step: no address or code to type and no fingerprint to compare. Typing the address and code still works.
+
+Not verified yet: not tried on the phone or against the real ClaudeIn; the two new Arabic texts have not been read by
+the owner.
+
 ## 0.2.0
 
 Five new things. Every call is still on paper, and nothing here is financial advice.
