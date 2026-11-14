@@ -439,3 +439,16 @@ Proposed and approved by the owner on 2026-11-14 ("approve"), after a whole-acco
   `bnc://app.binance.com/trade/trade?at=spot&symbol=<coin>usdt` opened the coin's Spot trade screen. The browser fallback
   keeps the www.binance.com page. A line under the button says to paste the amount into Total (USDT).
 - Released as 2.5.0 (final, per the owner's no-pre-release rule), `v4` fast-forwarded into `main`.
+
+## Signal Lab EGX (branch `egx`)
+
+Built from `docs/egx-build-list.md` under one "approve" given 2026-11-14 for items 1 to 46. Every decision made without
+asking is logged here.
+
+### E1: research and engine
+
+- Item 1: the 15 listed scripts copied unchanged into `tools/egx/` with a README. The research data (raw Yahoo JSON,
+  hourly bars, prepared candles, about 330 MB) and every other script of the research folder copied to
+  `research/data/egx/`, which is already gitignored, so a temp-folder cleanup cannot lose them.
+- The plan, the build list and the scripts were committed first, before any engine change, so the side sessions' worktrees
+  start with them.
