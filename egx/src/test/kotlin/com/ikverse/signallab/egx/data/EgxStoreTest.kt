@@ -27,6 +27,30 @@ private fun memoryStore() = EgxStore(context, name = null, io = Dispatchers.Unco
 @RunWith(RobolectricTestRunner::class)
 class EgxStoreTest {
     @Test
+    fun theDollarAndGoldAreKeptAndVersionOneGainsTheirTableWithItsDividendsKept() = runTest {
+        val s = memoryStore()
+        s.saveMacro(Macro.USD, listOf(day(2026, 11, 11) to 47.5, day(2026, 11, 12) to 47.6))
+        s.saveMacro(Macro.USD, listOf(day(2026, 11, 12) to 47.7))
+        assertEquals(listOf(day(2026, 11, 11) to 47.5, day(2026, 11, 12) to 47.7), s.macro(Macro.USD))
+        assertTrue(s.macro(Macro.GOLD).isEmpty())
+
+        // A phone on version 1: no macro table, one dividend typed by hand.
+        val name = "egx-upgrade-test.db"
+        context.deleteDatabase(name)
+        val v1 = object : android.database.sqlite.SQLiteOpenHelper(context, name, null, 1) {
+            override fun onCreate(db: android.database.sqlite.SQLiteDatabase) = EgxStore(null, null).onCreate(db).also { db.execSQL("DROP TABLE macro") }
+            override fun onUpgrade(db: android.database.sqlite.SQLiteDatabase, o: Int, n: Int) {}
+        }
+        v1.writableDatabase.execSQL("INSERT INTO dividend (code, amount, last_cum_estimated, source, by_hand, cancelled, check_state, headline, url, updated_at) VALUES ('SWDY', 2.5, 0, 'HAND', 1, 0, 'WAITING', '', '', 0)")
+        v1.close()
+        val upgraded = EgxStore(context, name, io = Dispatchers.Unconfined)
+        upgraded.saveMacro(Macro.GOLD, listOf(day(2026, 11, 12) to 2_650.0))
+        assertEquals(1, upgraded.macro(Macro.GOLD).size)
+        assertEquals("SWDY", upgraded.dividends().single().code)
+        upgraded.close()
+    }
+
+    @Test
     fun dailyRowsComeBackExactlyAndAFullDownloadReplacesThem() = runTest {
         val s = memoryStore()
         val rows = EgxCleaning.dailyRows(EgxFixtures.comiDaily)
@@ -145,6 +169,8 @@ class EgxSyncTest {
         assertTrue(sources.asked.any { it.startsWith("/v8/finance/chart/COMI.CA?period1=0&") })
         assertTrue(sources.asked.any { it == "/v8/finance/chart/EGS60121C018.CA?range=1mo&interval=1h" })
         assertTrue(sources.asked.any { it == "/v8/finance/chart/%5ECASE30?range=2y&interval=1h" })
+        assertTrue(sources.asked.any { it.startsWith("/v8/finance/chart/EGP=X?period1=") && it.endsWith("&interval=1d") }, sources.asked.toString())
+        assertTrue(sources.asked.any { it.startsWith("/v8/finance/chart/GC=F?period1=") }, "a missing series is no failure: ${r.failed}")
 
         val series = sync(store).series("COMI", r.calendar)
         assertEquals(138, series.size)

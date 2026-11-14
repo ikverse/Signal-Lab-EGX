@@ -118,8 +118,15 @@ fun EgxRoot(graph: EgxGraph) {
                                 onPlaced = { card -> scope.launch { dao.setPlaced(card.call.day, card.call.strategy, card.call.code, card.call.action, !card.placed) } },
                                 onOpen = { card -> open = "${card.call.strategy}|${card.call.code}|${card.call.action}" }, bottom = bottom, onMonthEnd = { monthEnd = true }, onDividends = { dividendsOpen = true })
                             1 -> StrategiesPage(strategyViews(days, yard, fills, tr), posture, tr, chosen) { chosen = it }
-                            2 -> LedgerPage(ledgerView(mapOf(Records.LEVELS to days, Records.RULE to rule, Records.LEVELS_DOUBLE to double), yard, mapOf(Records.LEVELS to fills), copies,
-                                calls.count { it.action != "keep" }, prefs, tr), posture, tr) { stock = it }
+                            2 -> {
+                                val lv = ledgerView(mapOf(Records.LEVELS to days, Records.RULE to rule, Records.LEVELS_DOUBLE to double), yard, mapOf(Records.LEVELS to fills), copies,
+                                    calls.count { it.action != "keep" }, prefs, tr)
+                                val usd by produceState(initialValue = emptyList<Pair<Long, Double>>(), calls) { value = graph.store.macro(com.ikverse.signallab.egx.data.Macro.USD) }
+                                val gold by produceState(initialValue = emptyList<Pair<Long, Double>>(), calls) { value = graph.store.macro(com.ikverse.signallab.egx.data.Macro.GOLD) }
+                                val end = days.filter { it.strategy in prefs.on }.maxOfOrNull { it.day }
+                                val real = realTerms(prefs.liveStart, end, prefs.money, lv.withTargets, lv.accountBars[1].value, lv.accountBars[2].value, usd, gold, tr)
+                                LedgerPage(lv, posture, tr, onStock = { stock = it }, real = real)
+                            }
                             else -> {
                                 val update by graph.updates.state.collectAsState()
                                 androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { graph.updates.checkIfDue() } }

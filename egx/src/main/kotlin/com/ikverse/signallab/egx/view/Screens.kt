@@ -285,16 +285,25 @@ fun ColumnScope.EvidencePage(s: StrategyView, tr: Tr, onBack: (() -> Unit)?) {
 // ---- Ledger (item 33) ----
 
 @Composable
-fun LedgerPage(v: LedgerView, posture: Posture, tr: Tr, onStock: (String) -> Unit = {}) {
+fun LedgerPage(v: LedgerView, posture: Posture, tr: Tr, onStock: (String) -> Unit = {}, real: RealTermsView? = null) {
     val c = LocalCalm.current
     var rule by remember { mutableStateOf(false) }
+    var measure by remember { mutableStateOf(Measure.POUNDS) }
     val a: @Composable ColumnScope.() -> Unit = {
         if (v.since.isNotEmpty()) Note(v.since)
         Title(tr.t("Ledger"))
         Lead(v.lead)
         CalmCard(tr.t("Paper account")) {
             Text(tr.t("EGP %1\$s", tr.pounds(if (rule) v.byRule else v.account)), style = Type.tile, color = c.ink, modifier = Modifier.padding(bottom = 4.dp))
-            if (v.started) Bars(v.accountBars, tr)
+            if (v.started && real != null && real.known) {
+                Note(tr.t("Shown in"))
+                Seg(listOf(tr.t("Pounds"), tr.t("Dollars"), tr.t("Gold")), measure.ordinal) { measure = Measure.entries[it] }
+                Bars(real.bars.getValue(measure), tr)
+            } else if (v.started) Bars(v.accountBars, tr)
+        }
+        if (v.started && real != null && real.known) CalmCard(tr.t("In real terms")) {
+            for ((k, value) in real.became) Kv(k, value)
+            Note(real.note)
         }
         if (v.started) CalmCard(tr.t("Two records")) {
             Seg(listOf(tr.t("With targets"), tr.t("By the rule alone")), if (rule) 1 else 0) { rule = it == 1 }

@@ -674,3 +674,16 @@ widget, and the AI analyst through the PC host.
 - Cancelled dividends are left out. Only dividends already collected are read; nothing new is downloaded.
 - "Add to my calendar" sends Android's ACTION_INSERT with an all-day event: the phone's calendar app opens filled in and
   the owner saves it there. No calendar permission.
+
+**Real-terms ledger**
+- Two Yahoo daily series, no key: `EGP=X` (the dollar in pounds, the official rate) and `GC=F` (the front gold future in
+  dollars an ounce). The first download reaches back four years; later ones re-read the last ten days. A failure goes to
+  the sync report's failures and the pass goes on.
+- `egx.db` goes to version 2: a new `macro` table, added by `CREATE TABLE IF NOT EXISTS` on upgrade. Nothing else in the
+  file changes, so the owner's hand-typed dividends stay (tested on a version-1 file).
+- The Ledger is still stored in pounds only; dollars and gold are worked out on display, so the ledger stays append-only.
+  A pound growth g becomes (1 + g) · m(start) / m(end) − 1 in a measure costing m pounds a unit; the value used for a day
+  is the last close on or before it. Gold is counted in grams (31.103 g an ounce).
+- "Held dollars" and "Held gold" join the account's bars, beside cash and the EGX30. The measure choice and the
+  "In real terms" card appear only once the dollar is known for the ledger's first day; a series that stops short of the
+  ledger's last day is named with the date it reaches.

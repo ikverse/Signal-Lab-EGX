@@ -81,6 +81,19 @@ class EgxSync(
         } catch (e: Exception) {
             failed["EGX30"] = e.message ?: e.javaClass.simpleName
         }
+
+        // The dollar and gold, for the Ledger's real terms. Either may fail on an evening; the pass goes on.
+        for (symbol in Macro.ALL) {
+            try {
+                val last = store.macro(symbol).lastOrNull()?.first
+                val from = if (last == null) now - Macro.FIRST_YEARS * 365 * EgxTime.DAY_MS else last - Macro.OVERLAP_DAYS * EgxTime.DAY_MS
+                yahoo.daily(symbol, from / 1000)?.let { store.saveMacro(symbol, Macro.closes(it)) }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                failed[symbol] = e.message ?: e.javaClass.simpleName
+            }
+        }
         return EgxSyncReport(stocks.size, full, updates, missing, failed, hourly, index, calendar, universe)
     }
 

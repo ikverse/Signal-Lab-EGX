@@ -111,6 +111,14 @@ class YahooClient(
             addQueryParameter("events", "div,splits")
         })
 
+    /** Daily bars of any symbol from [fromSec], such as the dollar in pounds or gold ([Macro]). */
+    suspend fun daily(symbol: String, fromSec: Long): YahooChart? =
+        fetch(chartUrl(symbol) {
+            addQueryParameter("period1", fromSec.toString())
+            addQueryParameter("period2", "9999999999")
+            addQueryParameter("interval", "1d")
+        })
+
     /** Hourly bars of one stock (by its ISIN symbol) over Yahoo's [range] ("5d", "1mo", "2y"). */
     suspend fun hourly(stock: EgxStock, range: String = "5d"): YahooChart? = hourly(stock.hourlySymbol, range)
 

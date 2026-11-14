@@ -75,11 +75,16 @@ class EgxStore(
             )
         """.trimIndent())
         db.execSQL("CREATE INDEX dividend_code ON dividend (code)")
+        createMacro(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Version 1 is the first. A later version must keep the dividend table: it holds the owner's own entries.
+        // Every version keeps the dividend table: it holds the owner's own entries. Version 2 adds the macro table.
+        if (oldVersion < 2) createMacro(db)
     }
+
+    private fun createMacro(db: SQLiteDatabase) =
+        db.execSQL("CREATE TABLE IF NOT EXISTS macro (symbol TEXT NOT NULL, day INTEGER NOT NULL, close REAL NOT NULL, PRIMARY KEY (symbol, day)) WITHOUT ROWID")
 
     private suspend fun <T> access(block: (SQLiteDatabase) -> T): T =
         lock.withLock { withContext(io) { block(writableDatabase) } }
@@ -171,6 +176,26 @@ class EgxStore(
     suspend fun egx30(): List<IndexDay> = access { db ->
         db.rawQuery("SELECT day, open, high, low, close FROM egx30 ORDER BY day", null).use { c ->
             List(c.count) { c.moveToNext(); IndexDay(c.getLong(0), c.getDouble(1), c.getDouble(2), c.getDouble(3), c.getDouble(4)) }
+        }
+    }
+
+    // --- the dollar and gold ([Macro]) ------------------------------------------------
+
+    suspend fun saveMacro(symbol: String, closes: List<Pair<Long, Double>>) = access { db ->
+        db.inTransaction {
+            val stmt = compileStatement("INSERT OR REPLACE INTO macro (symbol, day, close) VALUES (?,?,?)")
+            for ((day, close) in closes) {
+                stmt.bindString(1, symbol); stmt.bindLong(2, day); stmt.bindDouble(3, close)
+                stmt.executeInsert()
+                stmt.clearBindings()
+            }
+        }
+    }
+
+    /** A macro series, oldest first. */
+    suspend fun macro(symbol: String): List<Pair<Long, Double>> = access { db ->
+        db.rawQuery("SELECT day, close FROM macro WHERE symbol=? ORDER BY day", arrayOf(symbol)).use { c ->
+            List(c.count) { c.moveToNext(); c.getLong(0) to c.getDouble(1) }
         }
     }
 
@@ -268,6 +293,6 @@ class EgxStore(
     }
 
     companion object {
-        const val VERSION = 1
+        const val VERSION = 2
     }
 }

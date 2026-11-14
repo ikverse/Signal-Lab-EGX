@@ -562,3 +562,18 @@ Dividend run holds it	«قبل الكوبون» شايلاه	dividend calendar; 
 Each dividend's last day to hold and the day its cash arrives.	نهاية الحق في كل كوبون، واليوم اللي فلوسه بتوصل فيه.	dividend calendar; added by the lead, to check
 No dividend dates this month.	مفيش مواعيد كوبونات الشهر ده.	dividend calendar; added by the lead, to check
 yield %1$s at the last close	عائد %1$s على آخر إغلاق	dividend calendar; added by the lead, to check
+$%1$s → $%2$s	من %1$s لـ %2$s دولار	real-terms ledger; added by the lead, to check
+%1$s g → %2$s g	من %1$s لـ %2$s جرام	real-terms ledger; added by the lead, to check
+Dollars	دولار	real-terms ledger; added by the lead, to check
+EGP %1$s → %2$s	من %1$s لـ %2$s ج	real-terms ledger; added by the lead, to check
+Gold	دهب	real-terms ledger; added by the lead, to check
+Gold is known up to %1$s.	سعر الدهب معروف لحد %1$s.	real-terms ledger; added by the lead, to check
+Held dollars	لو شلت دولار	real-terms ledger; added by the lead, to check
+Held gold	لو شلت دهب	real-terms ledger; added by the lead, to check
+In dollars	بالدولار	real-terms ledger; added by the lead, to check
+In gold	بالدهب	real-terms ledger; added by the lead, to check
+In pounds	بالجنيه	real-terms ledger; added by the lead, to check
+In real terms	بالقيمة الحقيقية	real-terms ledger; added by the lead, to check
+Shown in	محسوب بـ	real-terms ledger; added by the lead, to check
+The dollar is Yahoo's official rate, not the parallel market's. Gold is the front gold future in dollars.	الدولار بسعر Yahoo الرسمي، مش سعر السوق الموازية. الدهب هو أقرب عقد دهب آجل بالدولار.	real-terms ledger; added by the lead, to check
+The dollar is known up to %1$s.	سعر الدولار معروف لحد %1$s.	real-terms ledger; added by the lead, to check
