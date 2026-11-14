@@ -1,0 +1,436 @@
+english	arabic	note
+Today	اليوم	menu (mockup)
+Strategies	الاستراتيجيات	menu (mockup)
+Ledger	الدفتر	menu (mockup)
+Settings	الإعدادات	menu (mockup)
+Markets	الأسواق	crypto menu
+Analyst	المحلل	crypto menu
+Back	رجوع	button
+Signal Lab EGX	Signal Lab EGX	app name stays in Latin letters
+%1$s's plan	خطة %1$s	mockup "خطة الأحد 15 نوفمبر"; %1$s = day and date
+Market up · %1$s	السوق صاعد · %1$s	mockup; %1$s = EGX30 level
+Market down · %1$s	السوق هابط · %1$s	%1$s = EGX30 level
+Market flat · %1$s	السوق مستقر · %1$s	%1$s = EGX30 level
+Market closed today	البورصة مقفولة النهارده	holiday or weekend
+Tomorrow: %1$s.	غدًا: %1$s.	joins the parts below with " و"
+Tomorrow: nothing to do.	غدًا: مفيش حاجة تتعمل.	no calls
+Tomorrow: keep what you hold.	غدًا: خلّيك على اللي معاك.	open calls, nothing new
+Tomorrow: buy two, sell one.	غدًا: اشترِ سهمين وبِع سهمًا.	mockup sentence, as written there
+buy one	اشترِ سهمًا	count part, 1
+buy two	اشترِ سهمين	count part, 2
+buy %1$d	اشترِ %1$d أسهم	count part, 3 to 10
+buy %1$d (11+)	اشترِ %1$d سهمًا	count part, 11 and more (Arabic plural rule)
+sell one	بِع سهمًا	count part, 1
+sell two	بِع سهمين	count part, 2
+sell %1$d	بِع %1$d أسهم	count part, 3 to 10
+sell %1$d (11+)	بِع %1$d سهمًا	count part, 11 and more
+and	و	joins sentence parts; written joined to the next word
+No calls right now	مفيش توصيات دلوقتي	empty Today
+When a strategy fires at the close, its call shows here with what to do, and a notification says so. Most days nothing does, and then there is nothing to do.	لما استراتيجية تدّي إشارة بعد الإغلاق، التوصية بتظهر هنا ومعاها المطلوب، وبيوصلك إشعار. أغلب الأيام مفيش حاجة، ويبقى مفيش حاجة تتعمل.	empty Today, EGX wording
+Calls show here.	التوصيات بتظهر هنا.	
+Open calls	الصفقات المفتوحة	
+Show %1$d more	اعرض %1$d كمان	
+Show fewer	اعرض أقل	
+Paper trades only. Calls are research, not financial advice.	صفقات ورقية بس. التوصيات بحث، مش نصيحة استثمارية.	footer
+Signal Lab trades on paper only and never touches a brokerage account. Its calls are research, not financial advice.	Signal Lab بيتداول على الورق بس وعمره ما بيلمس حساب السمسرة بتاعك. توصياته بحث، مش نصيحة استثمارية.	about
+Checked %1$s · next %2$s	اتراجع %1$s · المرة الجاية %2$s	pass line; times
+not checked yet	لسه ما اتراجعش	pass line
+%1$s · day %2$d	%1$s · اليوم %2$d	open call: strategy, days held
+%1$s to buy	%1$s للشراء	
+%1$s to sell	%1$s للبيع	
+Buy	اشترِ	card action (mockup)
+Sell	بِع	card action (mockup)
+Keep	احتفظ	card action, month-end
+Wait	استنى	card action above the entry range
+%1$d shares	%1$d سهم	mockup "390 سهم"; Egyptian screens write سهم after any number
+1 share	سهم واحد	
+EGP %1$s	%1$s ج	short amount (mockup "12,500 ج")
+%1$s pounds	%1$s جنيه	long amount, sentences
+Near the close	قرب الإغلاق	timing (mockup)
+At the open	عند الفتح	timing (mockup)
+Wait a day	استنى يوم	timing after a jump of 8%
+Placed the order	وضعتُ الأمر	card button (mockup)
+Before the dividend · until %1$s	قبل الكوبون · حتى %1$s	card line (mockup); %1$s = last day with the right
+Joined the list	دخل القائمة	card line (mockup)
+Left the list	خرج من القائمة	card line (mockup)
+Still on the list	لسه في القائمة	card line, keep
+New 100-day high	أعلى سعر في 100 يوم	card line, slow breakout
+Closed below the 40-day low	أغلق تحت أدنى سعر في 40 يوم	card line, slow breakout exit
+Swipe for the next call	اسحب للتوصية اللي بعدها	hint
+Call %1$d of %2$d	توصية %1$d من %2$d	card position
+The four levels	المستويات الأربعة	section
+Entry range	نطاق الدخول	level
+Entry range: %1$s to %2$s	نطاق الدخول: من %1$s لـ %2$s	level line
+Stop loss	وقف الخسارة	level
+Stop loss: %1$s (%2$s)	وقف الخسارة: %1$s (%2$s)	%2$s = percent from entry
+Target 1	الهدف الأول	level
+Target 2	الهدف الثاني	level
+Target 1: %1$s, sell half	الهدف الأول: %1$s، بِع النص	
+Target 2: %1$s, sell the rest	الهدف الثاني: %1$s، بِع الباقي	
+Above the range: wait. Don't chase the price.	السعر فوق النطاق: استنى. ما تجريش ورا السعر.	don't-chase rule
+The stop fires on a close below it, not on a dip during the day.	الوقف بيتفعّل لو السهم قفل تحته، مش لو نزل تحته جوه الجلسة.	
+At target 1 the call sells half; at target 2 it sells the rest.	عند الهدف الأول بنبيع نص الكمية، وعند الهدف الثاني بنبيع الباقي.	
+Whatever is still held leaves by the rule's own exit or the stop.	اللي يفضل معاك بيخرج بقاعدة الخروج بتاعة الاستراتيجية أو بوقف الخسارة.	
+Prices are rounded to the exchange's price step.	الأسعار متقرّبة لوحدة تغيّر السعر في البورصة.	tick size
+A normal day's move: %1$s	حركة اليوم العادي: %1$s	ATR in plain words
+Amount	المبلغ	
+Shares	عدد الأسهم	
+When to place it	إمتى تحط الأمر	section
+Buy near the close: in the last half hour of the session.	اشترِ قرب الإغلاق: في آخر نص ساعة من الجلسة.	timing advice
+Sell at the open: in the first minutes of the session.	بِع عند الفتح: في أول دقايق الجلسة.	timing advice
+Wait a day: the stock jumped %1$s today. Buying the morning after a jump usually costs more than it gains.	استنى يوم: السهم طلع %1$s النهارده. الشراء تاني يوم بعد قفزة كبيرة غالبًا بيخسر أكتر ما بيكسب.	jump rule
+Locked at its limit: it cannot be filled today, the paper fill waits for the next day it trades.	السهم واقف عند الحد السعري: مش هيتنفذ النهارده، والتنفيذ الورقي مستني أول يوم يتداول فيه.	price limit
+Why now	ليه دلوقتي	section
+The exact rule	القاعدة بالظبط	section
+The strategy's record	سجل الاستراتيجية	section
+Copy amount and open Thndr	انسخ المبلغ وافتح ثاندر	button; Thndr written ثاندر in Arabic text
+On Thndr, choose the stock, then paste the amount or type the shares.	في ثاندر، اختار السهم، وبعدين الزق المبلغ أو اكتب عدد الأسهم.	
+I took it	نفّذتها	copy button
+I did not take it	ما نفّذتهاش	
+At what price?	بكام؟	copy price field
+Record it	سجّلها	
+Take it back	ارجع فيها	undo
+I sold	بعت	
+Your copy on Thndr	نسختك على ثاندر	
+Took this call on Thndr? Say at what price, and the ledger tracks your real result beside the paper one.	نفّذت التوصية دي على ثاندر؟ قول بكام، والدفتر هيتابع نتيجتك الحقيقية جنب النتيجة الورقية.	
+Ask the analyst about this call	اسأل المحلل عن التوصية دي	crypto app
+Earlier %1$s calls on %2$s: %3$d, %4$d ended up.	توصيات %1$s السابقة على %2$s: %3$d، منها %4$d قفلت على ربح.	
+Exit now	اخرج دلوقتي	
+Left at %1$s: %2$s.	خرجت عند %1$s: %2$s.	
+Ended %1$s	انتهت %1$s	
+Ended at	انتهت عند	
+Enter at	ادخل عند	
+Safety stop	وقف الأمان	crypto wording of stop
+safety stop hit	ضرب وقف الخسارة	exit reason
+stop loss hit	ضرب وقف الخسارة	exit reason
+target 1 reached	وصل للهدف الأول	exit reason
+target 2 reached	وصل للهدف الثاني	exit reason
+the strategy's exit signal	إشارة الخروج بتاعة الاستراتيجية	exit reason
+time limit reached	خلصت المدة	exit reason
+left the list	خرج من القائمة	exit reason
+the last day with the dividend right	آخر يوم بحق الكوبون	exit reason, dividend run
+since the entry	من وقت الدخول	
+Now %1$s	دلوقتي %1$s	current price
+next open	الفتح الجاي	
+Dividend	كوبون	
+Cash dividend	كوبون نقدي	
+Dividend: %1$s a share	كوبون: %1$s للسهم	
+Dividend yield	عائد الكوبون	
+Last day with the right: %1$s	تاريخ نهاية الحق: %1$s	last day to hold and get the dividend
+Ex-dividend from %1$s	بدون الكوبون من %1$s	first day without the right
+Cash arrives: %1$s	صرف الكوبون: %1$s	payment date
+Hold it until the close of %1$s to get the dividend.	خلّي السهم معاك لحد إقفال %1$s عشان تاخد الكوبون.	
+Fixed by the general assembly on %1$s	أقرّته الجمعية العامة يوم %1$s	
+Dividends are paid into the paper account after the 5% tax.	الكوبونات بتدخل الحساب الورقي بعد خصم ضريبة 5%.	
+Upcoming dividends	الكوبونات الجاية	section
+Add a dividend	أضف كوبون	button
+Correct this dividend	عدّل الكوبون ده	button
+Amount per share	قيمة الكوبون للسهم	field
+From Arab Finance's dividend news	من أخبار التوزيعات على عرب فاينانس	source line
+Added by hand	مُضاف يدويًا	source line
+No dividend dates yet	لسه مفيش مواعيد كوبونات	empty
+Month-end list	قائمة آخر الشهر	
+Sell these	بِع دول	section
+Buy these	اشترِ دول	section
+Keep these	خلّي دول معاك	section
+Quarter-end list	قائمة آخر الربع	low-risk formula
+A stock stays while it stays on the list; nothing is sold and bought back.	السهم بيفضل طول ما هو في القائمة؛ مفيش بيع وشراء تاني لنفس السهم.	
+Free orders	أوامر مجانية	tile (mockup)
+%1$d / %2$d	%1$d / %2$d	tile value (mockup "14 / 50")
+%1$d left this month	باقي %1$d هذا الشهر	tile (mockup)
+Your Thndr plan waives commission on 50 orders a month.	باقتك في ثاندر بتعفيك من العمولة على 50 أمر في الشهر.	
+The calls would use %1$d orders; %2$d are left.	التوصيات هتستخدم %1$d أمر؛ الباقي %2$d.	
+Over the free orders: each extra order pays Thndr's commission.	عدّيت الأوامر المجانية: كل أمر زيادة عليه عمولة ثاندر.	
+Paper account	الحساب الورقي	tile (mockup)
+You %1$s	أنت %1$s	tile bar (mockup "أنت +31%")
+EGX30 %1$s	المؤشر %1$s	tile bar (mockup "المؤشر +23%")
+Cash %1$s	الكاش %1$s	tile bar (mockup "الكاش +16%")
+Paper account since %1$s	الحساب الورقي من %1$s	
+Money in stocks	فلوس في الأسهم	
+Money in cash	فلوس كاش	
+Idle money earns the cash rate you set.	الفلوس اللي مش في سهم بتاخد عائد الكاش اللي محدّده.	
+By strategy	حسب الاستراتيجية	
+By stock	حسب السهم	
+My copies	نسخي	
+Your calls	توصياتك	
+If you had copied every call	لو كنت نسخت كل التوصيات	
+Your average result %1$s after fees	متوسط نتيجتك %1$s بعد المصاريف	
+Your buys sat %1$s the paper entries on average.	مشترياتك كانت في المتوسط %1$s أسعار الدخول الورقية.	
+above	فوق	
+below	تحت	
+With the targets	بالأهداف	record 1
+By the rule alone	بالقاعدة بس	record 2
+The second record follows the rule without the targets, so the live results show what the targets cost or saved.	السجل التاني ماشي على القاعدة من غير الأهداف، عشان النتايج الحقيقية توضّح الأهداف كلّفت قد إيه أو وفّرت قد إيه.	
+At double the fees	بضعف المصاريف	
+Closed this week	اتقفلت الأسبوع ده	
+%1$d closed · %2$d won	%1$d اتقفلت · %2$d كسبانة	
+%1$s on the paper account, after fees.	%1$s على الحساب الورقي، بعد المصاريف.	
+Result %1$s after fees	النتيجة %1$s بعد المصاريف	
+Worst fall on the way	أسوأ نزول في السكة	drawdown
+Average hold	متوسط مدة الاحتفاظ	
+%1$d days	%1$d يوم	
+Calls that ended up	توصيات قفلت على ربح	
+Save as CSV	حفظ كملف CSV	
+Each strategy's live record builds up here from its first call. Until then its evidence is the research and its history on your stocks, under Strategies.	السجل الحقيقي لكل استراتيجية بيتبني هنا من أول توصية. لحد ساعتها دليلها هو البحث وتاريخها على أسهمك، تحت الاستراتيجيات.	
+No live calls yet	لسه مفيش توصيات حقيقية	
+None yet.	لسه مفيش.	
+Nothing yet.	لسه مفيش حاجة.	
+Dividends received	كوبونات اتصرفت	
+Interest on cash	عائد الكاش	
+Yardsticks	مقاييس المقارنة	section
+Against cash	مقارنة بالكاش	
+Against the EGX30	مقارنة بالمؤشر EGX30	
+Against eight random stocks	مقارنة بـ 8 أسهم عشوائية	
+Cash	الكاش	yardstick; money-market fund rate
+The EGX30	المؤشر EGX30	yardstick
+Eight random stocks picked the same days	8 أسهم عشوائية اتختارت في نفس الأيام	yardstick
+Random entries	دخول عشوائي	crypto yardstick
+vs random	مقارنة بالعشوائي	
+%1$s vs random	%1$s مقارنة بالعشوائي	
+Ahead of cash by %1$s	متقدمة على الكاش بـ %1$s	
+Behind cash by %1$s	متأخرة عن الكاش بـ %1$s	
+Ahead of the EGX30 by %1$s	متقدمة على المؤشر بـ %1$s	
+Behind the EGX30 by %1$s	متأخرة عن المؤشر بـ %1$s	
+Ahead of random stocks by %1$s	متقدمة على الأسهم العشوائية بـ %1$s	
+Behind random stocks by %1$s	متأخرة عن الأسهم العشوائية بـ %1$s	
+The calls are ahead of chance by %1$s points, after fees.	التوصيات متقدمة على الصدفة بـ %1$s نقطة، بعد المصاريف.	
+The calls are behind chance by %1$s points, after fees.	التوصيات متأخرة عن الصدفة بـ %1$s نقطة، بعد المصاريف.	
+Likely range (95%)	النطاق المرجّح (95%)	
+A wide range means the past alone cannot tell yet. Live calls narrow it.	النطاق الواسع معناه إن الماضي لوحده لسه مش كفاية يحكم. التوصيات الحقيقية بتضيّقه.	
+A money-market fund paid about 20% a year. A rule has to beat it.	صندوق النقد كان بيدّي حوالي 20% في السنة. أي قاعدة لازم تغلبه.	
+Dividend run	قبل الكوبون	strategy name
+When a general assembly fixes a cash dividend worth 4% or more of the price, buy, and sell on the last day that still carries the dividend.	لما الجمعية العامة تقرّ كوبون نقدي قيمته 4% أو أكتر من السعر، اشترِ، وبِع في يوم نهاية الحق.	one-line description
+Calm stocks	الأسهم الهادئة	strategy name (mockup)
+At each month's end, hold the steadiest stocks among the 80 busiest that are above their 200-day average; sell the ones that drop off the list.	آخر كل شهر، احتفظ بأهدأ الأسهم من بين أنشط 80 سهم اللي فوق متوسط 200 يوم؛ وبِع اللي يخرج من القائمة.	one-line description
+Dividend payers	الأسهم الموزّعة	strategy name
+At each month's end, hold the stocks that paid the most in dividends over the last year.	آخر كل شهر، احتفظ بالأسهم اللي وزّعت أكتر كوبونات في آخر سنة.	one-line description
+Slow breakout	الاختراق البطيء	strategy name
+Buy a new 100-day high, sell on a close below the 40-day low, no time limit, and never the day after a jump of 8%.	اشترِ عند أعلى سعر في 100 يوم، وبِع لو قفل تحت أدنى سعر في 40 يوم، من غير مدة محددة، وأبدًا مش تاني يوم بعد قفزة 8%.	one-line description
+Low-risk formula	معادلة المخاطرة القليلة	strategy name
+Each quarter, from the calmer half of the stocks, hold those with the best twelve-month rise and dividend yield.	كل ربع سنة، من النص الأهدى من الأسهم، احتفظ باللي عندهم أحسن صعود في 12 شهر وأعلى عائد كوبون.	one-line description
+Fast breakout	الاختراق السريع	silent control strategy
+Runs silently as a control, so the ledger can show whether the research was right to drop it.	شغالة في الخلفية للمقارنة، عشان الدفتر يوضّح البحث كان صح لما استبعدها ولا لأ.	
+Each one is a fixed rule with its evidence. Switched on, it puts its calls on Today and notifies you; switched off, it still runs quietly into the ledger, so its record keeps growing.	كل واحدة قاعدة ثابتة ومعاها دليلها. لو شغّالة، توصياتها بتظهر في اليوم وبيوصلك إشعار؛ ولو مقفولة، بتفضل شغالة في الدفتر من غير صوت، وسجلها بيكبر.	
+Strategies tried so far: %1$d. Every new try raises the bar for the others a little.	الاستراتيجيات اللي اتجربت لحد دلوقتي: %1$d. كل تجربة جديدة بترفع المقياس على الباقيين شوية.	
+Does %1$s work?	هل %1$s شغالة؟	evidence page title
+Why it should work	ليه المفروض تنجح	evidence section
+Tested on your stocks	اتجربت على أسهمك	evidence section
+Research	البحث	evidence section
+Sources	المصادر	
+Live	حقيقي	live record label
+live calls · after fees	توصيات حقيقية · بعد المصاريف	
+A test on the past, not a promise.	اختبار على اللي فات، مش وعد.	
+%1$s on Today	%1$s في اليوم	
+Off Today	مش في اليوم	
+On	شغالة	switch
+Off	مقفولة	switch
+Running	شغالة	
+Not started	لسه ما بدأتش	
+Start it to collect live calls. Only live calls can give it a verdict.	شغّلها عشان تجمع توصيات حقيقية. التوصيات الحقيقية بس هي اللي تقدر تحكم عليها.	
+It makes calls into the ledger at each close.	بتسجّل توصيات في الدفتر بعد كل إغلاق.	
+%1$d stocks, daily, from %2$s, at your fees.	%1$d سهم، يومي، من %2$s، بمصاريفك.	
+When the market was rising	لما السوق كان صاعد	
+When the market was falling	لما السوق كان نازل	
+Proven	مُثبتة	tier
+Promising	واعدة	tier
+Watch	تحت المراقبة	tier
+Testing	تحت التجربة	tier
+Failing	متعثّرة	tier
+Promising: calls on Today	واعدة: توصياتها في اليوم	
+Watch: recorded, no calls	تحت المراقبة: بتتسجل، من غير توصيات	
+Behind random entries over %1$d live calls.	متأخرة عن الدخول العشوائي في %1$d توصية حقيقية.	tier reason
+Behind random stocks over %1$d live calls.	متأخرة عن الأسهم العشوائية في %1$d توصية حقيقية.	tier reason, EGX
+Ahead of random entries over %1$d live calls.	متقدمة على الدخول العشوائي في %1$d توصية حقيقية.	tier reason
+Ahead of cash, the EGX30 and random stocks even at double the fees, allowing for the %1$d strategies tried.	متقدمة على الكاش والمؤشر والأسهم العشوائية حتى بضعف المصاريف، مع حساب الـ %1$d استراتيجية اللي اتجربت.	tier reason, EGX
+The research supports it, but your stocks do not show it clearly yet.	البحث في صفّها، بس أسهمك لسه ما بيّنتش ده بوضوح.	tier reason
+Too few past calls on your stocks to confirm the research.	التوصيات السابقة على أسهمك قليلة ومش كفاية تأكد البحث.	tier reason
+One study or none behind it; it has to earn its place with live calls.	وراها دراسة واحدة أو ولا دراسة؛ لازم تثبت نفسها بتوصيات حقيقية.	tier reason
+No verdict	لسه مفيش حكم	
+A strategy is demoted only by its own record against the yardsticks, never because another did better lately.	الاستراتيجية بتنزل درجة بسجلها هي قدام مقاييس المقارنة بس، مش عشان واحدة تانية عملت أحسن الفترة اللي فاتت.	
+Language	اللغة	
+Arabic	العربية	
+English	English	language name in its own language
+Follow the phone	زي لغة التليفون	
+Arabic-Indic digits	أرقام عربية (٠١٢٣)	switch
+Money I trade with, EGP	الفلوس اللي بتداول بيها، جنيه	field
+Your own Thndr balance. Each call then says how many pounds and shares to buy, sized the same way as on paper. Signal Lab never trades for you.	رصيدك في ثاندر. كل توصية هتقولك تشتري بكام جنيه وكام سهم، بنفس الحجم اللي على الورق. Signal Lab عمره ما بيتداول بالنيابة عنك.	
+Cash rate, % a year	عائد الكاش، % في السنة	field
+Which strategies are on	الاستراتيجيات الشغالة	
+Costs	المصاريف	section
+Exchange fees and stamp duty, % a round trip	رسوم البورصة والدمغة، % للشراء والبيع	field
+Spread on the 30 busiest stocks, %	فرق السعر في أنشط 30 سهم، %	field
+Spread on other stocks, %	فرق السعر في باقي الأسهم، %	field
+Round-trip cost on the 30 busiest stocks, %	تكلفة الشراء والبيع في أنشط 30 سهم، %	field
+Round-trip cost on other stocks, %	تكلفة الشراء والبيع في باقي الأسهم، %	field
+Fees include the spread. New calls use them; finished calls keep the fees they were charged.	المصاريف شاملة فرق السعر. التوصيات الجديدة بتستخدمها؛ والقديمة بتفضل بمصاريفها.	
+Free orders a month	أوامر مجانية في الشهر	field
+Notifications	الإشعارات	section
+Notify me	ابعتلي إشعار	
+Evening plan	خطة المساء	notification channel
+Dividend dates	مواعيد الكوبونات	notification channel
+Targets and stops	الأهداف ووقف الخسارة	notification channel
+Updates	التحديثات	section
+Version %1$s	الإصدار %1$s	
+Check now	اتأكد دلوقتي	
+What Android allows	اللي أندرويد بيسمح بيه	section
+Exact alarms, for the evening pass	منبّهات بالظبط، لمراجعة المساء	
+No battery limits, so Samsung does not put it to sleep	من غير قيود على البطارية، عشان سامسونج ما تنيّموش	
+Allowed	مسموح	
+Not allowed	مش مسموح	
+Save	حفظ	
+Cancel	إلغاء	
+Remove	شيل	
+Dismiss	تجاهل	
+Hide	إخفاء	
+Show	إظهار	
+Turn off	اقفل	
+Sync between devices	مزامنة بين الأجهزة	
+Sync now	زامن دلوقتي	
+Syncing…	بيزامن…	
+Sign in with Google	ادخل بحساب جوجل	
+Sign in again	ادخل تاني	
+Signing in…	بيدخل…	
+last synced %1$s	آخر مزامنة %1$s	
+not synced yet	لسه ما اتزامنش	
+Keep this phone's ledger in step with your other devices, through a hidden folder in your Google Drive that only Signal Lab can see.	خلّي دفتر التليفون ده متطابق مع أجهزتك التانية، من خلال فولدر مخفي في جوجل درايف مفيش غير Signal Lab يقدر يشوفه.	
+Find a stock	دوّر على سهم	search
+Watching the %1$d busiest stocks · %2$d pinned · %3$d excluded	بنتابع أنشط %1$d سهم · %2$d مثبّت · %3$d مستبعد	
+Always watch	تابع دايمًا	
+Never watch	ما تتابعش أبدًا	
+Stop excluding	ما تستبعدش	
+Unpin	إلغاء التثبيت	
+Not among the watched stocks.	مش من الأسهم اللي بنتابعها.	
+The stocks are chosen at the first evening pass, after their history has downloaded.	الأسهم بتتحدد في أول مراجعة مسائية، بعد ما تاريخها يتحمّل.	
+Your stocks	أسهمك	
+Tomorrow's plan	خطة بكرة	notification title
+Today's plan: %1$s	خطة النهارده: %1$s	crypto morning plan
+Buy %1$s, %2$s shares for %3$s	اشترِ %1$s، %2$s سهم بـ %3$s	notification line; %1$s = ticker
+Sell %1$s (%2$s): %3$s.	بِع %1$s (%2$s): %3$s.	notification line
+Month-end list: sell %1$d, buy %2$d, keep %3$d	قائمة آخر الشهر: بيع %1$d، شراء %2$d، احتفاظ %3$d	notification
+Dividend: hold %1$s until the close of %2$s	كوبون: خلّي %1$s معاك لحد إقفال %2$s	notification
+%1$s reached target 1: sell half at the open.	%1$s وصل للهدف الأول: بِع النص عند الفتح.	notification
+%1$s reached target 2: sell the rest at the open.	%1$s وصل للهدف الثاني: بِع الباقي عند الفتح.	notification
+%1$s closed below its stop: sell at the open.	%1$s قفل تحت وقف الخسارة: بِع عند الفتح.	notification
+Sell now: %1$s · %2$s	بِع دلوقتي: %1$s · %2$s	notification title
+New calls	توصيات جديدة	channel
+Calls and exits	التوصيات والخروج	channel
+New calls and exits of the strategies that are on	التوصيات الجديدة والخروج للاستراتيجيات الشغالة	channel description
+A strategy's new call, and when an open call should be left.	توصية جديدة من استراتيجية، ولما صفقة مفتوحة لازم تتقفل.	channel description
+One evening plan	خطة واحدة بالليل	
+One notification a day with what to sell and buy, instead of one for each call	إشعار واحد في اليوم بالمطلوب بيعه وشراؤه، بدل إشعار لكل توصية	
+Paper exit at %1$s: %2$s. Result %3$s after fees.	خروج ورقي عند %1$s: %2$s. النتيجة %3$s بعد المصاريف.	
+No price history for %1$s.	مفيش تاريخ أسعار لـ %1$s.	error
+Today's prices are not out yet; trying again later.	أسعار النهارده لسه ما نزلتش؛ هنحاول تاني بعد شوية.	error, retry
+The price source did not answer. Check the internet and try again.	مصدر الأسعار ما ردّش. اتأكد من الإنترنت وجرّب تاني.	error
+The dividend news page could not be read.	صفحة أخبار التوزيعات ما اتقرتش.	error
+This dividend date conflicts with the stock's dividend table; check it by hand.	ميعاد الكوبون ده مش متطابق مع جدول توزيعات السهم؛ راجعه بإيدك.	error
+This stock did not trade today.	السهم ده ما اتداولش النهارده.	
+A price move beyond the exchange's limit was flattened as a bad row or a bonus issue.	حركة سعر أكبر من حد البورصة اتلغت لأنها غلط أو أسهم مجانية.	data note
+Not enough money for one share.	الفلوس مش مكفية لسهم واحد.	error
+The paper account is full; tracked only.	الحساب الورقي مليان؛ بنتابعها بس.	
+Enter a number.	اكتب رقم.	field error
+This link does not work	اللينك ده مش شغال	error
+Something went wrong. Try again.	حصل خطأ. جرّب تاني.	error
+No finished calls to draw yet.	لسه مفيش توصيات خلصت عشان نرسمها.	
+Sunday	الأحد	day
+Monday	الاثنين	day
+Tuesday	الثلاثاء	day
+Wednesday	الأربعاء	day
+Thursday	الخميس	day
+Friday	الجمعة	day
+Saturday	السبت	day
+January	يناير	month, Egyptian names
+February	فبراير	month
+March	مارس	month
+April	أبريل	month
+May	مايو	month
+June	يونيو	month
+July	يوليو	month
+August	أغسطس	month
+September	سبتمبر	month
+October	أكتوبر	month
+November	نوفمبر	month
+December	ديسمبر	month
+today	النهارده	
+tomorrow	بكرة	
+%1$s %2$s	%1$s %2$s	date "15 نوفمبر": day then month, same order
+Your coins	عملاتك	crypto
+Find a coin	دوّر على عملة	crypto
+No coins yet	لسه مفيش عملات	crypto
+Copy %1$s and open Binance	انسخ %1$s وافتح باينانس	crypto
+Open %1$s on Binance	افتح %1$s على باينانس	crypto
+On Binance's Buy screen, paste the amount into Total (USDT).	في شاشة الشراء في باينانس، الزق المبلغ في خانة Total (USDT).	crypto
+Money I trade with, USDT	الفلوس اللي بتداول بيها، USDT	crypto
+Round-trip fees on BTC and ETH, %	مصاريف الشراء والبيع على BTC وETH، %	crypto
+Round-trip fees on other coins, %	مصاريف الشراء والبيع على باقي العملات، %	crypto
+Use Binance.US	استخدم Binance.US	crypto
+Binance refuses this network.	باينانس رافض الشبكة دي.	crypto error
+Futures data	بيانات العقود الآجلة	crypto
+Funding, 8h	التمويل، 8 ساعات	crypto
+When Bitcoin was rising	لما البيتكوين كان صاعد	crypto
+When Bitcoin was falling	لما البيتكوين كان نازل	crypto
+No Bitcoin daily history yet.	لسه مفيش تاريخ يومي للبيتكوين.	crypto
+Calls are made at the daily close, 00:00 UTC. With a morning plan they wait for your hour, so you act once, when you are awake.	التوصيات بتطلع عند الإغلاق اليومي، 00:00 UTC. مع خطة الصبح بتستنى الساعة اللي تختارها، عشان تتصرف مرة واحدة وأنت صاحي.	crypto
+Hour of the plan, 1 to 23, on this phone's clock	ساعة الخطة، من 1 لـ 23، بساعة التليفون	crypto
+Imported from Signal Lab 1	متنقلة من Signal Lab 1	crypto
+Kept as history. Their old patterns are retired, but they still count as tries, so new strategies are judged fairly.	متشالة كتاريخ. أنماطها القديمة اتقاعدت، بس لسه بتتحسب كتجارب، عشان الاستراتيجيات الجديدة تتحكم عليها بعدل.	crypto
+Ask the analyst	اسأل المحلل	crypto
+Your question (optional)	سؤالك (اختياري)	crypto
+Send	ابعت	crypto
+Clear the conversation	امسح المحادثة	crypto
+Share to the Claude app	شارك مع تطبيق Claude	crypto
+Use your PC	استخدم الكمبيوتر	crypto
+Connect	اتصل	crypto
+Connecting…	بيتصل…	crypto
+Unpair	إلغاء الربط	crypto
+Pairing code	كود الربط	crypto
+It matches	متطابق	crypto
+It doesn't	مش متطابق	crypto
+Save key	حفظ المفتاح	crypto
+Key, model and budget	المفتاح والموديل والميزانية	crypto
+Monthly budget, USD	الميزانية الشهرية، دولار	crypto
+Daily brief	ملخص يومي	crypto
+Weekly review	مراجعة أسبوعية	crypto
+Spent this month: %1$s	المصروف الشهر ده: %1$s	crypto
+The analyst is not set up in this build.	المحلل مش متظبط في النسخة دي.	crypto
+Proposed by the analyst	مقترحة من المحلل	crypto
+From the analyst	من المحلل	crypto
+What was sent	اللي اتبعت	crypto
+stock, share	سهم (الجمع: أسهم)	glossary
+company	شركة	glossary
+ticker	الكود (يفضل بالحروف اللاتينية: COMI)	glossary
+buy / sell	اشترِ / بِع (اسم: شراء / بيع)	glossary
+keep / hold	احتفظ / خلّيه معاك	glossary
+call (a recommendation)	توصية	glossary
+order (on Thndr)	أمر	glossary
+place the order	حط الأمر / وضعتُ الأمر	glossary
+open (session) / close (session)	الفتح / الإغلاق (القفل في الكلام)	glossary
+session	جلسة	glossary
+dividend	كوبون (توزيع نقدي)	glossary
+last day with the dividend right	تاريخ نهاية الحق	glossary
+ex-dividend	بدون الكوبون	glossary
+dividend payment date	تاريخ صرف الكوبون	glossary
+general assembly	الجمعية العامة	glossary
+dividend yield	عائد الكوبون	glossary
+stop loss	وقف الخسارة	glossary
+target 1 / target 2	الهدف الأول / الهدف الثاني	glossary
+entry range	نطاق الدخول	glossary
+a normal day's move (ATR)	حركة اليوم العادي	glossary
+price limit	الحد السعري	glossary
+price step (tick)	وحدة تغيّر السعر	glossary
+bonus shares	أسهم مجانية	glossary
+turnover	قيمة التداول	glossary
+spread	فرق السعر (بين العرض والطلب)	glossary
+fees / commission	مصاريف / عمولة	glossary
+stamp duty	ضريبة الدمغة	glossary
+round trip	شراء وبيع	glossary
+EGX30	المؤشر الرئيسي EGX30 (مختصر: المؤشر)	glossary
+cash, money-market fund	الكاش، صندوق النقد	glossary
+paper account	الحساب الورقي	glossary
+ledger	الدفتر	glossary
+strategy	استراتيجية	glossary
+yardstick	مقياس المقارنة	glossary
+random stocks	أسهم عشوائية	glossary
+the market is up / down	السوق صاعد / هابط	glossary
+pound(s)	جنيه، مختصر ج	glossary
+Thndr	ثاندر في النص العربي، Thndr في الأزرار لو الشعار ظاهر	glossary
