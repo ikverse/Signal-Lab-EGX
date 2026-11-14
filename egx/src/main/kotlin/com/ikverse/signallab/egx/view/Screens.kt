@@ -146,7 +146,7 @@ fun Chip(text: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CallPage(v: CallView, posture: Posture, tr: Tr, onBack: () -> Unit, onCopyAndOpen: () -> Unit, onTook: (Double, Long) -> Unit) {
+fun CallPage(v: CallView, posture: Posture, tr: Tr, onBack: () -> Unit, onCopyAndOpen: () -> Unit, onTook: (Double, Long) -> Unit, onStock: () -> Unit = {}) {
     val c = LocalCalm.current
     var sheet by remember { mutableStateOf(false) }
     val hero: @Composable ColumnScope.() -> Unit = {
@@ -156,8 +156,8 @@ fun CallPage(v: CallView, posture: Posture, tr: Tr, onBack: () -> Unit, onCopyAn
                 Text(v.action, style = Type.action, color = if (v.buy) c.up else c.down)
                 Chip(v.strategy)
             }
-            Text(v.name, style = Type.name, color = c.ink)
-            Text("${v.call.code} · ${v.closeLine}", style = Type.small, color = c.muted)
+            Text(v.name, style = Type.name, color = c.ink, modifier = Modifier.clickable(role = Role.Button, onClick = onStock))
+            Text("${v.call.code} · ${v.closeLine} · ${tr.t("Chart ›")}", style = Type.small, color = c.muted, modifier = Modifier.clickable(role = Role.Button, onClick = onStock))
             Spacer(Modifier.height(6.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) { for (chip in v.chips) Chip(chip) }
         }
@@ -285,7 +285,7 @@ fun ColumnScope.EvidencePage(s: StrategyView, tr: Tr, onBack: (() -> Unit)?) {
 // ---- Ledger (item 33) ----
 
 @Composable
-fun LedgerPage(v: LedgerView, posture: Posture, tr: Tr) {
+fun LedgerPage(v: LedgerView, posture: Posture, tr: Tr, onStock: (String) -> Unit = {}) {
     val c = LocalCalm.current
     var rule by remember { mutableStateOf(false) }
     val a: @Composable ColumnScope.() -> Unit = {
@@ -310,7 +310,7 @@ fun LedgerPage(v: LedgerView, posture: Posture, tr: Tr) {
         CalmCard(tr.t("My copies")) {
             Text(v.copiesLine, style = Type.body, color = c.ink)
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                Column { for (cp in v.copies.take(20)) Kv("${dayText(com.ikverse.signallab.egx.data.EgxTime.date(cp.day), tr)} · ${cp.code} · ${if (cp.buy) tr.t("Buy") else tr.t("Sell")}", "${tr.count(cp.shares)} @ ${tr.price(cp.price)}") }
+                Column { for (cp in v.copies.take(20)) Box(Modifier.clickable(role = Role.Button) { onStock(cp.code) }) { Kv("${dayText(com.ikverse.signallab.egx.data.EgxTime.date(cp.day), tr)} · ${cp.code} · ${if (cp.buy) tr.t("Buy") else tr.t("Sell")}", "${tr.count(cp.shares)} @ ${tr.price(cp.price)}") } }
             }
         }
         if (v.started) CalmCard(tr.t("Costs")) {
@@ -406,7 +406,7 @@ private fun Toggle(name: String, line: String, on: Boolean, enabled: Boolean, on
 // ---- the month-end list (item 34) ----
 
 @Composable
-fun MonthEndPage(v: MonthEndView, posture: Posture, tr: Tr, names: (String) -> String, onBack: () -> Unit, onPlaced: (CallRow) -> Unit) {
+fun MonthEndPage(v: MonthEndView, posture: Posture, tr: Tr, names: (String) -> String, onBack: () -> Unit, onStock: (String) -> Unit = {}, onPlaced: (CallRow) -> Unit) {
     val c = LocalCalm.current
     val head: @Composable ColumnScope.() -> Unit = {
         Back(tr.t("Today"), onBack)
@@ -425,7 +425,7 @@ fun MonthEndPage(v: MonthEndView, posture: Posture, tr: Tr, names: (String) -> S
         @Composable
         fun row(call: CallRow) {
             Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(if (call.action == "buy") c.buyCard else c.sellCard).padding(horizontal = 16.dp, vertical = 14.dp), verticalAlignment = Alignment.CenterVertically) {
-                Column(Modifier.weight(1f)) {
+                Column(Modifier.weight(1f).clickable(role = Role.Button) { onStock(call.code) }) {
                     Text(names(call.code), style = Type.nameSmall, color = c.ink)
                     Note("${call.code} · ${EgxStrategies.of(call.strategy)?.name?.let { tr.t(it) } ?: ""} · ${tr.t("%1\$d shares", call.shares)} · ${tr.t("EGP %1\$s", tr.pounds(call.pounds))}")
                 }

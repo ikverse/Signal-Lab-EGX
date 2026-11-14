@@ -535,3 +535,22 @@ The update could not be completed.	التحديث ماكملش.	updates card; ad
 This is the newest version.	ده أحدث إصدار.	updates card; added by the lead, to check
 Version %1$s is ready.	الإصدار %1$s جاهز.	updates card; added by the lead, to check
 The record starts after the first evening pass.	السجل بيبدأ بعد أول مراجعة مساء.	empty state before the first pass; added by the lead, to check
+%1$d calls on this stock so far.	%1$d توصية على السهم ده لحد دلوقتي.	stock page; added by the lead, to check
+%1$s over %2$s	%1$s في آخر %2$s	stock page; added by the lead, to check
+%1$s · %2$s to %3$s · %4$s	%1$s · من %2$s لـ %3$s · %4$s	stock page; added by the lead, to check
+%1$s · bought %2$s · still held	%1$s · اشترى %2$s · لسه معاه	stock page; added by the lead, to check
+1 year	سنة	stock page; added by the lead, to check
+3 months	3 شهور	stock page; added by the lead, to check
+All	الكل	stock page; added by the lead, to check
+Amount not known yet	المبلغ لسه مش معروف	stock page; added by the lead, to check
+Chart ›	الرسم البياني ‹	stock page; added by the lead, to check
+Date not known yet	التاريخ لسه مش معروف	stock page; added by the lead, to check
+Dividends	الكوبونات	stock page; added by the lead, to check
+EGP %1$s a share	%1$s ج للسهم	stock page; added by the lead, to check
+No dividends recorded for this stock.	مفيش كوبونات متسجلة للسهم ده.	stock page; added by the lead, to check
+No prices stored yet.	لسه مفيش أسعار محفوظة.	stock page; added by the lead, to check
+No strategy has held it yet.	ولا استراتيجية اشترته لحد دلوقتي.	stock page; added by the lead, to check
+Paper trades on this stock	الصفقات الورقية على السهم ده	stock page; added by the lead, to check
+cash date %1$s	صرف الكوبون %1$s	stock page; added by the lead, to check
+last close %1$s on %2$s	آخر إغلاق %1$s يوم %2$s	stock page; added by the lead, to check
+last day to hold %1$s	نهاية الحق %1$s	stock page; added by the lead, to check

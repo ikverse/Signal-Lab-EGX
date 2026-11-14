@@ -69,16 +69,30 @@ fun EgxRoot(graph: EgxGraph) {
                 fun stockName(code: String): String { val s = graph.stocks[code]; return (if (tr.isArabic) s?.nameAr ?: s?.nameEn else s?.nameEn) ?: code }
                 val today = todayView(calls, days, yard, fills, prefs, egx30, tr, { code -> stockName(code) to code }, EgxTime.date(EgxTime.today(System.currentTimeMillis())))
                 val openCall = calls.firstOrNull { "${it.strategy}|${it.code}|${it.action}" == open }
+                var stock by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
                 when {
+                    stock != null -> {
+                        val code = stock!!
+                        androidx.activity.compose.BackHandler { stock = null }
+                        var range by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(ChartRange.YEAR) }
+                        val rows by produceState(initialValue = emptyList<com.ikverse.signallab.egx.data.DailyRow>(), code) { value = graph.store.daily(code) }
+                        val divs by produceState(initialValue = emptyList<com.ikverse.signallab.egx.data.EgxDividend>(), code) { value = graph.store.dividends() }
+                        val history by androidx.compose.runtime.remember(code) { dao.callsFor(code) }.collectAsState(initial = emptyList())
+                        // The levels drawn are those of the newest buy on the stock while a strategy still holds it.
+                        val held = trades(code, fills, tr).any { it.closed == null }
+                        val levelsOf = if (held) history.firstOrNull { it.action == "buy" } else null
+                        StockPage(stockView(code, stockName(code), rows, divs, history, fills, levelsOf, range, tr), posture, tr, range, { range = it }) { stock = null }
+                    }
                     openCall != null -> {
                         androidx.activity.compose.BackHandler { open = null }
                         CallPage(callView(openCall, stockName(openCall.code), prefs, tr), posture, tr, onBack = { open = null },
                             onCopyAndOpen = { Thndr.copyAndOpen(context, openCall.shares.toString()) },
-                            onTook = { price, shares -> scope.launch { dao.addCopy(CopyRow(strategy = openCall.strategy, code = openCall.code, buy = openCall.action == "buy", day = EgxTime.today(System.currentTimeMillis()), shares = shares, price = price)) } })
+                            onTook = { price, shares -> scope.launch { dao.addCopy(CopyRow(strategy = openCall.strategy, code = openCall.code, buy = openCall.action == "buy", day = EgxTime.today(System.currentTimeMillis()), shares = shares, price = price)) } },
+                            onStock = { stock = openCall.code })
                     }
                     monthEnd -> {
                         androidx.activity.compose.BackHandler { monthEnd = false }
-                        MonthEndPage(monthEndView(calls, today.ordersUsed, tr), posture, tr, ::stockName, onBack = { monthEnd = false }) { call ->
+                        MonthEndPage(monthEndView(calls, today.ordersUsed, tr), posture, tr, ::stockName, onBack = { monthEnd = false }, onStock = { stock = it }) { call ->
                             scope.launch { dao.setPlaced(call.day, call.strategy, call.code, call.action, !call.placed) }
                         }
                     }
@@ -89,7 +103,7 @@ fun EgxRoot(graph: EgxGraph) {
                                 onOpen = { card -> open = "${card.call.strategy}|${card.call.code}|${card.call.action}" }, bottom = bottom, onMonthEnd = { monthEnd = true })
                             1 -> StrategiesPage(strategyViews(days, yard, fills, tr), posture, tr, chosen) { chosen = it }
                             2 -> LedgerPage(ledgerView(mapOf(Records.LEVELS to days, Records.RULE to rule, Records.LEVELS_DOUBLE to double), yard, mapOf(Records.LEVELS to fills), copies,
-                                calls.count { it.action != "keep" }, prefs, tr), posture, tr)
+                                calls.count { it.action != "keep" }, prefs, tr), posture, tr) { stock = it }
                             else -> {
                                 val update by graph.updates.state.collectAsState()
                                 androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { graph.updates.checkIfDue() } }
@@ -107,7 +121,7 @@ fun EgxRoot(graph: EgxGraph) {
                         }
                     }
                 }
-                if (openCall == null && !monthEnd) Dock(tr, pages.currentPage, Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { i -> scope.launch { pages.animateScrollToPage(i) } }
+                if (stock == null && openCall == null && !monthEnd) Dock(tr, pages.currentPage, Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { i -> scope.launch { pages.animateScrollToPage(i) } }
             }
         }
     }

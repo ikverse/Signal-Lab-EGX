@@ -167,6 +167,10 @@ interface EgxLedgerDao {
     @Query("SELECT * FROM call WHERE day >= :from ORDER BY day")
     suspend fun callsSince(from: Long): List<CallRow>
 
+    /** Every call ever made on one stock, newest first: the stock page's history. */
+    @Query("SELECT * FROM call WHERE code = :code ORDER BY day DESC")
+    fun callsFor(code: String): Flow<List<CallRow>>
+
     @Query("UPDATE call SET placed = :placed WHERE day = :day AND strategy = :strategy AND code = :code AND action = :action")
     suspend fun setPlaced(day: Long, strategy: String, code: String, action: String, placed: Boolean)
 

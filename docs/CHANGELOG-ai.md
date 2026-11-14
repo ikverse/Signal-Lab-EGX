@@ -651,3 +651,17 @@ rows). The owner reads both before the install (item 41).
   direction from their own letters. The owner rejected a rewrite into standard Arabic: the spoken Egyptian wording stays.
   Two rows changed: "Follow the phone" is now زي التليفون, and the new empty-state line (marked "to check").
 - Checked on the Fold's cover screen by screenshot before release; the unfolded layout was not re-checked (phone folded).
+
+### 0.2.0: five new features (approved 2026-11-14, branch `egx-features`)
+
+The owner approved: a stock page with chart, a dividend calendar, a real-terms ledger (dollars and gold), a home-screen
+widget, and the AI analyst through the PC host.
+
+**Stock page**
+- Opened by tapping the company on a call page, on the month-end list, or a row of My copies. The Dock hides while it is open.
+- The chart is drawn on a Compose Canvas (no chart library): closes as a line, the levels of the newest buy as dashed
+  lines while a strategy still holds the stock. Ranges 3 months (63 sessions), 1 year (245), all. Left to right in Arabic.
+- Paper trades are rebuilt from the LEVELS fills: a trade runs from a buy until the shares are back to none, its result
+  after costs. A new DAO query `callsFor(code)` reads the stock's calls; no schema change.
+- Built with `ANDROID_HOME` set in the command: this checkout has no `local.properties`, and reading the other checkout's
+  copy (it holds the signing settings) was refused. Debug builds need only the SDK path.
