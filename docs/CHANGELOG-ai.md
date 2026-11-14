@@ -665,3 +665,12 @@ widget, and the AI analyst through the PC host.
   after costs. A new DAO query `callsFor(code)` reads the stock's calls; no schema change.
 - Built with `ANDROID_HOME` set in the command: this checkout has no `local.properties`, and reading the other checkout's
   copy (it holds the signing settings) was refused. Debug builds need only the SDK path.
+
+**Dividend calendar**
+- A "Dividend calendar ›" link under Today's sentence and in the stock page's Dividends card. A month grid, Sunday to
+  Saturday (the exchange's week), marks the days with a last day to hold or a cash date; the list beside or below it gives
+  each date with the amount, the yield at the stock's last close (from the last 30 days stored) and a chip when a
+  Dividend run trade holds the stock on paper.
+- Cancelled dividends are left out. Only dividends already collected are read; nothing new is downloaded.
+- "Add to my calendar" sends Android's ACTION_INSERT with an all-day event: the phone's calendar app opens filled in and
+  the owner saves it there. No calendar permission.

@@ -554,3 +554,11 @@ Paper trades on this stock	الصفقات الورقية على السهم ده	
 cash date %1$s	صرف الكوبون %1$s	stock page; added by the lead, to check
 last close %1$s on %2$s	آخر إغلاق %1$s يوم %2$s	stock page; added by the lead, to check
 last day to hold %1$s	نهاية الحق %1$s	stock page; added by the lead, to check
+%1$s: dividend cash date	%1$s: تاريخ صرف الكوبون	dividend calendar; added by the lead, to check
+%1$s: last day to hold for the dividend	%1$s: نهاية الحق في الكوبون	dividend calendar; added by the lead, to check
+Add to my calendar	ضيفه على النتيجة بتاعتي	dividend calendar; added by the lead, to check
+Dividend calendar ›	نتيجة الكوبونات ‹	dividend calendar; added by the lead, to check
+Dividend run holds it	«قبل الكوبون» شايلاه	dividend calendar; added by the lead, to check
+Each dividend's last day to hold and the day its cash arrives.	نهاية الحق في كل كوبون، واليوم اللي فلوسه بتوصل فيه.	dividend calendar; added by the lead, to check
+No dividend dates this month.	مفيش مواعيد كوبونات الشهر ده.	dividend calendar; added by the lead, to check
+yield %1$s at the last close	عائد %1$s على آخر إغلاق	dividend calendar; added by the lead, to check

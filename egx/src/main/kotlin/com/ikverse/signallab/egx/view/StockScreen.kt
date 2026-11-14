@@ -1,6 +1,8 @@
 package com.ikverse.signallab.egx.view
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,7 +22,7 @@ import com.ikverse.signallab.egx.i18n.Tr
 
 /** A stock's own page: its chart with an open call's levels, its dividends and every paper trade on it. */
 @Composable
-fun StockPage(v: StockView, posture: Posture, tr: Tr, range: ChartRange, onRange: (ChartRange) -> Unit, onBack: () -> Unit) {
+fun StockPage(v: StockView, posture: Posture, tr: Tr, range: ChartRange, onRange: (ChartRange) -> Unit, onDividends: () -> Unit = {}, onBack: () -> Unit) {
     val c = LocalCalm.current
     val chart: @Composable ColumnScope.() -> Unit = {
         Back(tr.t("Back"), onBack)
@@ -42,6 +44,7 @@ fun StockPage(v: StockView, posture: Posture, tr: Tr, range: ChartRange, onRange
         CalmCard(tr.t("Dividends")) {
             if (v.dividends.isEmpty()) Note(tr.t("No dividends recorded for this stock."))
             for ((amount, day) in v.dividends) Kv(day, amount)
+            Text(tr.t("Dividend calendar ›"), style = Type.body, color = c.ink, modifier = Modifier.clickable(role = Role.Button, onClick = onDividends))
         }
         CalmCard(tr.t("Paper trades on this stock")) {
             Note(v.callsLine)

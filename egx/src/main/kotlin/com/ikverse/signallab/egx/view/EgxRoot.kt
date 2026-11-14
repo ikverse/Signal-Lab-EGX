@@ -70,6 +70,7 @@ fun EgxRoot(graph: EgxGraph) {
                 val today = todayView(calls, days, yard, fills, prefs, egx30, tr, { code -> stockName(code) to code }, EgxTime.date(EgxTime.today(System.currentTimeMillis())))
                 val openCall = calls.firstOrNull { "${it.strategy}|${it.code}|${it.action}" == open }
                 var stock by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
+                var dividendsOpen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
                 when {
                     stock != null -> {
                         val code = stock!!
@@ -81,7 +82,22 @@ fun EgxRoot(graph: EgxGraph) {
                         // The levels drawn are those of the newest buy on the stock while a strategy still holds it.
                         val held = trades(code, fills, tr).any { it.closed == null }
                         val levelsOf = if (held) history.firstOrNull { it.action == "buy" } else null
-                        StockPage(stockView(code, stockName(code), rows, divs, history, fills, levelsOf, range, tr), posture, tr, range, { range = it }) { stock = null }
+                        StockPage(stockView(code, stockName(code), rows, divs, history, fills, levelsOf, range, tr), posture, tr, range, { range = it },
+                            onDividends = { stock = null; dividendsOpen = true }) { stock = null }
+                    }
+                    dividendsOpen -> {
+                        androidx.activity.compose.BackHandler { dividendsOpen = false }
+                        var month by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(java.time.YearMonth.from(EgxTime.date(EgxTime.today(System.currentTimeMillis())))) }
+                        val divs by produceState(initialValue = emptyList<com.ikverse.signallab.egx.data.EgxDividend>()) { value = graph.store.dividends() }
+                        val closes by produceState(initialValue = emptyMap<String, Double>(), divs) {
+                            val from = EgxTime.today(System.currentTimeMillis()) - 30 * EgxTime.DAY_MS
+                            value = divs.map { it.code }.distinct().mapNotNull { c -> graph.store.daily(c, from).lastOrNull()?.let { c to it.close } }.toMap()
+                        }
+                        val run = com.ikverse.signallab.engine.egx.EgxStrategies.dividendRun.id
+                        val runOpen = fills.filter { it.strategy == run }.map { it.code }.distinct()
+                            .filter { c -> trades(c, fills, tr).any { it.strategy == run && it.closed == null } }.toSet()
+                        DividendPage(dividendMonth(divs, closes, runOpen, month, tr, ::stockName), posture, tr, onMonth = { month = it },
+                            onStock = { stock = it }, onAdd = { addToCalendar(context, it) }) { dividendsOpen = false }
                     }
                     openCall != null -> {
                         androidx.activity.compose.BackHandler { open = null }
@@ -100,7 +116,7 @@ fun EgxRoot(graph: EgxGraph) {
                         when (page) {
                             0 -> TodayScreen(today, posture, tr,
                                 onPlaced = { card -> scope.launch { dao.setPlaced(card.call.day, card.call.strategy, card.call.code, card.call.action, !card.placed) } },
-                                onOpen = { card -> open = "${card.call.strategy}|${card.call.code}|${card.call.action}" }, bottom = bottom, onMonthEnd = { monthEnd = true })
+                                onOpen = { card -> open = "${card.call.strategy}|${card.call.code}|${card.call.action}" }, bottom = bottom, onMonthEnd = { monthEnd = true }, onDividends = { dividendsOpen = true })
                             1 -> StrategiesPage(strategyViews(days, yard, fills, tr), posture, tr, chosen) { chosen = it }
                             2 -> LedgerPage(ledgerView(mapOf(Records.LEVELS to days, Records.RULE to rule, Records.LEVELS_DOUBLE to double), yard, mapOf(Records.LEVELS to fills), copies,
                                 calls.count { it.action != "keep" }, prefs, tr), posture, tr) { stock = it }
@@ -121,7 +137,7 @@ fun EgxRoot(graph: EgxGraph) {
                         }
                     }
                 }
-                if (stock == null && openCall == null && !monthEnd) Dock(tr, pages.currentPage, Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { i -> scope.launch { pages.animateScrollToPage(i) } }
+                if (stock == null && !dividendsOpen && openCall == null && !monthEnd) Dock(tr, pages.currentPage, Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { i -> scope.launch { pages.animateScrollToPage(i) } }
             }
         }
     }

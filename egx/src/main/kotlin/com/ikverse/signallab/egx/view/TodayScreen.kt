@@ -144,13 +144,16 @@ private fun dayMonth(d: LocalDate, tr: Tr, locale: Locale): String = tr.digits("
 /** The month-end link's text and action, handed down to the head of Today. */
 val LocalMonthEndLink = androidx.compose.runtime.staticCompositionLocalOf<Pair<String, () -> Unit>> { "" to {} }
 
+/** The dividend calendar's link, under Today's sentence on every evening. */
+val LocalDividendsLink = androidx.compose.runtime.staticCompositionLocalOf<Pair<String, () -> Unit>> { "" to {} }
+
 /** How the Fold is held: folded (one narrow pane), unfolded (two panes side by side), half-folded (above and below the crease). */
 enum class Posture { FOLDED, UNFOLDED, TABLETOP }
 
 @Composable
-fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit, bottom: PaddingValues, onMonthEnd: () -> Unit = {}) {
+fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit, bottom: PaddingValues, onMonthEnd: () -> Unit = {}, onDividends: () -> Unit = {}) {
     val c = LocalCalm.current
-    androidx.compose.runtime.CompositionLocalProvider(LocalMonthEndLink provides (tr.t("Month-end list") + " ›" to onMonthEnd)) {
+    androidx.compose.runtime.CompositionLocalProvider(LocalMonthEndLink provides (tr.t("Month-end list") + " ›" to onMonthEnd), LocalDividendsLink provides (tr.t("Dividend calendar ›") to onDividends)) {
     when (posture) {
         Posture.FOLDED -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = bottom.calculateBottomPadding() + 80.dp)) {
             Head(v, Modifier.padding(start = 22.dp, end = 22.dp, top = 22.dp))
@@ -207,6 +210,8 @@ private fun Head(v: TodayView, modifier: Modifier = Modifier) {
         Text(v.sentence, style = Type.sentence, color = c.ink, modifier = Modifier.padding(top = 10.dp, bottom = 2.dp))
         if (v.monthEnd) Text(LocalMonthEndLink.current.first, style = Type.body, color = c.ink,
             modifier = Modifier.padding(top = 4.dp).clickable(role = Role.Button, onClick = LocalMonthEndLink.current.second))
+        Text(LocalDividendsLink.current.first, style = Type.small, color = c.muted,
+            modifier = Modifier.padding(top = 6.dp).clickable(role = Role.Button, onClick = LocalDividendsLink.current.second))
     }
 }
 
