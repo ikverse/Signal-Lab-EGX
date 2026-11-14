@@ -529,3 +529,34 @@ rows). The owner reads both before the install (item 41).
 - **Names I am not sure of** (best guess written; the owner or EGX's site should confirm): ACAMD, ACAP, ACTF, AIHC,
   AMII, ASPI, CFGH, COPR, CPME, CRST, EGAS, GMCI, GPIM, GRCA, GTEX, GTWL, ICID, IDRE, LUTS, MBEG, NARE, NDRL, PHGC,
   RREI, UEGC, VLMR/VLMRA, KRDI/NAKH (which of the two codes is current), EFHI (likely an old code of EFIH).
+
+### E3: the second app, the evening pass and the ledger
+
+- Item 22: the EGX app is its own module `:egx` (id `com.ikverse.signallab.egx`, "Signal Lab EGX", green rising-line icon
+  on the light page), depending on `:engine` only. Product flavours of `:app` were rejected: they rename the crypto app's
+  tasks and APK path, which CI, the release workflow and `CLAUDE.md` rely on. Session B's data layer and session D's
+  tables moved into it (package `com.ikverse.signallab.egx.data`); nothing of the crypto app changed. CI also runs
+  `:egx:testDebugUnitTest`. Same signing key as the crypto app.
+- The board: `pass/BoardSource.kt` lays B's cleaned series on the calendar as `prepare.py` did. Past dividends come from
+  Yahoo (announced 17 sessions before the ex-day, as researched); upcoming ones from Arab Finance (announced at the
+  assembly, ex-day = the session after the last cum-day); one dividend on both counts once; yield against the raw close.
+- Holidays known ahead (needed for month ends): the past's closed weekdays, Egypt's seven fixed public holidays, and the
+  owner's own list in Settings (the Eids and Sham el-Nessim move every year). B's calendar assumes plain weekdays after
+  the last session; the engine's board uses this table instead.
+- Item 23: an exact alarm at 15:45 Cairo, Sunday to Thursday, starts a WorkManager job. If the session's candle is not
+  on Yahoo yet it retries every 30 minutes, 7 times (to 19:15). On a day off the pass works from the last session.
+- Item 24: the ledger (`egx-ledger.db`, Room) is append-only: each evening re-runs every strategy from the session the
+  ledger started on and appends only sessions after the last stored one, so a later price correction cannot rewrite it.
+  Four records per strategy: with the levels, by the rule alone, and both at double costs. Costs by rank: 0.5% for the
+  30 busiest, 0.8% for the rest. Yardsticks (cash, EGX30, 20 random twins' tenth/middle/ninetieth percentiles) are
+  stored per evening.
+- Item 25: each strategy's paper account starts with money / (strategies on); a strategy that is not on is recorded at
+  the same share for comparison. Monthly lists first buy at the first month end after the start, as tested.
+- The paper fills buys at the next session's open (as the engine and the research do), while a call advises placing a
+  buy near the close: the "My copies" record will show which was right (a question of the plan).
+- Calls: one slot of the paper account in pounds and whole shares; levels from the close and the 14-session ATR,
+  rounded to 0.01; "wait a day" after a jump of 8%; sells at the open; "keep" rows on a month-end list.
+- Item 26: settings in the app's preferences (money, cash rate 19%, strategies on, language, digits, double costs,
+  holidays). Item 27: four notifications (tomorrow's plan, the month-end list, targets and stops reached, dividend dates).
+- Item 37's format decided here: every text is written in English in the code and looked up by that exact English in
+  `strings_ar.tsv` (D's table), so no key list has to be kept in step; a missing text shows in English and is listed.

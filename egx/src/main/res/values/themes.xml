@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The window before Compose draws: the light page of "Calm with cards"; the Compose theme takes over at once. -->
+    <style name="Theme.SignalLabEgx" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#F3F6F4</item>
+        <item name="android:statusBarColor">#00000000</item>
+        <item name="android:navigationBarColor">#00000000</item>
+    </style>
+</resources>

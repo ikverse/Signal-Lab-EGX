@@ -22,6 +22,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Signal Lab Android"
 include(":app")
+include(":egx")
 include(":engine")
 include(":analyst-host")
 include(":research")

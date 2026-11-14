@@ -96,7 +96,18 @@ class SlotFill(val k: Int, val code: String, val buy: Boolean, val shares: Doubl
 /** The account at one close. */
 class SlotDay(val k: Int, val equity: Double, val held: Double)
 
-class SlotRun(val days: List<SlotDay>, val fills: List<SlotFill>, val decisions: List<Decision>, val dividends: Double)
+class SlotRun(
+    val days: List<SlotDay>,
+    val fills: List<SlotFill>,
+    val decisions: List<Decision>,
+    val dividends: Double,
+    /** What the account holds after the last close. */
+    val held: Map<String, Holding> = emptyMap(),
+    /** Sells ordered for the next session, with why: the rule's, a stop, or a stock that left the data. */
+    val sells: Map<String, Exit> = emptyMap(),
+    /** Buys ordered for the next session, in order of preference, including blocked buys still waiting. */
+    val buys: List<String> = emptyList(),
+)
 
 /**
  * The paper account of one rule, session by session, exactly as the research's `run_levels` follows it:
@@ -243,7 +254,8 @@ object Slots {
             buys = dec.buys.filter { it !in held }
             if (!dec.isEmpty) waiting.keys.retainAll(buys.toSet()) // the rule decided again: only what it still wants may wait
         }
-        return SlotRun(days, fills, decisions, dividends)
+        val waitingNow = waiting.keys.filter { it !in buys && it !in held }
+        return SlotRun(days, fills, decisions, dividends, LinkedHashMap(held), sells.associateWith { exits[it] ?: Exit.RULE }, buys + waitingNow)
     }
 
     /**
