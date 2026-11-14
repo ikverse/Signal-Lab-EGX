@@ -1,5 +1,27 @@
 # Signal Lab EGX: changes
 
+## 0.2.0
+
+Five new things. Every call is still on paper, and nothing here is financial advice.
+
+- **A page for each stock.** Tap a company on a call, on the month-end list or in My copies to see its price chart (3
+  months, a year, or all), with the entry range, stop and targets drawn on it while a strategy holds it, its dividends,
+  and every paper trade the strategies made on it, after costs.
+- **A dividend calendar**, from Today and from each stock's page: a month at a glance with each dividend's last day to
+  hold and its cash date, the amount, its yield at the last close, and whether the Dividend run holds it. "Add to my
+  calendar" opens your phone's calendar with the date filled in.
+- **The Ledger in dollars and gold.** Choose pounds, dollars or gold: the account, cash and the EGX30 are counted in it,
+  beside what holding dollars or gold would have made, so a rise that is only the pound falling shows as such. The
+  dollar is the official rate, not the parallel market's.
+- **A home-screen widget** with tomorrow's plan, the count of buys and sells, and the paper account against the EGX30.
+  It updates after each evening pass.
+- **The analyst.** A new Analyst page: pair the phone with the analyst host on your PC, then ask about your strategies,
+  calls, stocks and dividends. Claude answers on your PC from this phone's own numbers, and can look up the news. It only
+  reads; it cannot place, change or delete anything.
+
+Not verified yet: none of these has been tried on the phone; the Arabic texts added for them have not been read by the
+owner; the analyst has been tested against a stand-in for the PC host, not the real one.
+
 ## 0.1.1
 
 Fixes from the first look on the Fold 7.
