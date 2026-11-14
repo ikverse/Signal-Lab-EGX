@@ -687,3 +687,14 @@ widget, and the AI analyst through the PC host.
 - "Held dollars" and "Held gold" join the account's bars, beside cash and the EGX30. The measure choice and the
   "In real terms" card appear only once the dollar is known for the ledger's first day; a series that stops short of the
   ledger's last day is named with the date it reaches.
+
+**Home-screen widget**
+- Glance 1.1.1 (`androidx.glance:glance-appwidget`, already in the machine's Gradle cache) added to the catalog and to
+  `:egx` only.
+- The widget reuses `todayView`, so its sentence, date line and figures are the same as Today's. Two sizes: small shows
+  the date and the sentence; wide adds the count of buys and sells and the account against the EGX30. Colours are the
+  design's, with night variants. A tap opens the app.
+- Android's periodic refresh is off (`updatePeriodMillis="0"`). It is redrawn after each evening pass that writes calls
+  (the call sits in `EveningWorker` in `Schedule.kt`, not in `EveningPass.kt` as the list said, because the worker is
+  where the pass's outcome is handled), and whenever the app sees a change of settings or of tonight's calls.
+- The widget's layout direction follows the phone's language, not the app's; its texts follow the app's.

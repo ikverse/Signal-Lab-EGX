@@ -72,7 +72,10 @@ class EveningWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         val graph = (applicationContext as EgxApplication).graph
         val attempt = inputData.getInt("attempt", 0)
         when (val outcome = graph.pass.run()) {
-            is PassOutcome.Done -> graph.notifier.evening(outcome.result, graph.settings.value)
+            is PassOutcome.Done -> {
+                graph.notifier.evening(outcome.result, graph.settings.value)
+                com.ikverse.signallab.egx.widget.TodayWidget.refresh(applicationContext)
+            }
             PassOutcome.NotYet, is PassOutcome.Failed -> if (attempt < Schedule.RETRIES) Schedule.runNow(applicationContext, attempt + 1, Schedule.RETRY_MINUTES)
             PassOutcome.NoSession -> Unit
         }

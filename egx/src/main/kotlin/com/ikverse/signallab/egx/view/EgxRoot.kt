@@ -55,6 +55,8 @@ fun EgxRoot(graph: EgxGraph) {
     val posture = posture()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    // A change of language, money or tonight's calls shows on the home-screen widget too.
+    androidx.compose.runtime.LaunchedEffect(prefs, calls) { com.ikverse.signallab.egx.widget.TodayWidget.refresh(context) }
     CalmTheme {
         CompositionLocalProvider(LocalLayoutDirection provides if (tr.isArabic) LayoutDirection.Rtl else LayoutDirection.Ltr) {
             CalmPage {

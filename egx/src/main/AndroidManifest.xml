@@ -56,6 +56,19 @@
             android:name=".pass.EveningReceiver"
             android:exported="false" />
 
+        <!-- The home-screen widget: tomorrow's plan and the paper account against the EGX30. -->
+        <receiver
+            android:name=".widget.TodayWidgetReceiver"
+            android:exported="true"
+            android:label="Signal Lab EGX">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/today_widget_info" />
+        </receiver>
+
         <receiver
             android:name=".pass.EgxBootReceiver"
             android:exported="true">
