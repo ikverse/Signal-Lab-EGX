@@ -19,7 +19,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.ExperimentalTextApi
+import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
+import com.ikverse.signallab.egx.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
@@ -63,12 +67,16 @@ data class Calm(
 
 val LocalCalm = staticCompositionLocalOf { Calm.LIGHT }
 
+/** One weight of Readex Pro's variable font. */
+@OptIn(ExperimentalTextApi::class)
+private fun readex(w: Int) = Font(R.font.readex_pro, FontWeight(w), variationSettings = FontVariation.Settings(FontVariation.weight(w)))
+
 /**
- * The type of the design: Readex Pro for Arabic and English. Until its font file is in the app (it has to be downloaded
- * from Google Fonts, which waits on the owner's OK), the phone's own sans-serif stands in; swapping [Family] is all it takes.
+ * The type of the design: Readex Pro for Arabic and English (Google Fonts, SIL Open Font Licence, shipped in
+ * `assets/licences`). One variable font file carries every weight.
  */
 object Type {
-    val Family: FontFamily = FontFamily.SansSerif
+    val Family: FontFamily = FontFamily(readex(300), readex(400), readex(500), readex(600), readex(700))
     val sentence = TextStyle(fontFamily = Family, fontSize = 32.sp, lineHeight = 42.sp, fontWeight = FontWeight.SemiBold, letterSpacing = (-0.5).sp)
     val action = TextStyle(fontFamily = Family, fontSize = 40.sp, lineHeight = 46.sp, fontWeight = FontWeight.Bold)
     val actionSmall = TextStyle(fontFamily = Family, fontSize = 24.sp, fontWeight = FontWeight.Bold)

@@ -36,7 +36,10 @@ import androidx.window.layout.WindowInfoTracker
 import com.ikverse.signallab.egx.EgxGraph
 import com.ikverse.signallab.egx.data.EgxTime
 import com.ikverse.signallab.egx.i18n.Tr
+import com.ikverse.signallab.egx.ledger.CopyRow
 import com.ikverse.signallab.egx.ledger.Records
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.ikverse.signallab.egx.pass.Schedule
 import kotlinx.coroutines.launch
 
@@ -61,33 +64,43 @@ fun EgxRoot(graph: EgxGraph) {
             CalmPage(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) {
                 val pages = rememberPagerState { PAGES.size }
                 val bottom = WindowInsets.navigationBars.asPaddingValues()
-                HorizontalPager(pages, Modifier.fillMaxSize(), beyondViewportPageCount = 0) { page ->
-                    when (page) {
-                        0 -> {
-                            val v = todayView(calls, days, yard, fills, prefs, egx30, tr, { code ->
-                                val s = graph.stocks[code]
-                                ((if (tr.isArabic) s?.nameAr ?: s?.nameEn else s?.nameEn) ?: code) to code
-                            }, EgxTime.date(EgxTime.today(System.currentTimeMillis())))
-                            TodayScreen(v, posture, tr,
-                                onPlaced = { card -> scope.launch { dao.setPlaced(card.call.day, card.call.strategy, card.call.code, card.call.action, !card.placed) } },
-                                onOpen = { }, bottom = bottom)
+                var open by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
+                var monthEnd by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+                var chosen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
+                val rule by dao.allDays(Records.RULE).collectAsState(initial = emptyList())
+                val double by dao.allDays(Records.LEVELS_DOUBLE).collectAsState(initial = emptyList())
+                val copies by dao.copies().collectAsState(initial = emptyList())
+                fun stockName(code: String): String { val s = graph.stocks[code]; return (if (tr.isArabic) s?.nameAr ?: s?.nameEn else s?.nameEn) ?: code }
+                val today = todayView(calls, days, yard, fills, prefs, egx30, tr, { code -> stockName(code) to code }, EgxTime.date(EgxTime.today(System.currentTimeMillis())))
+                val openCall = calls.firstOrNull { "${it.strategy}|${it.code}|${it.action}" == open }
+                when {
+                    openCall != null -> {
+                        androidx.activity.compose.BackHandler { open = null }
+                        CallPage(callView(openCall, stockName(openCall.code), prefs, tr), posture, tr, onBack = { open = null },
+                            onCopyAndOpen = { Thndr.copyAndOpen(context, openCall.shares.toString()) },
+                            onTook = { price, shares -> scope.launch { dao.addCopy(CopyRow(strategy = openCall.strategy, code = openCall.code, buy = openCall.action == "buy", day = EgxTime.today(System.currentTimeMillis()), shares = shares, price = price)) } })
+                    }
+                    monthEnd -> {
+                        androidx.activity.compose.BackHandler { monthEnd = false }
+                        MonthEndPage(monthEndView(calls, today.ordersUsed, tr), posture, tr, ::stockName, onBack = { monthEnd = false }) { call ->
+                            scope.launch { dao.setPlaced(call.day, call.strategy, call.code, call.action, !call.placed) }
                         }
-                        else -> Waiting(tr, PAGES[page]) { Schedule.runNow(context) }
+                    }
+                    else -> HorizontalPager(pages, Modifier.fillMaxSize(), beyondViewportPageCount = 0) { page ->
+                        when (page) {
+                            0 -> TodayScreen(today, posture, tr,
+                                onPlaced = { card -> scope.launch { dao.setPlaced(card.call.day, card.call.strategy, card.call.code, card.call.action, !card.placed) } },
+                                onOpen = { card -> open = "${card.call.strategy}|${card.call.code}|${card.call.action}" }, bottom = bottom, onMonthEnd = { monthEnd = true })
+                            1 -> StrategiesPage(strategyViews(days, yard, fills, tr), posture, tr, chosen) { chosen = it }
+                            2 -> LedgerPage(ledgerView(mapOf(Records.LEVELS to days, Records.RULE to rule, Records.LEVELS_DOUBLE to double), yard, mapOf(Records.LEVELS to fills), copies,
+                                calls.count { it.action != "keep" }, prefs, tr), posture, tr)
+                            else -> SettingsPage(prefs, posture, tr, onChange = { graph.settings.update(it) }, onRunNow = { Schedule.runNow(context) })
+                        }
                     }
                 }
-                Dock(tr, pages.currentPage, Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { i -> scope.launch { pages.animateScrollToPage(i) } }
+                if (openCall == null && !monthEnd) Dock(tr, pages.currentPage, Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { i -> scope.launch { pages.animateScrollToPage(i) } }
             }
         }
-    }
-}
-
-/** A page whose design waits for the owner's acceptance (build item 30). */
-@Composable
-private fun Waiting(tr: Tr, title: String, onRun: () -> Unit) {
-    val c = LocalCalm.current
-    Column(Modifier.fillMaxSize().padding(22.dp)) {
-        Text(tr.t(title), style = Type.sentence, color = c.ink)
-        Text(tr.t("Run the evening pass now"), style = Type.body, color = c.muted, modifier = Modifier.padding(top = 24.dp).clickable(role = Role.Button, onClick = onRun))
     }
 }
 

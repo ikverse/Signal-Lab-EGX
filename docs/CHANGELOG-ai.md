@@ -577,3 +577,35 @@ rows). The owner reads both before the install (item 41).
   (1, 2, 3 to 10, 11 and more) and " و" to join the sentence's parts. One row was missing and is added, marked for the
   owner: "Plan for %1$s" = "خطة %1$s" (the mockup's wording). A test holds Today's and the notifications' texts to
   having an Arabic row.
+
+### E4: screens (part 2: the screens accepted in session C)
+
+- Readex Pro downloaded from Google Fonts on the owner's OK (variable TTF, SIL Open Font Licence in
+  `assets/licences/ReadexPro-OFL.txt`), one file for every weight.
+- Items 31 to 34 built from the five screens the owner accepted at version 1 in session C
+  (https://claude.ai/artifact/AsCAdWNe48c1sX8iDPUhoF): the call page (levels ladder, amount with costs and costs at
+  double, timing, dividend dates, reason; "Copy amount and open Thndr" and the "I took it" sheet saving to My copies),
+  Strategies grouped by tier with an evidence page (research figures from docs/egx-research.md), Ledger (both records,
+  by strategy, watched ones, costs, dividends, My copies), Settings (money, cash rate, strategies on, language,
+  digits, double costs, the holiday list, run now), and the month-end list. Unfolded, each screen splits in two panes.
+- Where the mockup and the plan or tables differ: Arabic strategy names come from session D's table (قبل الكوبون, not
+  the mockup's سباق الكوبون); the count of versions tried is the registry's 170 (the mockup said 176); the mockup's
+  "1.66 a share after the 5% tax" on a Dividend run call is left out, because the run sells at the open of the last day
+  that carries the dividend and does not collect it (session C's open question); the page says so instead.
+- Thndr's package name is not published: the known candidates (`com.thndr.app`, `com.thndr`, `app.thndr`) are tried,
+  else the browser opens thndr.app. Unverified until it runs on the Fold.
+- Calls now store their round trip and the normal day's move (the call page's costs line and levels note). The ledger
+  database has never been installed, so its first version changed without a migration.
+
+### E5 and E6 so far
+
+- Item 37's completeness is a test: `ArabicTableTest` reads every literal `t("...")` text of the app's sources (plus the
+  strategies' names and lines, the menu and the counted forms) and fails on any without an Arabic row. 87 texts of the new
+  screens had none; session D is translating them. Placeholders must match between the languages (also tested).
+- Items 39 and 40: the whole app is right to left in Arabic; bar charts, the levels ladder and the copies table stay
+  left to right; tickers stay Latin; language and Arabic-Indic digits are in Settings.
+- Item 42: `CLAUDE.md` has the EGX app's layout, commands and agreements.
+- Item 43: `FullEveningPassTest` runs a whole evening pass on a PC against the research's recorded downloads (191
+  stocks, hourly bars, the EGX30, the recorded Arab Finance page) with the ledger started a year back. It found one bug,
+  fixed: the random twins' growth was measured against the pound share instead of 1.00. A second pass the same evening
+  appends nothing.

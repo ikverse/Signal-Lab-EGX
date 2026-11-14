@@ -60,7 +60,29 @@ Wrap every adb call in `timeout N`.
   strategy over years of Binance history, followed as one account (`docs/strategy-research.md` §8). Download history with
   `python tools/download_history.py klines`, then `./gradlew :research:run`. Its results are copied by hand into
   `engine/.../eval/AccountRecord.kt`, which the tiers and the evidence pages read.
-- `tools/` — one-off scripts, not part of the build.
+- `egx/` — **Signal Lab EGX**, the second app (`com.ikverse.signallab.egx`, plan `docs/egx-plan.md`, build list
+  `docs/egx-build-list.md`, evidence `docs/egx-research.md`): evening paper calls for the Egyptian Exchange, copied by hand
+  on Thndr. Depends on `:engine` only; the crypto app is never touched by it. `data/` (Yahoo, Arab Finance, the store),
+  `pass/` (the board, the evening pass, schedule, notifications), `ledger/` (Room, append-only), `i18n/` (language
+  tables), `view/` (Compose, "Calm with cards"). Its rules live in the engine's `egx/` package.
+- `tools/` — one-off scripts, not part of the build. `tools/egx/` holds the EGX research scripts.
+
+## Signal Lab EGX
+
+```bash
+./gradlew :engine:test :egx:testDebugUnitTest :egx:assembleDebug 2>&1 | grep -E "^e:|^w:|FAILED|BUILD"
+python -I tools/egx/export.py research/data/egx/data_typical <dbn2.json> research/data/egx/raw
+./gradlew :research:run --args="egx research/data/egx/data_typical"        # the research's table, re-made (add "wait")
+```
+
+- Texts are written in English in the code (`tr.t("...")`) and looked up by that exact English in
+  `egx/src/main/assets/egx/strings_ar.tsv`; `ArabicTableTest` fails when a text has no Arabic row. The owner reads the
+  Arabic before an install.
+- Month ends need tomorrow's date, never tomorrow's candle: the board knows the exchange's holidays ahead (the past's
+  closed weekdays, the fixed public holidays, and the owner's list in Settings for the Eids and moved holidays).
+- The ledger is append-only: each evening re-runs every strategy from the ledger's start and stores only new sessions.
+- `FullEveningPassTest` runs a whole pass on the research's recorded downloads when `research/data/egx/` is present.
+- Not built from the build list without the owner's word: an install, a push, a tag or release, deleting user data.
 
 ## The engine's rules
 

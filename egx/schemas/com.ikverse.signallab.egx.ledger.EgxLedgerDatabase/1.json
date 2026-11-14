@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7be208aea94369097357d71c6e93a319",
+    "identityHash": "3e3501b64fa20313df9a219e09f95530",
     "entities": [
       {
         "tableName": "paper_fill",
@@ -182,7 +182,7 @@
       },
       {
         "tableName": "call",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`day` INTEGER NOT NULL, `strategy` TEXT NOT NULL, `code` TEXT NOT NULL, `action` TEXT NOT NULL, `shares` INTEGER NOT NULL, `pounds` REAL NOT NULL, `close` REAL NOT NULL, `entryLow` REAL, `entryHigh` REAL, `stop` REAL, `target1` REAL, `target2` REAL, `timing` TEXT NOT NULL, `lastCumDay` INTEGER, `paymentDay` INTEGER, `reason` TEXT NOT NULL, `monthEnd` INTEGER NOT NULL, `placed` INTEGER NOT NULL, PRIMARY KEY(`day`, `strategy`, `code`, `action`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`day` INTEGER NOT NULL, `strategy` TEXT NOT NULL, `code` TEXT NOT NULL, `action` TEXT NOT NULL, `shares` INTEGER NOT NULL, `pounds` REAL NOT NULL, `close` REAL NOT NULL, `entryLow` REAL, `entryHigh` REAL, `stop` REAL, `target1` REAL, `target2` REAL, `timing` TEXT NOT NULL, `lastCumDay` INTEGER, `paymentDay` INTEGER, `reason` TEXT NOT NULL, `monthEnd` INTEGER NOT NULL, `roundTrip` REAL NOT NULL, `atr` REAL NOT NULL, `placed` INTEGER NOT NULL, PRIMARY KEY(`day`, `strategy`, `code`, `action`))",
         "fields": [
           {
             "fieldPath": "day",
@@ -277,6 +277,18 @@
             "fieldPath": "monthEnd",
             "columnName": "monthEnd",
             "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "roundTrip",
+            "columnName": "roundTrip",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atr",
+            "columnName": "atr",
+            "affinity": "REAL",
             "notNull": true
           },
           {
@@ -400,7 +412,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7be208aea94369097357d71c6e93a319')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e3501b64fa20313df9a219e09f95530')"
     ]
   }
 }

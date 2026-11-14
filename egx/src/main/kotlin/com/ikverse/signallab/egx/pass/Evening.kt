@@ -94,7 +94,8 @@ object Evening {
             val twins = Yardsticks.randomTwins(s.rule, ctx, main, from, costs(snapshot, 1.0), cash, Levels.PLAN)
             val cashDays = Yardsticks.cash(board, from, cash)
             val index = if (snapshot.egx30.drop(from).any { !it.isNaN() }) Growth.of(Yardsticks.index(snapshot.egx30, from)) else null
-            val random = twins.mapNotNull { t -> Growth.of(t.days, start = share)?.multiple }.sorted()
+            // The twins run from 1.00 (Yardsticks.randomTwin), so their growth is measured from 1.00.
+            val random = twins.mapNotNull { t -> Growth.of(t.days)?.multiple }.sorted()
             val record = YardstickRecord(
                 months = ((last - from + 1) / 20.4).toInt(),
                 rule = Growth.of(main.days, start = share)!!,
@@ -139,7 +140,8 @@ object Evening {
             val st = board.stocks.getValue(code)
             val (cum, pay) = dividendDates(code)
             out.add(CallRow(day, s.id, code, "sell", floor(h.shares).toLong(), h.shares * st.close[k], st.close[k], null, null, null, null, null,
-                "open", cum, pay, if (why == Exit.STOP) "stop" else if (s.rule is DividendRun) "dividend_last_day" else "rule", monthEnd))
+                "open", cum, pay, if (why == Exit.STOP) "stop" else if (s.rule is DividendRun) "dividend_last_day" else "rule", monthEnd,
+                Markets.EGX.roundTrip(board.rank(k, code)), h.atr.takeIf { !it.isNaN() } ?: 0.0))
         }
         var free = s.rule.slots - run.held.size + run.sells.size
         for (code in run.buys) {
@@ -158,7 +160,7 @@ object Evening {
                     s.rule is DividendRun -> "dividend_announced"
                     s.monthly -> "monthly_list"
                     else -> "breakout"
-                }, monthEnd))
+                }, monthEnd, Markets.EGX.roundTrip(board.rank(k, code)), atr.takeIf { !it.isNaN() } ?: 0.0))
             free--
         }
         if (monthEnd && s.monthly) {
@@ -168,7 +170,7 @@ object Evening {
                 val close = st.close[k]
                 val lv = if (h.atr.isNaN()) null else CallLevels(Markets.EGX.round(h.price), Markets.EGX.round(h.price), Markets.EGX.round(h.price - 4 * h.atr), Markets.EGX.round(h.price + 5 * h.atr), Markets.EGX.round(h.price + 10 * h.atr))
                 out.add(CallRow(day, s.id, code, "keep", floor(h.shares).toLong(), h.shares * close, close, lv?.entryLow, lv?.entryHigh, lv?.stop, lv?.target1, lv?.target2,
-                    "none", null, null, "monthly_list", true))
+                    "none", null, null, "monthly_list", true, Markets.EGX.roundTrip(board.rank(k, code)), h.atr.takeIf { !it.isNaN() } ?: 0.0))
             }
         }
         return out

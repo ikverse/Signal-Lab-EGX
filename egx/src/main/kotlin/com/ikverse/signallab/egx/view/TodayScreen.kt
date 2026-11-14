@@ -67,6 +67,8 @@ data class TodayView(
     val barsText: Triple<String, String, String>,
     val ordersUsed: Int,
     val ordersLeft: String,
+    /** True on the evening a month ended: Today links to the month-end list. */
+    val monthEnd: Boolean = false,
 )
 
 /** Thndr's Trader plan waives commission on this many orders a month. */
@@ -132,18 +134,22 @@ fun todayView(
     return TodayView(
         dateLine, market, NotificationTexts.sentence(calls, tr), cards, tr.t("EGP %1\$s", tr.pounds(account)), you, index, cash,
         Triple(tr.t("You %1\$s", signed(you)), tr.t("EGX30 %1\$s", signed(index)), tr.t("Cash %1\$s", signed(cash))),
-        used, tr.t("%1\$d left this month", maxOf(0, FREE_ORDERS - used)),
+        used, tr.t("%1\$d left this month", maxOf(0, FREE_ORDERS - used)), calls.any { it.monthEnd },
     )
 }
 
 private fun dayMonth(d: LocalDate, tr: Tr, locale: Locale): String = tr.digits("${d.dayOfMonth} ${d.month.getDisplayName(TextStyle.FULL, locale)}")
 
+/** The month-end link's text and action, handed down to the head of Today. */
+val LocalMonthEndLink = androidx.compose.runtime.staticCompositionLocalOf<Pair<String, () -> Unit>> { "" to {} }
+
 /** How the Fold is held: folded (one narrow pane), unfolded (two panes side by side), half-folded (above and below the crease). */
 enum class Posture { FOLDED, UNFOLDED, TABLETOP }
 
 @Composable
-fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit, bottom: PaddingValues) {
+fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit, bottom: PaddingValues, onMonthEnd: () -> Unit = {}) {
     val c = LocalCalm.current
+    androidx.compose.runtime.CompositionLocalProvider(LocalMonthEndLink provides (tr.t("Month-end list") + " ›" to onMonthEnd)) {
     when (posture) {
         Posture.FOLDED -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = bottom.calculateBottomPadding() + 80.dp)) {
             Head(v, Modifier.padding(start = 22.dp, end = 22.dp, top = 22.dp))
@@ -185,6 +191,7 @@ fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> 
             }
         }
     }
+    }
 }
 
 @Composable
@@ -197,6 +204,8 @@ private fun Head(v: TodayView, modifier: Modifier = Modifier) {
                 modifier = Modifier.clip(RoundedCornerShape(100)).background(c.dock).border(1.dp, c.line, RoundedCornerShape(100)).padding(horizontal = 12.dp, vertical = 4.dp))
         }
         Text(v.sentence, style = Type.sentence, color = c.ink, modifier = Modifier.padding(top = 10.dp, bottom = 2.dp))
+        if (v.monthEnd) Text(LocalMonthEndLink.current.first, style = Type.body, color = c.ink,
+            modifier = Modifier.padding(top = 4.dp).clickable(role = Role.Button, onClick = LocalMonthEndLink.current.second))
     }
 }
 

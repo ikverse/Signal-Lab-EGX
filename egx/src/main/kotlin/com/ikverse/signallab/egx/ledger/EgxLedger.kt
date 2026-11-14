@@ -96,6 +96,10 @@ data class CallRow(
     /** Why, as a key the screens turn into a sentence ("monthly_list", "dividend_announced", "breakout", "stop", ...). */
     val reason: String,
     val monthEnd: Boolean,
+    /** The round trip for this stock (0.5% for the 30 busiest, 0.8% for the rest). */
+    val roundTrip: Double = 0.0,
+    /** A normal day's move: the 14-session average true range the levels are measured in. */
+    val atr: Double = 0.0,
     val placed: Boolean = false,
 )
 
