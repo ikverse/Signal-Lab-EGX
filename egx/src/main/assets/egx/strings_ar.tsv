@@ -435,3 +435,91 @@ the market is up / down	السوق صاعد / هابط	glossary
 pound(s)	جنيه، مختصر ج	glossary
 Thndr	ثاندر في النص العربي، Thndr في الأزرار لو الشعار ظاهر	glossary
 Plan for %1$s	خطة %1$s	date line (mockup "خطة الأحد 15 نوفمبر"); added by the lead, to check
+% a year	% في السنة	settings unit
+%1$d calls · holds %2$d stocks now	%1$d توصية · معاها %2$d سهم دلوقتي	strategy row
+%1$s closed below its stop loss: sell at the open	%1$s قفل تحت وقف الخسارة: بِع عند الفتح	notification
+%1$s reached target 1: half sold at %2$s	%1$s وصل للهدف الأول: اتباع النص عند %2$s	notification
+%1$s reached target 2: the rest sold at %2$s	%1$s وصل للهدف الثاني: اتباع الباقي عند %2$s	notification
+%1$s to %2$s · above it, wait	من %1$s لـ %2$s · فوقه استنى	entry range line
+%1$s: last day with the right %2$s	%1$s: تاريخ نهاية الحق %2$s	dividend line
+191 stocks, 2010 to 2026, costs included. Each year used only settings that had worked in earlier years.	191 سهم، من 2010 لـ 2026، شامل المصاريف. كل سنة استخدمت بس الإعدادات اللي نجحت في السنين اللي قبلها.	evidence
+8 random stocks	8 أسهم عشوائية	yardstick
+A general assembly fixed a cash dividend worth 4% or more of the price; stocks like this have tended to rise until the dividend's last day.	الجمعية العامة أقرّت كوبون نقدي قيمته 4% أو أكتر من السعر؛ والأسهم اللي زي كده غالبًا بتطلع لحد تاريخ نهاية الحق.	why, dividend run
+A new 100-day high.	أعلى سعر في 100 يوم.	why, slow breakout
+A normal day's move for %1$s is %2$s. The stop is four moves below the entry, the targets five and ten above.	حركة اليوم العادي لـ %1$s هي %2$s. وقف الخسارة تحت الدخول بـ 4 حركات، والأهداف فوقه بـ 5 و10.	levels
+A strategy moves up or down only by its own record against the three yardsticks: cash, the EGX30, and eight random stocks picked the same days. %1$d versions have been tried in all, so some of any good result is luck.	الاستراتيجية بتطلع أو تنزل درجة بسجلها هي بس قدام مقاييس المقارنة التلاتة: الكاش، والمؤشر EGX30، و8 أسهم عشوائية اتختارت في نفس الأيام. اتجرب %1$d نسخة في المجمل، فجزء من أي نتيجة حلوة حظ.	tiers
+Account at double costs	الحساب بضعف المصاريف	ledger
+Against the paper call: %1$s	مقارنة بالتوصية الورقية: %1$s	my copies
+Also show everything at double costs	اعرض كل حاجة كمان بضعف المصاريف	settings switch
+At each month's end, hold the steadiest of the 80 busiest stocks that are above their 200-day average.	آخر كل شهر، احتفظ بأهدأ الأسهم من بين أنشط 80 سهم اللي فوق متوسط 200 يوم.	one-line, calm stocks
+Buy %1$s: %2$s shares, about %3$s pounds	اشترِ %1$s: %2$s سهم، حوالي %3$s جنيه	month-end line
+Buy a new 100-day high, sell on a close below the 40-day low; never the day after a jump of 8%.	اشترِ عند أعلى سعر في 100 يوم، وبِع لو قفل تحت أدنى سعر في 40 يوم؛ وأبدًا مش تاني يوم بعد قفزة 8%.	one-line, slow breakout
+Cash date	تاريخ صرف الكوبون	dividend label
+Cash rate	عائد الكاش	settings
+Control · silent, no calls	للمقارنة · في الخلفية، من غير توصيات	tier line
+Costs, buy and sell	المصاريف، شراء وبيع	settings
+Days the exchange is closed	أيام إجازة البورصة	settings
+Dividends paid in, after 5% tax	كوبونات اتصرفت، بعد ضريبة 5%	ledger
+EGP	ج	currency unit
+Each strategy that is on gets an equal share of your %1$s: %2$s.	كل استراتيجية شغالة بتاخد نصيب متساوي من %1$s بتوعك: %2$s.	ledger
+Every call's pounds and shares come from this, split equally among the strategies that are on: %1$s each.	جنيهات وأسهم كل توصية بتتحسب من المبلغ ده، متقسّم بالتساوي على الاستراتيجيات الشغالة: %1$s لكل واحدة.	settings help
+Evidence ›	الدليل ‹	link; arrow flipped for right to left
+Fast breakout (control)	الاختراق السريع (للمقارنة)	strategy name
+Fees and stamp duty 0.16% a round trip, plus the spread: 0.5% in all for the 30 busiest, 0.8% for the rest.	رسوم البورصة والدمغة 0.16% للشراء والبيع، وفوقها فرق السعر: 0.5% في المجمل لأنشط 30 سهم، و0.8% للباقي.	settings help
+Fixed public holidays are known. Add the Eids, Sham el-Nessim and any moved holiday, as yyyy-mm-dd, one a line.	الإجازات الرسمية الثابتة معروفة. ضيف العيدين وشم النسيم وأي إجازة اتنقلت، بالشكل yyyy-mm-dd، كل واحدة في سطر.	settings help; keep yyyy-mm-dd in Latin
+In the research: what 1.00 became	في البحث: الـ 1.00 بقى كام	evidence
+Keep · no order needed	احتفظ · مش محتاج أمر	month-end
+Last day to hold	آخر يوم تحتفظ فيه	dividend label
+Money	الفلوس	settings section
+Money I trade with	الفلوس اللي بتداول بيها	settings
+Money that is not in a stock earns this on paper. Set it to your money-market fund's rate.	الفلوس اللي مش في سهم بتاخد العائد ده على الورق. حطّه بعائد صندوق النقد بتاعك.	settings help
+On paper since the ledger started	على الورق من أول الدفتر	ledger
+Paid so far	اتصرف لحد دلوقتي	ledger
+Pounds	جنيه	field
+Price I paid	السعر اللي اشتريت بيه	my copies field
+Prices come from Yahoo's free feed and were cleaned. Delisted stocks are missing. Costs are 0.5% a round trip for the 30 busiest stocks and 0.8% for the rest.	الأسعار من مصدر ياهو المجاني واتنضفت. الأسهم اللي اتشطبت مش موجودة. المصاريف 0.5% للشراء والبيع في أنشط 30 سهم و0.8% للباقي.	evidence limits
+Promising · calls on Today	واعدة · توصياتها في اليوم	tier line
+Run the evening pass now	شغّل مراجعة المساء دلوقتي	settings button
+Save holidays	حفظ الإجازات	settings button
+Save to My copies	احفظ في نسخي	my copies button
+Sell %1$s: %2$s shares	بِع %1$s: %2$s سهم	month-end line
+Sell first at the open; buy near the close the same day.	بِع الأول عند الفتح؛ واشترِ قرب الإغلاق في نفس اليوم.	month-end timing
+Sell half · %1$d shares	بِع النص · %1$d سهم	target 1
+Sell if a day closes below	بِع لو يوم قفل تحت	stop label
+Sell the rest	بِع الباقي	target 2
+Selling at the targets	البيع عند الأهداف	ledger section
+Selling at the targets cost about half the gain in the research. You chose the targets on 14 Nov; the ledger keeps both records.	البيع عند الأهداف كلّف حوالي نص المكسب في البحث. أنت اخترت الأهداف يوم 14 نوفمبر؛ والدفتر بيحتفظ بالسجلين.	ledger
+Selling at the targets has cost %1$s so far.	البيع عند الأهداف كلّف %1$s لحد دلوقتي.	ledger
+Selling at the targets has saved %1$s so far.	البيع عند الأهداف وفّر %1$s لحد دلوقتي.	ledger
+Show ١٢٣ instead of 123	اعرض ١٢٣ بدل 123	settings switch
+Signal Lab EGX is a research tool. Every call is on paper; no real money is traded by the app. Not financial advice.	Signal Lab EGX أداة بحث. كل التوصيات على الورق؛ والتطبيق مش بيتداول بفلوس حقيقية. مش نصيحة استثمارية.	about
+Since %1$s · on paper	من %1$s · على الورق	ledger
+Strategies that give calls	الاستراتيجيات اللي بتدّي توصيات	settings
+The 30 busiest	أنشط 30 سهم	settings label
+The buys need	المشتريات محتاجة	month-end total
+The call sells at the open of the last day to hold, before the dividend: the run is paid by the rise before it, not by the dividend itself.	التوصية بتبيع عند فتح آخر يوم تحتفظ فيه، قبل الكوبون: المكسب من الصعود اللي قبل الكوبون، مش من الكوبون نفسه.	dividend run; sells at the open, does not collect
+The crypto app's Breakout, run silently to show whether the research was right to drop it.	الاختراق بتاع تطبيق الكريبتو، شغال في الخلفية عشان يوضّح البحث كان صح لما استبعده ولا لأ.	fast breakout
+The paper account made %1$s since %2$s. The EGX30 made %3$s and cash %4$s.	الحساب الورقي عمل %1$s من %2$s. المؤشر EGX30 عمل %3$s والكاش %4$s.	ledger
+The sells bring	المبيعات بتجيب	month-end total
+This list uses %1$d of them.	القائمة دي بتستخدم %1$d منهم.	free orders
+This strategy	الاستراتيجية دي	
+Three give calls on Today. Two are recorded and watched. One runs as a control.	تلاتة بيدّوا توصيات في اليوم. اتنين بيتسجلوا وتحت المراقبة. وواحدة شغالة للمقارنة.	strategies intro
+Tomorrow is the last day that carries the dividend.	بكرة تاريخ نهاية الحق.	dividend
+Tomorrow, %1$s, near the close: between 2:00 and 2:30 pm. Buying late in the day costs less than buying in the morning.	بكرة، %1$s، قرب الإغلاق: بين 2:00 و2:30 الضهر. الشراء آخر اليوم بيكلّف أقل من الشراء الصبح.	timing
+Two records	سجلين	ledger
+Watch · recorded, no calls	تحت المراقبة · بتتسجل، من غير توصيات	tier line
+Watch: can be turned on once its record earns it	تحت المراقبة: ممكن تتشغل لما سجلها يستاهل	strategy switch
+Watched, not in the account	تحت المراقبة، مش في الحساب	strategy row
+What to keep in mind	خلّي بالك من	section
+When a general assembly fixes a cash dividend worth 4% or more, buy; sell on the last day that still carries it.	لما الجمعية العامة تقرّ كوبون نقدي قيمته 4% أو أكتر، اشترِ؛ وبِع في يوم نهاية الحق.	one-line, dividend run
+Whole shares at %1$s	أسهم كاملة بسعر %1$s	call amount
+Why	ليه	section
+With targets	بالأهداف	ledger record
+With targets 5 and 10	بالأهداف 5 و10	ledger record
+You	أنت	yardstick bar
+You copied %1$d of %2$d calls.	نسخت %1$d من %2$d توصية.	my copies
+about %1$s · at double %2$s	حوالي %1$s · بالضعف %2$s	costs
+at the open	عند الفتح	timing
+last close %1$s	آخر إغلاق %1$s	price line
+near the close	قرب الإغلاق	timing
+wait a day: it jumped 8% or more	استنى يوم: طلع 8% أو أكتر	timing

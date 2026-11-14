@@ -609,3 +609,17 @@ rows). The owner reads both before the install (item 41).
   stocks, hourly bars, the EGX30, the recorded Arab Finance page) with the ledger started a year back. It found one bug,
   fixed: the random twins' growth was measured against the pound share instead of 1.00. A second pass the same evening
   appends nothing.
+
+### E5: Arabic for the screens (session D)
+
+- 88 rows appended to `egx/src/main/assets/egx/strings_ar.tsv` for the finished screens' texts (the lead's list held 88
+  lines, not 87); no existing row changed. Same register and glossary as before; placeholders match in both columns.
+- Near-twins reuse earlier wording: the strategy one-liners, the stop and target notifications (now "اتباع النص عند"
+  for a half already sold), "Last day to hold" = آخر يوم تحتفظ فيه, "Cash date" = تاريخ صرف الكوبون.
+- The Dividend run text says the call sells at the open of the last day to hold, so the gain is the rise before the
+  dividend, not the dividend itself.
+- "Evidence ›" is written "الدليل ‹": the arrow points the reading direction in Arabic; the lead may prefer an
+  auto-mirrored icon instead. "yyyy-mm-dd" in the holidays help stays in Latin, as typed.
+- `ArabicTableTest` is not committed on `egx` yet (it sits uncommitted in the lead's checkout), so it could not run in
+  this worktree. The same two checks were run in Python against the lead's current sources: all 147 `t("...")` texts
+  have a row, and placeholders match in all 524 rows.
