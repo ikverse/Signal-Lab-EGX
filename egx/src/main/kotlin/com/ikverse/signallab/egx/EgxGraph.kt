@@ -12,6 +12,13 @@ import com.ikverse.signallab.egx.i18n.Tr
 import com.ikverse.signallab.egx.ledger.EgxLedgerDatabase
 import com.ikverse.signallab.egx.pass.EveningPass
 import com.ikverse.signallab.egx.pass.Notifier
+import com.ikverse.signallab.egx.update.AndroidApkInspector
+import com.ikverse.signallab.egx.update.AndroidInstallLauncher
+import com.ikverse.signallab.egx.update.ApkDownloader
+import com.ikverse.signallab.egx.update.AppVersion
+import com.ikverse.signallab.egx.update.UpdateChecker
+import com.ikverse.signallab.egx.update.UpdateController
+import com.ikverse.signallab.egx.update.UpdateMemory
 
 /** Everything Signal Lab EGX is made of, built once by the application. */
 class EgxGraph(context: Context) {
@@ -45,4 +52,18 @@ class EgxGraph(context: Context) {
     }
 
     val notifier = Notifier(app, ::tr, ::name)
+
+    /** Updates from the newest release of ikverse/Signal-Lab-EGX on GitHub; Android's installer always asks first. */
+    val updates = UpdateController(
+        installed = AppVersion.parse(BuildConfig.VERSION_NAME) ?: AppVersion(0, 0, 0),
+        source = UpdateChecker(EgxHttp.defaultHttp()),
+        downloader = ApkDownloader(EgxHttp.defaultHttp(), AndroidInstallLauncher.downloadDir(app)),
+        inspector = AndroidApkInspector(app),
+        launcher = AndroidInstallLauncher(app),
+        memory = object : UpdateMemory {
+            private val prefs = app.getSharedPreferences("egx-updates", Context.MODE_PRIVATE)
+            override suspend fun lastCheck() = prefs.getLong("last_check", 0L)
+            override suspend fun saveLastCheck(time: Long) = prefs.edit().putLong("last_check", time).apply()
+        },
+    )
 }

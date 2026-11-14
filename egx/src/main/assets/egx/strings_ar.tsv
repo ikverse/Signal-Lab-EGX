@@ -523,3 +523,14 @@ at the open	عند الفتح	timing
 last close %1$s	آخر إغلاق %1$s	price line
 near the close	قرب الإغلاق	timing
 wait a day: it jumped 8% or more	استنى يوم: طلع 8% أو أكتر	timing
+Allow installs from Signal Lab EGX in Android's settings, then come back and tap Install.	اسمح بالتثبيت من Signal Lab EGX في إعدادات أندرويد، وبعدين ارجع ودوس تثبيت.	updates card; added by the lead, to check
+Android's installer is open. It asks you before it installs.	شاشة التثبيت في أندرويد مفتوحة، وهتسألك قبل ما تثبّت.	updates card; added by the lead, to check
+Check for updates	دوّر على تحديث	updates card; added by the lead, to check
+Checking GitHub…	بندوّر على GitHub…	updates card; added by the lead, to check
+Downloading version %1$s…	بننزّل الإصدار %1$s…	updates card; added by the lead, to check
+Install	تثبيت	updates card; added by the lead, to check
+Installed version	الإصدار المتثبّت	updates card; added by the lead, to check
+Looks for a newer version on GitHub once a day.	بيدوّر على إصدار أحدث على GitHub مرة في اليوم.	updates card; added by the lead, to check
+The update could not be completed.	التحديث ماكملش.	updates card; added by the lead, to check
+This is the newest version.	ده أحدث إصدار.	updates card; added by the lead, to check
+Version %1$s is ready.	الإصدار %1$s جاهز.	updates card; added by the lead, to check

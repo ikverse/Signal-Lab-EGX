@@ -7,6 +7,8 @@
     <!-- Wake after each session's close, Sunday to Thursday. -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Hand a downloaded update to Android's installer (which still asks the owner before it installs anything). -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <!-- "Copy amount and open Thndr" looks for Thndr's app; from Android 11 an app must name the apps it looks for. -->
     <queries>
@@ -38,6 +40,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Lets the installer read the downloaded update from the app's cache, and nothing else. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.updates"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/update_paths" />
+        </provider>
 
         <receiver
             android:name=".pass.EveningReceiver"

@@ -94,7 +94,20 @@ fun EgxRoot(graph: EgxGraph) {
                             1 -> StrategiesPage(strategyViews(days, yard, fills, tr), posture, tr, chosen) { chosen = it }
                             2 -> LedgerPage(ledgerView(mapOf(Records.LEVELS to days, Records.RULE to rule, Records.LEVELS_DOUBLE to double), yard, mapOf(Records.LEVELS to fills), copies,
                                 calls.count { it.action != "keep" }, prefs, tr), posture, tr)
-                            else -> SettingsPage(prefs, posture, tr, onChange = { graph.settings.update(it) }, onRunNow = { Schedule.runNow(context) })
+                            else -> {
+                                val update by graph.updates.state.collectAsState()
+                                androidx.compose.runtime.LaunchedEffect(Unit) { runCatching { graph.updates.checkIfDue() } }
+                                SettingsPage(prefs, posture, tr, onChange = { graph.settings.update(it) }, onRunNow = { Schedule.runNow(context) },
+                                    update = update, version = com.ikverse.signallab.egx.BuildConfig.VERSION_NAME) {
+                                    scope.launch {
+                                        when (update) {
+                                            is com.ikverse.signallab.egx.update.UpdateState.Available, is com.ikverse.signallab.egx.update.UpdateState.NeedsPermission,
+                                            is com.ikverse.signallab.egx.update.UpdateState.Handed, is com.ikverse.signallab.egx.update.UpdateState.Failed -> graph.updates.install()
+                                            else -> graph.updates.checkNow()
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }

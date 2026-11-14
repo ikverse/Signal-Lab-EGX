@@ -43,6 +43,7 @@ import com.ikverse.signallab.egx.EgxPrefs
 import com.ikverse.signallab.egx.Language
 import com.ikverse.signallab.egx.i18n.Tr
 import com.ikverse.signallab.egx.ledger.CallRow
+import com.ikverse.signallab.egx.update.UpdateState
 import com.ikverse.signallab.engine.egx.EgxStrategies
 import com.ikverse.signallab.engine.strategy.Tier
 
@@ -325,7 +326,8 @@ fun Seg(options: List<String>, selected: Int, onPick: (Int) -> Unit) {
 // ---- Settings (items 26 and 40) ----
 
 @Composable
-fun SettingsPage(p: EgxPrefs, posture: Posture, tr: Tr, onChange: ((EgxPrefs) -> EgxPrefs) -> Unit, onRunNow: () -> Unit) {
+fun SettingsPage(p: EgxPrefs, posture: Posture, tr: Tr, onChange: ((EgxPrefs) -> EgxPrefs) -> Unit, onRunNow: () -> Unit,
+    update: UpdateState = UpdateState.Idle(null), version: String = "", onUpdate: () -> Unit = {}) {
     val c = LocalCalm.current
     val a: @Composable ColumnScope.() -> Unit = {
         Title(tr.t("Settings"))
@@ -366,6 +368,7 @@ fun SettingsPage(p: EgxPrefs, posture: Posture, tr: Tr, onChange: ((EgxPrefs) ->
                 onChange { it.copy(holidays = days) }
             }
         }
+        UpdatesCard(update, version, tr, onUpdate)
         SecondButton(tr.t("Run the evening pass now"), onRunNow)
         CalmCard { Note(tr.t("Signal Lab EGX is a research tool. Every call is on paper; no real money is traded by the app. Not financial advice.")) }
     }
@@ -425,4 +428,32 @@ fun MonthEndPage(v: MonthEndView, posture: Posture, tr: Tr, names: (String) -> S
         if (v.keeps.isNotEmpty()) CalmCard(tr.t("Keep · no order needed")) { for (k in v.keeps) Kv(names(k.code), k.code) }
     }
     Panes(posture, head, lists)
+}
+
+// ---- updates from GitHub ----
+
+/** What the Updates card says for each state of the updater, and what its button does. */
+fun updateTexts(state: UpdateState, tr: Tr): Triple<String, String?, String?> = when (state) {
+    is UpdateState.Idle, is UpdateState.UpToDate -> Triple(
+        if (state is UpdateState.UpToDate) tr.t("This is the newest version.") else tr.t("Looks for a newer version on GitHub once a day."),
+        null, tr.t("Check for updates"))
+    UpdateState.Checking -> Triple(tr.t("Checking GitHub…"), null, null)
+    is UpdateState.Available -> Triple(tr.t("Version %1\$s is ready.", state.release.version.toString()), state.release.notes.take(400), tr.t("Install"))
+    is UpdateState.Downloading -> Triple(tr.t("Downloading version %1\$s…", state.release.version.toString()), null, null)
+    is UpdateState.NeedsPermission -> Triple(tr.t("Allow installs from Signal Lab EGX in Android's settings, then come back and tap Install."), null, tr.t("Install"))
+    is UpdateState.Handed -> Triple(tr.t("Android's installer is open. It asks you before it installs."), null, tr.t("Install"))
+    is UpdateState.Failed -> Triple(tr.t("The update could not be completed."), state.message, if (state.release != null) tr.t("Install") else tr.t("Check for updates"))
+}
+
+@Composable
+fun UpdatesCard(state: UpdateState, version: String, tr: Tr, onTap: () -> Unit) {
+    val c = LocalCalm.current
+    val (line, detail, button) = updateTexts(state, tr)
+    CalmCard(tr.t("Updates")) {
+        Kv(tr.t("Installed version"), tr.digits(version))
+        Text(line, style = Type.body, color = c.ink)
+        // GitHub's own words (versions, error codes) stay as they come; they are left to right.
+        if (detail != null) CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) { Note(detail) }
+        if (button != null) SecondButton(button, onTap)
+    }
 }

@@ -623,3 +623,15 @@ rows). The owner reads both before the install (item 41).
 - `ArabicTableTest` is not committed on `egx` yet (it sits uncommitted in the lead's checkout), so it could not run in
   this worktree. The same two checks were run in Python against the lead's current sources: all 147 `t("...")` texts
   have a row, and placeholders match in all 524 rows.
+
+### Auto-update from GitHub (approved 2026-11-14, with the first release)
+
+- The crypto app's updater (`update/`, six files) copied into `egx/.../egx/update/` with its tests; only the package and
+  the release URL changed (`api.github.com/repos/ikverse/Signal-Lab-EGX/releases/latest`). It reads GitHub's "latest"
+  (never drafts or pre-releases), follows downloads only to GitHub's hosts, and checks the file's package, version and
+  signing key against the installed app before Android's installer opens; the installer always asks.
+- `REQUEST_INSTALL_PACKAGES` and a file provider for the update folder in the manifest. A quiet check runs after each
+  evening pass and when Settings opens (at most once a day); an Updates card in Settings shows the version, the state and
+  the button. GitHub's own error details show in English under a translated line, since they carry numbers and codes.
+- Eleven Arabic rows for the card added by the lead in session D's register, marked "to check".
+- The repository must be public for this: the updater reads releases without a token.

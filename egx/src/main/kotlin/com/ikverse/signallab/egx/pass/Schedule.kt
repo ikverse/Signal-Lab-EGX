@@ -76,6 +76,8 @@ class EveningWorker(context: Context, params: WorkerParameters) : CoroutineWorke
             PassOutcome.NotYet, is PassOutcome.Failed -> if (attempt < Schedule.RETRIES) Schedule.runNow(applicationContext, attempt + 1, Schedule.RETRY_MINUTES)
             PassOutcome.NoSession -> Unit
         }
+        // The quiet daily look for a newer release; it only offers it in Settings, never installs.
+        runCatching { graph.updates.checkIfDue() }
         return Result.success()
     }
 }
