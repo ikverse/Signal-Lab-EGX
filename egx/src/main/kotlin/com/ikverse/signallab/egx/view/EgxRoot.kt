@@ -6,13 +6,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,6 +21,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
@@ -61,9 +57,9 @@ fun EgxRoot(graph: EgxGraph) {
     val context = LocalContext.current
     CalmTheme {
         CompositionLocalProvider(LocalLayoutDirection provides if (tr.isArabic) LayoutDirection.Rtl else LayoutDirection.Ltr) {
-            CalmPage(Modifier.windowInsetsPadding(WindowInsets.safeDrawing)) {
+            CalmPage {
                 val pages = rememberPagerState { PAGES.size }
-                val bottom = WindowInsets.navigationBars.asPaddingValues()
+                val bottom = androidx.compose.foundation.layout.PaddingValues(0.dp) // the page already keeps clear of the bars
                 var open by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
                 var monthEnd by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
                 var chosen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
@@ -121,7 +117,7 @@ fun EgxRoot(graph: EgxGraph) {
 @Composable
 private fun Dock(tr: Tr, current: Int, modifier: Modifier, onPick: (Int) -> Unit) {
     val c = LocalCalm.current
-    Row(modifier.clip(RoundedCornerShape(100)).background(c.dock).border(1.dp, c.dockEdge, RoundedCornerShape(100)).padding(6.dp)) {
+    Row(modifier.shadow(10.dp, RoundedCornerShape(100)).clip(RoundedCornerShape(100)).background(c.dock).border(1.dp, c.dockEdge, RoundedCornerShape(100)).padding(6.dp)) {
         for ((i, p) in PAGES.withIndex()) {
             val on = i == current
             Text(tr.t(p), style = Type.menu, color = if (on) c.actionInk else c.muted,

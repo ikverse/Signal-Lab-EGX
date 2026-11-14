@@ -37,6 +37,8 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.ikverse.signallab.egx.EgxPrefs
@@ -88,10 +90,10 @@ fun Kv(k: String, v: String) {
 fun Note(text: String) = Text(text, style = Type.small, color = LocalCalm.current.muted)
 
 @Composable
-fun Title(text: String) = Text(text, style = Type.sentence, color = LocalCalm.current.ink)
+fun Title(text: String) = Text(text, style = Type.title, color = LocalCalm.current.ink)
 
 @Composable
-fun Lead(text: String) = Text(text, style = Type.body.copy(fontSize = androidx.compose.ui.unit.TextUnit(16f, androidx.compose.ui.unit.TextUnitType.Sp)), color = LocalCalm.current.ink)
+fun Lead(text: String) = Text(text, style = Type.lead, color = LocalCalm.current.ink)
 
 @Composable
 fun Back(text: String, onBack: () -> Unit) = Text("‹ $text", style = Type.body, color = LocalCalm.current.muted, modifier = Modifier.clickable(role = Role.Button, onClick = onBack))
@@ -114,12 +116,16 @@ fun SecondButton(text: String, onClick: () -> Unit) {
 @Composable
 fun Bars(rows: List<BarRow>, tr: Tr) {
     val c = LocalCalm.current
+    if (rows.all { it.value == null }) {
+        Note(tr.t(Tr.NOT_YET))
+        return
+    }
     val top = rows.mapNotNull { it.value?.let { v -> kotlin.math.abs(v) } }.maxOrNull()?.takeIf { it > 0 } ?: 1.0
     val opacity = listOf(1f, 0.3f, 0.55f, 0.42f)
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             for ((i, r) in rows.withIndex()) Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(r.label, style = Type.small, color = if (r.mine) c.ink else c.muted, modifier = Modifier.width(108.dp), maxLines = 1)
+                Text(r.label, style = Type.small.copy(textDirection = TextDirection.Content), color = if (r.mine) c.ink else c.muted, modifier = Modifier.width(112.dp), maxLines = 1)
                 Box(Modifier.weight(1f).height(7.dp)) {
                     val share = ((r.value?.let { v -> kotlin.math.abs(v) } ?: 0.0) / top).toFloat().coerceIn(0.02f, 1f)
                     Box(Modifier.fillMaxWidth(share).height(7.dp).clip(RoundedCornerShape(7.dp)).background(c.up.copy(alpha = opacity[i % 4])))
@@ -256,11 +262,11 @@ fun ColumnScope.EvidencePage(s: StrategyView, tr: Tr, onBack: (() -> Unit)?) {
     val r = Evidence.BY_ID[s.strategy.id]
     if (r != null) {
         CalmCard(tr.t("In the research: what 1.00 became")) {
-            Note("2015–2022")
+            Note(tr.ltr("2015–2022"))
             Kv(s.name, tr.digits(String.format(java.util.Locale.US, "%.2f", r.old)))
             Kv(tr.t("Cash"), tr.digits(String.format(java.util.Locale.US, "%.2f", Evidence.CASH_OLD)))
             Kv(tr.t("The 30 busiest"), tr.digits(String.format(java.util.Locale.US, "%.2f", Evidence.MARKET_OLD)))
-            Note("2023–2026")
+            Note(tr.ltr("2023–2026"))
             Kv(s.name, tr.digits(String.format(java.util.Locale.US, "%.2f", r.recent)))
             Kv(tr.t("Cash"), tr.digits(String.format(java.util.Locale.US, "%.2f", Evidence.CASH_RECENT)))
             Kv("EGX30", tr.digits(String.format(java.util.Locale.US, "%.2f", Evidence.EGX30_RECENT)))
@@ -283,28 +289,31 @@ fun LedgerPage(v: LedgerView, posture: Posture, tr: Tr) {
     val c = LocalCalm.current
     var rule by remember { mutableStateOf(false) }
     val a: @Composable ColumnScope.() -> Unit = {
-        Note(v.since)
+        if (v.since.isNotEmpty()) Note(v.since)
         Title(tr.t("Ledger"))
         Lead(v.lead)
-        CalmCard(tr.t("Paper account")) { Text(tr.t("EGP %1\$s", tr.pounds(if (rule) v.byRule else v.account)), style = Type.tile, color = c.ink); Bars(v.accountBars, tr) }
-        CalmCard(tr.t("Two records")) {
+        CalmCard(tr.t("Paper account")) {
+            Text(tr.t("EGP %1\$s", tr.pounds(if (rule) v.byRule else v.account)), style = Type.tile, color = c.ink, modifier = Modifier.padding(bottom = 4.dp))
+            if (v.started) Bars(v.accountBars, tr)
+        }
+        if (v.started) CalmCard(tr.t("Two records")) {
             Seg(listOf(tr.t("With targets"), tr.t("By the rule alone")), if (rule) 1 else 0) { rule = it == 1 }
             Kv(tr.t("With targets"), tr.t("EGP %1\$s", tr.pounds(v.withTargets)))
             Kv(tr.t("By the rule alone"), tr.t("EGP %1\$s", tr.pounds(v.byRule)))
             Note(v.targetsCost)
         }
-        Text(tr.t("By strategy"), style = Type.small, color = c.muted)
-        for (s in v.byStrategy) CalmCard { Kv(s.name, s.equity?.let { tr.t("EGP %1\$s", tr.pounds(it)) } ?: "–"); Bars(s.bars, tr) }
+        if (v.started) Text(tr.t("By strategy"), style = Type.small, color = c.muted)
+        if (v.started) for (s in v.byStrategy) CalmCard { Kv(s.name, s.equity?.let { tr.t("EGP %1\$s", tr.pounds(it)) } ?: "–"); Bars(s.bars, tr) }
     }
     val b: @Composable ColumnScope.() -> Unit = {
-        CalmCard(tr.t("Watched, not in the account")) { for (s in v.watched) Kv(s.name, signed(s.bars.first().value, tr)) }
+        if (v.started) CalmCard(tr.t("Watched, not in the account")) { for (s in v.watched) Kv(s.name, signed(s.bars.first().value, tr)) }
         CalmCard(tr.t("My copies")) {
             Text(v.copiesLine, style = Type.body, color = c.ink)
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
                 Column { for (cp in v.copies.take(20)) Kv("${dayText(com.ikverse.signallab.egx.data.EgxTime.date(cp.day), tr)} · ${cp.code} · ${if (cp.buy) tr.t("Buy") else tr.t("Sell")}", "${tr.count(cp.shares)} @ ${tr.price(cp.price)}") }
             }
         }
-        CalmCard(tr.t("Costs")) {
+        if (v.started) CalmCard(tr.t("Costs")) {
             Kv(tr.t("Paid so far"), tr.t("EGP %1\$s", tr.pounds(v.costsPaid)))
             Kv(tr.t("Account at double costs"), tr.t("EGP %1\$s", tr.pounds(v.atDouble)))
             Kv(tr.t("Dividends paid in, after 5% tax"), tr.t("EGP %1\$s", tr.pounds(v.dividends)))
@@ -316,10 +325,13 @@ fun LedgerPage(v: LedgerView, posture: Posture, tr: Tr) {
 @Composable
 fun Seg(options: List<String>, selected: Int, onPick: (Int) -> Unit) {
     val c = LocalCalm.current
-    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(100)).border(1.dp, c.line, RoundedCornerShape(100)).padding(4.dp)) {
-        for ((i, o) in options.withIndex()) Text(o, style = Type.chip, textAlign = TextAlign.Center, color = if (i == selected) c.actionInk else c.muted,
-            modifier = Modifier.weight(1f).clip(RoundedCornerShape(100)).background(if (i == selected) c.action else androidx.compose.ui.graphics.Color.Transparent)
-                .clickable(role = Role.RadioButton) { onPick(i) }.padding(vertical = 8.dp))
+    // Every option is as tall as the tallest, with its text in the middle, so a longer label never makes the control lopsided.
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(RoundedCornerShape(100)).border(1.dp, c.line, RoundedCornerShape(100)).padding(4.dp)) {
+        for ((i, o) in options.withIndex()) Box(
+            Modifier.weight(1f).fillMaxHeight().clip(RoundedCornerShape(100)).background(if (i == selected) c.action else androidx.compose.ui.graphics.Color.Transparent)
+                .clickable(role = Role.RadioButton) { onPick(i) }.padding(horizontal = 6.dp, vertical = 8.dp),
+            contentAlignment = Alignment.Center,
+        ) { Text(o, style = Type.chip, textAlign = TextAlign.Center, color = if (i == selected) c.actionInk else c.muted, maxLines = 1) }
     }
 }
 

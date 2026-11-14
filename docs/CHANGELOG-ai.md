@@ -635,3 +635,19 @@ rows). The owner reads both before the install (item 41).
   the button. GitHub's own error details show in English under a translated line, since they carry numbers and codes.
 - Eleven Arabic rows for the card added by the lead in session D's register, marked "to check".
 - The repository must be public for this: the updater reads releases without a token.
+
+### 0.1.1: fixes from the owner's first look on the Fold (approved 2026-11-14)
+
+- The page background and wash draw behind the system bars; only content is inset. `isNavigationBarContrastEnforced` off;
+  a dark window background for dark mode (`values-night`).
+- Titles broke mid-word because of negative letter spacing on joined Arabic letters: no letter spacing in any style now,
+  and every style has a line height. Sizes reduced (the phone runs at font scale 1.15).
+- The wash is two circles that fade out inside the screen (it was a gradient cut by a rectangle).
+- The pill menu is 96% opaque with a shadow. Material's colour scheme is filled in from the design, so switches, fields
+  and the sheet stop using default purple.
+- Empty state: one line ("The record starts after the first evening pass.") replaces empty bars and dashes on Today,
+  Strategies and the Ledger; the Ledger hides its record cards until then.
+- Arabic: a number with its percent sign and year ranges are wrapped in left-to-right isolates; chart labels take their
+  direction from their own letters. The owner rejected a rewrite into standard Arabic: the spoken Egyptian wording stays.
+  Two rows changed: "Follow the phone" is now زي التليفون, and the new empty-state line (marked "to check").
+- Checked on the Fold's cover screen by screenshot before release; the unfolded layout was not re-checked (phone folded).

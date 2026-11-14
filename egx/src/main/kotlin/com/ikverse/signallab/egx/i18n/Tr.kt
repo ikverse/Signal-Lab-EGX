@@ -21,8 +21,14 @@ class Tr(private val arabic: Map<String, String>, val language: Language, val ph
         seen.add(en)
         val pattern = if (isArabic) arabic[en] ?: en else en
         val text = if (args.isEmpty()) pattern else String.format(Locale.US, pattern, *args)
-        return digits(text)
+        return digits(if (isArabic) PERCENT.replace(text) { ltr(it.value) } else text)
     }
+
+    /**
+     * [s] kept left to right as one piece inside Arabic text, so "4%", "+31%" or "2015–2022" never show as "%4" or
+     * "2022–2015". Unchanged in English.
+     */
+    fun ltr(s: String): String = if (isArabic) "\u2066" + s + "\u2069" else s
 
     /** [s] with 0-9 as Arabic-Indic digits when the owner chose them and the app is in Arabic. */
     fun digits(s: String): String = if (isArabic && arabicDigits) buildString(s.length) {
@@ -49,5 +55,11 @@ class Tr(private val arabic: Map<String, String>, val language: Language, val ph
         }.toMap()
 
         val ENGLISH = Tr(emptyMap(), Language.ENGLISH)
+
+        /** A number with its percent sign, and its sign when it has one. */
+        private val PERCENT = Regex("[+\u2212-]?[0-9][0-9.,]*%")
+
+        /** What every record says before the first evening pass has run. */
+        const val NOT_YET = "The record starts after the first evening pass."
     }
 }

@@ -1,5 +1,17 @@
 # Signal Lab EGX: changes
 
+## 0.1.1
+
+Fixes from the first look on the Fold 7.
+
+- The page now fills the whole screen: no white strip behind the status bar and no grey strip behind the gesture bar.
+- Titles no longer break in the middle of a word, and text is smaller throughout.
+- The wash at the top fades out smoothly; the menu at the bottom no longer shows the page through it.
+- Switches and text fields use the app's own colours.
+- Before the first evening pass, the pages say the record has not started yet, without empty bars and dashes.
+- In Arabic, numbers keep their order ("4%", "8 أسهم عشوائية", "2015–2022").
+- Today names the next session day, never a Friday or a Saturday.
+
 ## 0.1.0
 
 The first version of Signal Lab EGX: evening paper calls for the Egyptian Exchange, copied by hand on Thndr. A research

@@ -178,6 +178,8 @@ data class LedgerView(
     val dividends: Double,
     val copies: List<CopyRow>,
     val copiesLine: String,
+    /** False until the first evening pass has written the ledger: the page then says so instead of showing empty figures. */
+    val started: Boolean = true,
 )
 
 fun ledgerView(days: Map<String, List<PaperDayRow>>, yard: List<YardstickRow>, fills: Map<String, List<PaperFillRow>>, copies: List<CopyRow>, callsCount: Int, prefs: EgxPrefs, tr: Tr): LedgerView {
@@ -189,13 +191,14 @@ fun ledgerView(days: Map<String, List<PaperDayRow>>, yard: List<YardstickRow>, f
     val withTargets = total(Records.LEVELS)
     val byRule = total(Records.RULE)
     val y = yard.filter { it.strategy in on }.maxByOrNull { it.day }
+    val started = days[Records.LEVELS].orEmpty().any { it.strategy in on }
     val since = prefs.liveStart?.let { dayText(EgxTime.date(it), tr) } ?: "–"
     val you = withTargets / prefs.money - 1
     val views = strategyViews(days[Records.LEVELS].orEmpty(), yard, fills[Records.LEVELS].orEmpty(), tr)
     val dividends = days[Records.LEVELS].orEmpty().filter { it.strategy in on }.groupBy { it.strategy }.values.sumOf { l -> l.maxBy { it.day }.dividends }
     return LedgerView(
-        tr.t("Since %1\$s · on paper", since),
-        tr.t("The paper account made %1\$s since %2\$s. The EGX30 made %3\$s and cash %4\$s.", signed(you, tr), since, signed(y?.egx30?.takeIf { !it.isNaN() }?.minus(1), tr), signed(y?.cash?.minus(1), tr)),
+        if (started) tr.t("Since %1\$s · on paper", since) else "",
+        if (!started) tr.t(Tr.NOT_YET) else tr.t("The paper account made %1\$s since %2\$s. The EGX30 made %3\$s and cash %4\$s.", signed(you, tr), since, signed(y?.egx30?.takeIf { !it.isNaN() }?.minus(1), tr), signed(y?.cash?.minus(1), tr)),
         withTargets,
         listOf(BarRow(tr.t("You"), you, true), BarRow(tr.t("Cash"), y?.cash?.minus(1)), BarRow("EGX30", y?.egx30?.takeIf { !it.isNaN() }?.minus(1))),
         withTargets, byRule,
@@ -204,7 +207,7 @@ fun ledgerView(days: Map<String, List<PaperDayRow>>, yard: List<YardstickRow>, f
         views.filter { it.strategy.id in on }, views.filter { it.strategy.id !in on },
         fills[Records.LEVELS].orEmpty().filter { it.strategy in on }.sumOf { it.cost },
         total(Records.LEVELS_DOUBLE), dividends, copies,
-        tr.t("You copied %1\$d of %2\$d calls.", copies.size, callsCount),
+        tr.t("You copied %1\$d of %2\$d calls.", copies.size, callsCount), started,
     )
 }
 

@@ -87,7 +87,8 @@ fun todayView(
     today: LocalDate,
 ): TodayView {
     val session = calls.maxOfOrNull { it.day }
-    val next = session?.let { com.ikverse.signallab.engine.egx.Sessions.nextSession(EgxTime.date(it), prefs.holidays) } ?: today
+    val next = session?.let { com.ikverse.signallab.engine.egx.Sessions.nextSession(EgxTime.date(it), prefs.holidays) }         // With no calls yet, the plan is for the next session day: never a Friday, a Saturday or a known holiday.
+        ?: com.ikverse.signallab.engine.egx.Sessions.nextSession(today.minusDays(1), prefs.holidays)
     val locale = if (tr.isArabic) Locale.forLanguageTag("ar-EG") else Locale.ENGLISH
     val dateLine = tr.t("Plan for %1\$s", tr.digits("${next.dayOfWeek.getDisplayName(TextStyle.FULL, locale)} ${next.dayOfMonth} ${next.month.getDisplayName(TextStyle.FULL, locale)}"))
     val market = egx30.takeLast(2).takeIf { it.size == 2 }?.let { (a, b) ->
@@ -161,7 +162,7 @@ fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> 
                 }
                 Dots(pager, v.cards.size)
             }
-            Tiles(v, tr, Modifier.padding(start = 22.dp, end = 22.dp, top = 8.dp))
+            Tiles(v, tr, Modifier.padding(start = 22.dp, end = 22.dp, top = 18.dp))
         }
         Posture.UNFOLDED -> Row(Modifier.fillMaxSize()) {
             Column(Modifier.weight(1f).fillMaxHeight().padding(22.dp)) {
@@ -169,8 +170,8 @@ fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> 
                 Spacer(Modifier.weight(1f))
                 Tiles(v, tr, Modifier.padding(bottom = 70.dp))
             }
-            Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (v.cards.isEmpty()) Empty(tr)
+            if (v.cards.isEmpty()) Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 40.dp), contentAlignment = Alignment.Center) { Empty(tr) }
+            else Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 for (card in v.cards) SmallCard(card, onPlaced, onOpen)
                 Spacer(Modifier.height(70.dp))
             }
@@ -293,11 +294,14 @@ private fun Tiles(v: TodayView, tr: Tr, modifier: Modifier = Modifier) {
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
         Column(Modifier.weight(1.5f).clip(RoundedCornerShape(28.dp)).background(c.surface).padding(horizontal = 16.dp, vertical = 14.dp)) {
             Text(tr.t("Paper account"), style = Type.small, color = c.muted)
-            Text(v.account, style = Type.tile, color = c.ink)
-            val top = listOfNotNull(v.you, v.index, v.cash).maxOfOrNull { kotlin.math.abs(it) }?.takeIf { it > 0 } ?: 1.0
-            Bar(v.barsText.first, v.you, top, 1f)
-            Bar(v.barsText.second, v.index, top, 0.55f)
-            Bar(v.barsText.third, v.cash, top, 0.3f)
+            // The pound sign (ج) hangs well below the line: room under it, so it never touches the next line.
+            Text(v.account, style = Type.tile, color = c.ink, modifier = Modifier.padding(bottom = 6.dp))
+            if (v.you == null) Text(tr.t(Tr.NOT_YET), style = Type.small, color = c.muted) else {
+                val top = listOfNotNull(v.you, v.index, v.cash).maxOfOrNull { kotlin.math.abs(it) }?.takeIf { it > 0 } ?: 1.0
+                Bar(v.barsText.first, v.you, top, 1f)
+                Bar(v.barsText.second, v.index, top, 0.55f)
+                Bar(v.barsText.third, v.cash, top, 0.3f)
+            }
         }
         Column(Modifier.weight(1f).clip(RoundedCornerShape(28.dp)).background(c.surface).padding(horizontal = 16.dp, vertical = 14.dp)) {
             Text(tr.t("Free orders"), style = Type.small, color = c.muted)

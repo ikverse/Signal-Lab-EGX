@@ -250,7 +250,7 @@ A strategy is demoted only by its own record against the yardsticks, never becau
 Language	اللغة	
 Arabic	العربية	
 English	English	language name in its own language
-Follow the phone	زي لغة التليفون	
+Follow the phone	زي التليفون	
 Arabic-Indic digits	أرقام عربية (٠١٢٣)	switch
 Money I trade with, EGP	الفلوس اللي بتداول بيها، جنيه	field
 Your own Thndr balance. Each call then says how many pounds and shares to buy, sized the same way as on paper. Signal Lab never trades for you.	رصيدك في ثاندر. كل توصية هتقولك تشتري بكام جنيه وكام سهم، بنفس الحجم اللي على الورق. Signal Lab عمره ما بيتداول بالنيابة عنك.	
@@ -534,3 +534,4 @@ Looks for a newer version on GitHub once a day.	بيدوّر على إصدار �
 The update could not be completed.	التحديث ماكملش.	updates card; added by the lead, to check
 This is the newest version.	ده أحدث إصدار.	updates card; added by the lead, to check
 Version %1$s is ready.	الإصدار %1$s جاهز.	updates card; added by the lead, to check
+The record starts after the first evening pass.	السجل بيبدأ بعد أول مراجعة مساء.	empty state before the first pass; added by the lead, to check
