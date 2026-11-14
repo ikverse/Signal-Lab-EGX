@@ -136,6 +136,13 @@ fun EgxRoot(graph: EgxGraph) {
                                 AnalystPage(asking, paired, answers, graph.analyst.conversation.isNotEmpty(), posture, tr,
                                     onProbe = { a, c -> graph.pairing.probe(a, c) },
                                     onConfirm = { graph.pairing.confirm(it); paired = graph.pairing.paired() },
+                                    onScan = {
+                                        // Backing out of the scanner leaves the card as it was.
+                                        com.ikverse.signallab.egx.analyst.scanQr(context)?.let { text ->
+                                            graph.pairing.confirm(graph.pairing.probeScanned(com.ikverse.signallab.egx.analyst.ClaudeInQr.parse(text)))
+                                            paired = graph.pairing.paired()
+                                        }
+                                    },
                                     onForget = { graph.pairing.forget(); paired = null },
                                     onAsk = { graph.analyst.ask(it, tr.isArabic) }, onStop = { graph.analyst.stop() }, onNew = { graph.analyst.newConversation() })
                             }

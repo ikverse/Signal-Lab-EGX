@@ -593,7 +593,8 @@ Looking for the PC…	بيدوّر على الكمبيوتر…	analyst; added b
 New conversation	محادثة جديدة	analyst; added by the lead, to check
 No	لأ	analyst; added by the lead, to check
 Pair with your PC	اربط مع الكمبيوتر بتاعك	analyst; added by the lead, to check
-Start the analyst host on the PC (start-analyst-host.cmd in the tools folder). Type the address and code its window shows.	شغّل برنامج المحلل على الكمبيوتر (start-analyst-host.cmd في فولدر tools). اكتب العنوان والكود اللي بيظهروا في الشباك بتاعه.	analyst; added by the lead, to check
+On the PC, open ClaudeIn and choose "Pair a device…" in its tray menu. Scan the QR code it shows, or type the address and code.	على الكمبيوتر، افتح ClaudeIn واختار "Pair a device…" من القايمة بتاعته جنب الساعة. امسح كود الـQR اللي بيظهر، أو اكتب العنوان والكود.	analyst, ClaudeIn QR; added by the lead, to check
+Scan ClaudeIn's QR code	امسح كود الـQR بتاع ClaudeIn	analyst, ClaudeIn QR; added by the lead, to check
 Stop	وقّف	analyst; added by the lead, to check
 The analyst could not answer.	المحلل ماقدرش يرد.	analyst; added by the lead, to check
 The analyst only reads. It cannot place, change or delete anything. Not financial advice.	المحلل بيقرا بس. مايقدرش يحط أو يغيّر أو يمسح أي حاجة. ده مش نصيحة مالية.	analyst; added by the lead, to check

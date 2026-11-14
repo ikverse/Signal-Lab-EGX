@@ -727,3 +727,18 @@ widget, and the AI analyst through the PC host.
 - New step: the APK's signing certificate must match the previous release's APK, or nothing is published. The 0.1.x
   APKs were signed on the owner's PC; a different key in the secrets would leave every install unable to update.
 - Final release, not a pre-release. None of the five features had been tried on the Fold when it was tagged.
+
+### EGX: pairing by scanning ClaudeIn's QR code (approved 2026-11-15)
+
+- The Analyst tab's pairing card has a "Scan ClaudeIn's QR code" button above the typed address and code. It reads the
+  code ClaudeIn's "Pair a device…" window already shows (`qr_payload` in ClaudeIn's `windows.py`): addresses, port, code
+  and the certificate's full SHA-256. Nothing in ClaudeIn or the old analyst host changed.
+- Scanner: Google's code scanner from Play Services (`play-services-code-scanner` 16.1.0). It shows Google's own camera
+  screen, so the app asks for no camera permission and carries no camera code. A manifest entry has Play Services fetch
+  the scanner when the app installs, not at the first scan. Phones without Play Services can still type.
+- A scan pairs with no "Does the fingerprint match?" step: the fingerprint came straight off the PC's screen, and the
+  phone pins it from the first request, so a PC sending another certificate is refused before the code is sent.
+- Each address in the code is tried, Tailscale's (100.64.0.0/10) first, because that one also works away from home;
+  the first that answers is the one kept.
+- The pairing card's note now points at ClaudeIn instead of `start-analyst-host.cmd`; its Arabic row was replaced and one
+  added (to check). Not tried on the Fold; the crypto app's pairing screen is unchanged.

@@ -224,6 +224,33 @@ class HostPairing(
         return HostProbe(address.trim(), code.trim(), fp, hello.optString("claude").ifBlank { null })
     }
 
+    /**
+     * Pairing from ClaudeIn's QR code. The certificate is pinned to the QR's fingerprint from the first request, so a PC
+     * sending another certificate is refused; the code is then checked. Each address is tried, Tailscale's first, and the
+     * first that answers is the one kept. Nothing is saved until [confirm].
+     */
+    suspend fun probeScanned(qr: ClaudeInQr): HostProbe {
+        var mismatch = false
+        var refused: HostException? = null
+        for (a in qr.ordered()) {
+            val address = with(ClaudeInQr) { a.withPort(qr.port) }
+            val base = HostClient.baseUrl(address, scheme) ?: continue
+            val client = HostClient(base, qr.code, clientFor(qr.fingerprint) {})
+            try {
+                val hello = client.hello()
+                if (hello.optString("app") != HostClient.HOST_APP) continue
+                client.verify()
+                return HostProbe(address, qr.code, qr.fingerprint, hello.optString("claude").ifBlank { null })
+            } catch (e: Exception) {
+                if (generateSequence<Throwable>(e) { it.cause }.any { it is CertificateException } || e.message == "This is not the PC this phone paired with.") mismatch = true
+                else if (e is HostException && e.message?.contains("refused") == true) refused = e
+            }
+        }
+        if (mismatch) throw HostException("The PC that answered is not the one in the QR code: its certificate is different. Nothing was paired.")
+        refused?.let { throw HostException("ClaudeIn refused the code. A code expires 30 minutes after it is made; make a new one with \"Pair a device…\".") }
+        throw HostException("ClaudeIn did not answer at ${qr.addresses.joinToString { with(ClaudeInQr) { it.withPort(qr.port) } }}. Is it running on the PC, and is the phone on the same network or on Tailscale?")
+    }
+
     fun confirm(p: HostProbe) {
         codeFile.parentFile?.mkdirs()
         codeFile.writeBytes(cipher.encrypt(p.code.toByteArray(Charsets.UTF_8)))

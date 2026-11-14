@@ -122,6 +122,8 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.glance.appwidget)
+    // Google's own QR scanning screen, for ClaudeIn's pairing code: no camera permission for this app.
+    implementation(libs.play.services.code.scanner)
 
     testImplementation(testFixtures(project(":engine")))
     testImplementation(libs.androidx.room.testing)

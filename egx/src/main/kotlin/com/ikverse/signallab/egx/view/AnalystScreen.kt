@@ -43,6 +43,8 @@ fun AnalystPage(
     tr: Tr,
     onProbe: suspend (String, String) -> HostProbe,
     onConfirm: (HostProbe) -> Unit,
+    /** Scans ClaudeIn's QR code and pairs from it; a failure says why. */
+    onScan: suspend () -> Unit,
     onForget: () -> Unit,
     onAsk: (String) -> Unit,
     onStop: () -> Unit,
@@ -54,7 +56,7 @@ fun AnalystPage(
     val ask: @Composable ColumnScope.() -> Unit = {
         Title(tr.t("Analyst"))
         Lead(tr.t("Ask about your strategies, calls and stocks. Claude answers on your PC, from this phone's own numbers."))
-        if (paired == null) PairCard(tr, onProbe, onConfirm, scope)
+        if (paired == null) PairCard(tr, onProbe, onConfirm, onScan, scope)
         else {
             CalmCard {
                 OutlinedTextField(question, { question = it }, label = { Text(tr.t("Your question")) }, modifier = Modifier.fillMaxWidth(), minLines = 2)
@@ -99,7 +101,7 @@ fun AnalystPage(
 }
 
 @Composable
-private fun PairCard(tr: Tr, onProbe: suspend (String, String) -> HostProbe, onConfirm: (HostProbe) -> Unit, scope: kotlinx.coroutines.CoroutineScope) {
+private fun PairCard(tr: Tr, onProbe: suspend (String, String) -> HostProbe, onConfirm: (HostProbe) -> Unit, onScan: suspend () -> Unit, scope: kotlinx.coroutines.CoroutineScope) {
     val c = LocalCalm.current
     var address by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
@@ -107,13 +109,20 @@ private fun PairCard(tr: Tr, onProbe: suspend (String, String) -> HostProbe, onC
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     CalmCard(tr.t("Pair with your PC")) {
-        Note(tr.t("Start the analyst host on the PC (start-analyst-host.cmd in the tools folder). Type the address and code its window shows."))
+        Note(tr.t("On the PC, open ClaudeIn and choose \"Pair a device…\" in its tray menu. Scan the QR code it shows, or type the address and code."))
         val p = probe
         if (p == null) {
+            if (!busy) PrimaryButton(tr.t("Scan ClaudeIn's QR code")) {
+                busy = true; error = null
+                scope.launch {
+                    try { onScan() } catch (e: Exception) { error = e.message ?: e.javaClass.simpleName }
+                    busy = false
+                }
+            }
             OutlinedTextField(address, { address = it }, label = { Text(tr.t("Address")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(code, { code = it }, label = { Text(tr.t("Pairing code")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
             if (busy) Note(tr.t("Looking for the PC…"))
-            else PrimaryButton(tr.t("Find the PC")) {
+            else SecondButton(tr.t("Find the PC")) {
                 busy = true; error = null
                 scope.launch {
                     try { probe = onProbe(address, code) } catch (e: Exception) { error = e.message ?: e.javaClass.simpleName }
