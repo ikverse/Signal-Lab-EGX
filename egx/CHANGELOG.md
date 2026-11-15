@@ -1,5 +1,11 @@
 # Signal Lab EGX: changes
 
+## 0.2.2
+
+- **The QR scan works.** In 0.2.1, "Scan ClaudeIn's QR code" stopped with an error before the camera opened. Fixed.
+
+Not verified yet: not tried on the phone or against the real ClaudeIn.
+
 ## 0.2.1
 
 - **Pair by scanning.** On the Analyst page, "Scan ClaudeIn's QR code" pairs the phone with ClaudeIn on your PC in one
