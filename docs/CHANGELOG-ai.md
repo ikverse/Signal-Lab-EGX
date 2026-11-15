@@ -742,3 +742,16 @@ widget, and the AI analyst through the PC host.
   the first that answers is the one kept.
 - The pairing card's note now points at ClaudeIn instead of `start-analyst-host.cmd`; its Arabic row was replaced and one
   added (to check). Not tried on the Fold; the crypto app's pairing screen is unchanged.
+
+### EGX: the QR scan failed in the release build (approved 2026-11-15)
+
+- 0.2.1's "Scan ClaudeIn's QR code" stopped with "getClass() on a null object reference" before the camera opened. Debug
+  builds and the tests were fine. In the release build the shrinker (R8) had copied Play Services' and ML Kit's start-up
+  code into the app's scan and turned not-null checks into `getClass()` calls, and one of those got a null. The exact
+  call was not pinned down; the phone was not connected.
+- Fix: `egx/proguard-rules.pro` keeps `com.google.android.gms.**` and `com.google.mlkit.**` as Google ships them. The
+  release's code grew from about 4.0 MB to 4.9 MB; the rebuilt release now calls `GmsBarcodeScanning.getClient` and
+  `startScan` directly. Not yet tried on the phone.
+- A pairing failure that is not the host's own refusal now also writes its stack trace to the phone's log
+  (`adb logcat -s SignalLabEgx`), so the next fault like this shows its line.
+

@@ -1,5 +1,6 @@
 package com.ikverse.signallab.egx.view
 
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.LayoutDirection
 import com.ikverse.signallab.egx.analyst.AskState
+import com.ikverse.signallab.egx.analyst.HostException
 import com.ikverse.signallab.egx.analyst.HostProbe
 import com.ikverse.signallab.egx.analyst.PairedHost
 import com.ikverse.signallab.egx.i18n.Tr
@@ -115,7 +117,7 @@ private fun PairCard(tr: Tr, onProbe: suspend (String, String) -> HostProbe, onC
             if (!busy) PrimaryButton(tr.t("Scan ClaudeIn's QR code")) {
                 busy = true; error = null
                 scope.launch {
-                    try { onScan() } catch (e: Exception) { error = e.message ?: e.javaClass.simpleName }
+                    try { onScan() } catch (e: Exception) { error = pairingError(e) }
                     busy = false
                 }
             }
@@ -125,7 +127,7 @@ private fun PairCard(tr: Tr, onProbe: suspend (String, String) -> HostProbe, onC
             else SecondButton(tr.t("Find the PC")) {
                 busy = true; error = null
                 scope.launch {
-                    try { probe = onProbe(address, code) } catch (e: Exception) { error = e.message ?: e.javaClass.simpleName }
+                    try { probe = onProbe(address, code) } catch (e: Exception) { error = pairingError(e) }
                     busy = false
                 }
             }
@@ -139,4 +141,13 @@ private fun PairCard(tr: Tr, onProbe: suspend (String, String) -> HostProbe, onC
             SecondButton(tr.t("No")) { probe = null }
         }
     }
+}
+
+/**
+ * What the pairing card shows for a failure. The host's own refusals are sentences already; anything else is a fault in
+ * the app or a library, so its whole stack trace also goes to the phone's log (`adb logcat -s SignalLabEgx`).
+ */
+private fun pairingError(e: Exception): String {
+    if (e !is HostException) Log.e("SignalLabEgx", "Pairing failed", e)
+    return e.message ?: e.javaClass.simpleName
 }
