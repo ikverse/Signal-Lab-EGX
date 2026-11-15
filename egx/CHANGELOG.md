@@ -1,5 +1,13 @@
 # Signal Lab EGX: changes
 
+## 0.2.3
+
+- **Updates work when GitHub is busy.** When GitHub limits requests from your network, "Check for updates" now asks
+  GitHub's release page instead of stopping with an error. An update found that way shows without its notes. If both
+  fail, the message says when to try again.
+
+Not verified yet: not tried on the phone.
+
 ## 0.2.2
 
 - **The QR scan works.** In 0.2.1, "Scan ClaudeIn's QR code" stopped with an error before the camera opened. Fixed.
