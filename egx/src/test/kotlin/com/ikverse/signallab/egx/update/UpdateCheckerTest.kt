@@ -9,6 +9,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import java.io.IOException
+import java.time.ZoneOffset
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
@@ -29,8 +30,22 @@ class UpdateCheckerTest {
         server.close()
     }
 
-    private fun checker(trusted: Boolean = true, http: OkHttpClient = OkHttpClient()) =
-        UpdateChecker(http, latestUrl = server.url("/latest").toString(), trustedHost = { trusted })
+    private fun checker(trusted: Boolean = true, http: OkHttpClient = OkHttpClient()) = UpdateChecker(
+        http,
+        latestUrl = server.url("/latest").toString(),
+        pageUrl = server.url("/o/r/releases/latest").toString(),
+        trustedHost = { trusted },
+        zone = { ZoneOffset.ofHours(2) },
+    )
+
+    private fun limited(reset: String? = null) = MockResponse.Builder().code(403).body("{}")
+        .apply { if (reset != null) setHeader("X-RateLimit-Reset", reset) }.build()
+
+    private fun redirect(to: String) = MockResponse.Builder().code(302).setHeader("Location", to).build()
+
+    private fun sized(bytes: Long) = MockResponse.Builder().code(200).setHeader("Content-Length", bytes.toString()).build()
+
+    private fun missing() = MockResponse.Builder().code(404).body("{}").build()
 
     private fun release(
         tag: String = "v0.2.0", body: String = "Notes.", draft: Boolean = false, prerelease: Boolean = false,
@@ -148,11 +163,83 @@ class UpdateCheckerTest {
         server.enqueue(MockResponse.Builder().code(404).body("{}").build())
         assertTrue("No release" in assertIs<CheckResult.Failed>(checker().check(installed)).message)
         server.enqueue(MockResponse.Builder().code(403).body("{}").build())
+        server.enqueue(missing())
         assertTrue("limiting" in assertIs<CheckResult.Failed>(checker().check(installed)).message)
         server.enqueue(MockResponse.Builder().code(429).body("{}").build())
+        server.enqueue(missing())
         assertTrue("limiting" in assertIs<CheckResult.Failed>(checker().check(installed)).message)
         server.enqueue(MockResponse.Builder().code(500).body("{}").build())
         assertTrue("error 500" in assertIs<CheckResult.Failed>(checker().check(installed)).message)
+    }
+
+    @Test
+    fun `when the API is limited, the release page's tag is offered with the file it names`() = runTest {
+        server.enqueue(limited())
+        server.enqueue(redirect("/o/r/releases/tag/v0.2.0"))
+        server.enqueue(sized(6_134_266))
+        val r = assertIs<CheckResult.Newer>(checker().check(installed)).release
+        assertEquals(AppVersion(0, 2, 0), r.version)
+        assertEquals("", r.notes)
+        assertEquals(6_134_266L, r.apkBytes)
+        assertEquals(server.url("/o/r/releases/download/v0.2.0/signal-lab-egx-0.2.0.apk").toString(), r.apkUrl)
+        server.takeRequest()
+        assertEquals("/o/r/releases/latest", server.takeRequest().url.encodedPath)
+        val head = server.takeRequest()
+        assertEquals("HEAD", head.method)
+        assertEquals("/o/r/releases/download/v0.2.0/signal-lab-egx-0.2.0.apk", head.url.encodedPath)
+    }
+
+    @Test
+    fun `when the API is limited and the release page's tag is not newer, it is up to date`() = runTest {
+        server.enqueue(limited())
+        server.enqueue(redirect("/o/r/releases/tag/v0.1.0"))
+        assertEquals(CheckResult.UpToDate, checker().check(installed))
+        assertEquals(2, server.requestCount)
+    }
+
+    @Test
+    fun `a release page that points anywhere but a version tag leaves the limit's message`() = runTest {
+        for (odd in listOf("/o/r/releases", "/o/r/releases/tag/nightly", "/o/r/releases/tag/v0.2.0-rc1", "/o/r/tags/v0.2.0", "/o/r/releases/tag/v0.2.0/x")) {
+            server.enqueue(limited())
+            server.enqueue(redirect(odd))
+            val failed = assertIs<CheckResult.Failed>(checker().check(installed))
+            assertTrue("limiting" in failed.message, "$odd: ${failed.message}")
+        }
+        server.enqueue(limited())
+        server.enqueue(ok("<html>a page, no redirect</html>"))
+        assertTrue("limiting" in assertIs<CheckResult.Failed>(checker().check(installed)).message)
+    }
+
+    @Test
+    fun `a release page whose file is missing or has no size leaves the limit's message`() = runTest {
+        server.enqueue(limited())
+        server.enqueue(redirect("/o/r/releases/tag/v0.2.0"))
+        server.enqueue(missing())
+        assertTrue("limiting" in assertIs<CheckResult.Failed>(checker().check(installed)).message)
+        server.enqueue(limited())
+        server.enqueue(redirect("/o/r/releases/tag/v0.2.0"))
+        server.enqueue(sized(0))
+        assertTrue("limiting" in assertIs<CheckResult.Failed>(checker().check(installed)).message)
+    }
+
+    @Test
+    fun `a release page file outside GitHub is refused`() = runTest {
+        server.enqueue(limited())
+        server.enqueue(redirect("/o/r/releases/tag/v0.2.0"))
+        val failed = assertIs<CheckResult.Failed>(checker(trusted = false).check(installed))
+        assertTrue("outside GitHub" in failed.message, failed.message)
+    }
+
+    @Test
+    fun `the limit's message says when it lifts, in local time, when GitHub says`() = runTest {
+        // 1794704182 is 2026-11-15 00:56:22 UTC, 02:56 at UTC+2.
+        server.enqueue(limited(reset = "1794704182"))
+        server.enqueue(missing())
+        val failed = assertIs<CheckResult.Failed>(checker().check(installed))
+        assertTrue("Try again after 02:56." in failed.message, failed.message)
+        server.enqueue(limited(reset = "soon"))
+        server.enqueue(missing())
+        assertTrue("in an hour" in assertIs<CheckResult.Failed>(checker().check(installed)).message)
     }
 
     @Test
@@ -186,5 +273,6 @@ class UpdateCheckerTest {
     @Test
     fun `the repository it asks is this app's own`() {
         assertEquals("https://api.github.com/repos/ikverse/Signal-Lab-EGX/releases/latest", UpdateChecker.LATEST_URL)
+        assertEquals("https://github.com/ikverse/Signal-Lab-EGX/releases/latest", UpdateChecker.PAGE_URL)
     }
 }

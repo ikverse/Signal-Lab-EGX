@@ -11,6 +11,9 @@ import okhttp3.Request
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /** A published release that can be installed over this app. */
 data class Release(val version: AppVersion, val notes: String, val apkUrl: String, val apkBytes: Long)
@@ -30,11 +33,18 @@ interface UpdateSource {
 /**
  * Reads the latest release of the app's own GitHub repository. Draft and pre-release builds are not offered
  * (GitHub's "latest" never returns them), and a download is only ever followed to GitHub's own hosts.
+ *
+ * GitHub's API answers only 60 unsigned requests an hour from one internet address, which a shared home or mobile address
+ * can use up without this app. When it refuses, the release page at [pageUrl] (not counted against that limit) is asked
+ * instead: it points at the newest release's tag, and the app file's name follows from the tag the way the release
+ * workflow names it. That way has no release notes.
  */
 class UpdateChecker(
     private val http: OkHttpClient,
     private val latestUrl: String = LATEST_URL,
+    private val pageUrl: String = PAGE_URL,
     private val trustedHost: (HttpUrl) -> Boolean = ::isGitHubHost,
+    private val zone: () -> ZoneId = ZoneId::systemDefault,
     private val io: CoroutineDispatcher = Dispatchers.IO,
 ) : UpdateSource {
 
@@ -42,13 +52,13 @@ class UpdateChecker(
         try {
             val request = Request.Builder().url(latestUrl)
                 .header("Accept", "application/vnd.github+json")
-                .header("User-Agent", "SignalLab-Android")
+                .header("User-Agent", USER_AGENT)
                 .build()
             http.newCall(request).execute().use { response ->
                 when {
                     response.code == 404 -> CheckResult.Failed("No release of Signal Lab EGX has been published yet.")
                     response.code == 403 || response.code == 429 ->
-                        CheckResult.Failed("GitHub is limiting requests from this network. Try again in an hour.")
+                        fromReleasePage(installed) ?: CheckResult.Failed(limited(response.header("X-RateLimit-Reset")))
                     !response.isSuccessful -> CheckResult.Failed("GitHub answered with error ${response.code}. Try again later.")
                     else -> read(response.body.string(), installed)
                 }
@@ -83,6 +93,49 @@ class UpdateChecker(
         return CheckResult.Newer(Release(version, json.optString("body").trim(), url.toString(), size))
     }
 
+    /** The newest release as the release page points at it; null when that did not work either. */
+    private fun fromReleasePage(installed: AppVersion): CheckResult? = try {
+        val page = pageUrl.toHttpUrl()
+        val tag = http.newBuilder().followRedirects(false).build()
+            .newCall(Request.Builder().url(page).header("User-Agent", USER_AGENT).build()).execute().use { response ->
+                if (!response.isRedirect) return null
+                val target = response.header("Location")?.let(page::resolve) ?: return null
+                val segments = target.pathSegments
+                val at = segments.indexOf("tag")
+                if (at < 1 || segments[at - 1] != "releases" || at != segments.size - 2) return null
+                segments.last()
+            }
+        val version = AppVersion.parse(tag)
+        when {
+            version == null || tag != "v$version" -> null
+            version <= installed -> CheckResult.UpToDate
+            else -> {
+                val apk = page.newBuilder().removePathSegment(page.pathSize - 1)
+                    .addPathSegment("download").addPathSegment(tag).addPathSegment("signal-lab-egx-$version.apk").build()
+                if (!trustedHost(apk)) {
+                    CheckResult.Failed("The download for version $version points outside GitHub, so it was refused.")
+                } else {
+                    val size = http.newCall(Request.Builder().url(apk).head().header("User-Agent", USER_AGENT).build()).execute().use { response ->
+                        if (response.isSuccessful) response.header("Content-Length")?.toLongOrNull() ?: -1L else -1L
+                    }
+                    if (size <= 0L) null else CheckResult.Newer(Release(version, "", apk.toString(), size))
+                }
+            }
+        }
+    } catch (_: IOException) {
+        null
+    } catch (_: IllegalArgumentException) {
+        null
+    }
+
+    /** GitHub says when the limit lifts, as seconds since 1970; said as a local time when it does. */
+    private fun limited(reset: String?): String {
+        val seconds = reset?.trim()?.toLongOrNull()
+        val time = seconds?.let { DateTimeFormatter.ofPattern("HH:mm").format(Instant.ofEpochSecond(it).atZone(zone())) }
+        return if (time == null) "GitHub is limiting requests from this network. Try again in an hour."
+        else "GitHub is limiting requests from this network. Try again after $time."
+    }
+
     private fun parseUrl(text: String): HttpUrl? = try {
         text.toHttpUrl()
     } catch (_: IllegalArgumentException) {
@@ -91,6 +144,11 @@ class UpdateChecker(
 
     companion object {
         const val LATEST_URL = "https://api.github.com/repos/ikverse/Signal-Lab-EGX/releases/latest"
+
+        /** The same release as a web page, which redirects to `.../releases/tag/<tag>`. */
+        const val PAGE_URL = "https://github.com/ikverse/Signal-Lab-EGX/releases/latest"
+
+        private const val USER_AGENT = "SignalLab-Android"
 
         /** HTTPS, and a host GitHub serves release files from. */
         fun isGitHubHost(url: HttpUrl): Boolean =
