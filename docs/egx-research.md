@@ -83,7 +83,65 @@ line; 2015-22 moves by up to 16% where settings are chosen year by year (a small
 stocks 3.06, dividend payers 8.03) and by under 3% for fixed settings, except the slow breakout with levels (3.15
 against 3.44).
 
-## 4. Limits
+## 4. Technical picks (stage 1 of the technical-picks plan, 2026-11-16)
+
+The owner asked for channel-style recommendations: chart setups with an entry range, two targets and a stop loss.
+
+**What the channels do.** EGX Analyzer's records (33 calls with levels, 188 settled, August to September 2026) give
+the typical channel call: an entry band about 0.4% wide, target 1 about 5% up, target 2 about 11% up, a stop about 3.4%
+down, five sessions allowed. 83 reached both targets, 31 one, 74 were stopped, in five weeks of a rising market.
+
+**Event study first** (26 setups, the 80 busiest stocks, bought the next session, against the stand-in index, after
+costs; a scratch script, folded into `technical.py`'s choices). Short term (5 to 10 sessions) nothing beat the market
+reliably; new highs were the only setups not below it. Sixty sessions on, a tight range in an uptrend was the only
+setup ahead in both periods (+3.6% and +3.3%; with the full trend template and three-month strength +7.1% and +5.0%).
+Oversold RSI, MACD crosses, golden crosses, pullbacks to the 20-day average and bounces after a 10% fall lost money in
+both periods.
+
+**Whole accounts** (`technical.py`): eight slots, the levels fixed in pounds at the signal close as a card shows them
+(entry range from the breakout level or half a normal day's move below the close up to the close; stop under the last
+ten sessions' low, between 1.5 and 4 normal moves; target 1 at the first earlier swing high at least twice the risk
+away, target 2 the next one at least one risk further, else two and four risks), the T-bill rate on idle money,
+dividends, 0.5% and 0.8% round trips. What 1.00 became:
+
+| | 2015-22 | 2023-26 | fall 2023-26 |
+|---|---|---|---|
+| Cash | 2.41 | 1.98 | |
+| Stand-in index | 0.83 | 3.60 | |
+| Short term, the 8 versions (20 or 55-day high, volume filter or not, 10 or 20 sessions) | 2.48 to 5.59 | 3.70 to 6.38 | -17 to -29% |
+| Short term, chosen from the past only | 1.79 | 4.92 | |
+| Short term, random stocks on the same days with the same levels (10 draws, middle) | 1.45 | 1.77 | |
+| Mid term, the 24 versions (template or uptrend, fifth or tenth, 60 or 120 sessions, three exits) | 2.02 to 4.10 | 1.72 to 2.60 | -17 to -23% |
+| Mid term, chosen from the past only | 2.97 | 2.09 | |
+| Mid term, random stocks on the same days with the same levels (middle) | 0.95 | 2.01 | |
+
+At double costs: short term from the past only 1.64 and 4.18, mid term 2.02 and 1.39.
+
+The levels, on the version each list would register now (best through 2025):
+
+| | Short term (20-day high, 20 sessions) | Mid term (template, tightest fifth, 120 sessions) |
+|---|---|---|
+| By the rule alone | 4.67, 2.90 | 7.37, 2.90 |
+| Entry range only | 5.86, 4.05 | 7.01, 3.49 |
+| Range and swing stop, no targets | 6.41, 4.70 | 5.62, 3.93 |
+| **The plan's chart levels** | **5.59, 4.94** | **4.10, 2.11** |
+| Chart targets at three risks | 6.59, 4.80 | 4.52, 2.62 |
+| The app's current ATR levels (4, 5, 10) | 3.57, 5.35 | 5.80, 2.61 |
+| No new picks while the index is under its 200-day average | 3.35, 4.87 | 4.64, 2.05 |
+
+Findings:
+
+- **Short term works on paper since 2023 and beats random stocks in both periods**, but chosen from the past only it
+  lost to cash in 2015-22. The volume filter did not help; the version that leads is a plain new 20-day high in an
+  uptrend, never the day after an 8% jump, held up to 20 sessions. Half the trades win; 13% reach target 1, 21% are
+  stopped.
+- **Mid term with chart targets does not beat random stocks.** Its targets sell the winners early: without them it
+  makes 5.62 and 3.93. This is the same cost the levels test found for the monthly rules.
+- **The market filter did not help** either list.
+- **The loss-making filter cannot be tested**: the free data has no history of company results.
+- About 44 more account versions and 26 event-study setups were tried; the multiple-testing count grows by 70.
+
+## 5. Limits
 
 The prices are an unofficial feed that needed cleaning; delisted stocks are missing; some of what looks good is luck
 after about 170 tries; the EGX30 yardstick of the backtest is a stand-in. That is why every rule starts on paper and has

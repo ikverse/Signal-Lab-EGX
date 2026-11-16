@@ -17,5 +17,6 @@ which is gitignored like the rest of `research/data/`.
 | `adapt3.py`, `harden.py`, `wf.py`, `divacct.py`, `levels.py` | The rule versions, walk-forward test, dividend account and the four price levels |
 | `events.py`, `divwin.py` | Event studies: dividends, bonus shares, strong closes, volume surges, the calendar |
 | `overnight.py`, `hourly_study.py` | When in the day to place orders; holding overnight only |
+| `technical.py` | Technical picks: short and mid-term chart setups as whole accounts with chart levels, walk-forward, against random stocks |
 
 Typical order: `download.py`, `hourly.py`, `prepare.py`, `fills.py`, then the studies.
