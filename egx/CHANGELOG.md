@@ -1,5 +1,33 @@
 # Signal Lab EGX: changes
 
+## 0.3.0
+
+Technical picks. Every pick is on paper, and nothing here is financial advice.
+
+- **Technical picks each evening.** Up to five picks from chart rules tested on the market since 2010:
+  - **Short term**, up to three: an entry range, target 1 (sell half), target 2 (sell the rest) and a stop loss, held up
+    to 20 sessions.
+  - **Mid term**, up to two: an entry range and a stop loss, with no targets. Held up to 120 sessions, or until a close
+    under the stop or under the 50-day average.
+- **Each pick's page** shows:
+  - the shares for your amount per pick;
+  - why it was picked;
+  - the list's record in the backtest and live;
+  - the company's price to earnings, profit or loss, and debt to equity;
+  - recent headlines, with flags for results, general assembly, capital increase, dividend or a loss;
+  - a "share as text" button.
+- **On Today**, the market line (the EGX30 against its 50 and 200-day averages, and how many of the busiest stocks are
+  rising) sits above the picks, followed by the picks still open.
+- **Learning each month.** Each list switches to the version of its rule that did best on the history before that
+  month. After 12 months live, a list that falls behind cash and the EGX30, or behind random picks, is switched off.
+- **Elsewhere:**
+  - Settings: the amount per pick, and an on/off switch for each list.
+  - Notifications: when picks are ready, and when a pick reaches a target or closes under its stop.
+  - Strategies: a Learn page explaining each list.
+  - The AI analyst: tools for the picks and for a stock's headlines.
+
+Not verified yet: not tried on the phone; the 88 new Arabic texts have not been read by the owner.
+
 ## 0.2.3
 
 - **Updates work when GitHub is busy.** When GitHub limits requests from your network, "Check for updates" now asks

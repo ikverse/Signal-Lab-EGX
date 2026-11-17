@@ -6,7 +6,7 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
-val appVersionName = "0.2.3"
+val appVersionName = "0.3.0"
 val appVersionCode = appVersionName.split(".").let { (major, minor, patch) ->
     major.toInt() * 10_000 + minor.toInt() * 100 + patch.toInt()
 }
