@@ -52,6 +52,19 @@ fun EgxRoot(graph: EgxGraph) {
     val yard by dao.yardsticks().collectAsState(initial = emptyList())
     val fills by dao.fills(Records.LEVELS).collectAsState(initial = emptyList())
     val egx30 by produceState(initialValue = emptyList<Pair<Long, Double>>(), calls) { value = graph.store.egx30().map { it.day to it.close } }
+    val picks by dao.picks().collectAsState(initial = emptyList())
+    val pickEvents by dao.pickEvents().collectAsState(initial = emptyList())
+    val pickRecords by dao.pickRecords().collectAsState(initial = emptyList())
+    val pickChoices by dao.pickChoices().collectAsState(initial = emptyList())
+    val market by dao.lastMarket().collectAsState(initial = null)
+    val facts by dao.allFacts().collectAsState(initial = emptyList())
+    val headlines by dao.recentHeadlines().collectAsState(initial = emptyList())
+    val pickDays by dao.allDays(Records.PICKS).collectAsState(initial = emptyList())
+    // The last close of every stock with a pick still open, for "+2.1% since".
+    val pickCloses by produceState(initialValue = emptyMap<String, Double>(), picks, pickEvents) {
+        val from = EgxTime.today(System.currentTimeMillis()) - 30 * EgxTime.DAY_MS
+        value = picks.filter { it.shown }.map { it.code }.distinct().take(60).mapNotNull { c -> graph.store.daily(c, from).lastOrNull()?.let { c to it.close } }.toMap()
+    }
     val posture = posture()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -71,6 +84,9 @@ fun EgxRoot(graph: EgxGraph) {
                 fun stockName(code: String): String { val s = graph.stocks[code]; return (if (tr.isArabic) s?.nameAr ?: s?.nameEn else s?.nameEn) ?: code }
                 val today = todayView(calls, days, yard, fills, prefs, egx30, tr, { code -> stockName(code) to code }, EgxTime.date(EgxTime.today(System.currentTimeMillis())))
                 val openCall = calls.firstOrNull { "${it.strategy}|${it.code}|${it.action}" == open }
+                val picksToday = picksView(picks, pickEvents, pickRecords, market, facts.associateBy { it.code }, headlines, pickCloses, prefs, tr, ::stockName)
+                var pickOpen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
+                val openPick = picks.firstOrNull { "${it.list}|${it.code}|${it.day}" == pickOpen }
                 var stock by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
                 var dividendsOpen by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
                 when {
@@ -101,6 +117,12 @@ fun EgxRoot(graph: EgxGraph) {
                         DividendPage(dividendMonth(divs, closes, runOpen, month, tr, ::stockName), posture, tr, onMonth = { month = it },
                             onStock = { stock = it }, onAdd = { addToCalendar(context, it) }) { dividendsOpen = false }
                     }
+                    openPick != null -> {
+                        androidx.activity.compose.BackHandler { pickOpen = null }
+                        val card = pickCard(openPick, pickEvents, pickRecords, facts.firstOrNull { it.code == openPick.code }, headlines, pickCloses[openPick.code], prefs, tr, stockName(openPick.code))
+                        PickPage(card, posture, tr, onBack = { pickOpen = null }, onStock = { pickOpen = null; stock = openPick.code },
+                            onShare = { sharePick(context, card.shareText, tr.t("Share as text")) })
+                    }
                     openCall != null -> {
                         androidx.activity.compose.BackHandler { open = null }
                         CallPage(callView(openCall, stockName(openCall.code), prefs, tr), posture, tr, onBack = { open = null },
@@ -118,8 +140,9 @@ fun EgxRoot(graph: EgxGraph) {
                         when (page) {
                             0 -> TodayScreen(today, posture, tr,
                                 onPlaced = { card -> scope.launch { dao.setPlaced(card.call.day, card.call.strategy, card.call.code, card.call.action, !card.placed) } },
-                                onOpen = { card -> open = "${card.call.strategy}|${card.call.code}|${card.call.action}" }, bottom = bottom, onMonthEnd = { monthEnd = true }, onDividends = { dividendsOpen = true })
-                            1 -> StrategiesPage(strategyViews(days, yard, fills, tr), posture, tr, chosen) { chosen = it }
+                                onOpen = { card -> open = "${card.call.strategy}|${card.call.code}|${card.call.action}" }, bottom = bottom, onMonthEnd = { monthEnd = true }, onDividends = { dividendsOpen = true },
+                                picks = picksToday, onPick = { card -> pickOpen = "${card.pick.list}|${card.pick.code}|${card.pick.day}" })
+                            1 -> StrategiesPage(strategyViews(days, yard, fills, tr), posture, tr, chosen, pickEvidence(pickDays, yard, pickRecords, pickChoices, tr)) { chosen = it }
                             2 -> {
                                 val lv = ledgerView(mapOf(Records.LEVELS to days, Records.RULE to rule, Records.LEVELS_DOUBLE to double), yard, mapOf(Records.LEVELS to fills), copies,
                                     calls.count { it.action != "keep" }, prefs, tr)
@@ -163,7 +186,7 @@ fun EgxRoot(graph: EgxGraph) {
                         }
                     }
                 }
-                if (stock == null && !dividendsOpen && openCall == null && !monthEnd) Dock(tr, pages.currentPage, Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { i -> scope.launch { pages.animateScrollToPage(i) } }
+                if (stock == null && !dividendsOpen && openCall == null && openPick == null && !monthEnd) Dock(tr, pages.currentPage, Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { i -> scope.launch { pages.animateScrollToPage(i) } }
             }
         }
     }

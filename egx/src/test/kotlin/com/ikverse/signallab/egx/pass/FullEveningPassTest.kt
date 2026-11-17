@@ -15,6 +15,7 @@ import com.ikverse.signallab.egx.ledger.EgxLedgerDatabase
 import com.ikverse.signallab.egx.ledger.Records
 import com.ikverse.signallab.engine.egx.EgxStrategies
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
@@ -29,6 +30,7 @@ import java.io.File
 import java.time.LocalTime
 import java.time.ZonedDateTime
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
@@ -78,10 +80,12 @@ class FullEveningPassTest {
             val db = EgxLedgerDatabase.open(context, name = null)
             val settings = EgxSettings(context.getSharedPreferences("full-pass-test", Context.MODE_PRIVATE))
             // The ledger as if it had started a year earlier, so every strategy has a year of record to show.
-            settings.update { it.copy(liveStart = EgxTime.day(2025, 11, 12)) }
+            settings.update { it.copy(liveStart = EgxTime.day(2025, 11, 12), picksStart = EgxTime.day(2025, 11, 12)) }
             val pass = EveningPass(store, sync, dividends, db.dao(), settings, clock = { now })
 
+            val started = System.currentTimeMillis()
             val first = pass.run()
+            println("The pass took ${(System.currentTimeMillis() - started) / 1000} s")
             assertTrue(first is PassOutcome.Done, "outcome: $first")
             val r = first.result
             assertEquals(EgxTime.day(2026, 11, 12), r.session)
@@ -99,6 +103,22 @@ class FullEveningPassTest {
             }
             assertTrue(r.strategies.first { it.strategy == EgxStrategies.calm }.runs.getValue(Records.LEVELS).fills.isNotEmpty(), "calm stocks traded in a year")
             assertTrue(r.calls.filter { it.action == "buy" }.all { it.shares > 0 && it.stop != null })
+            // The technical picks: both lists ran a year, with their records, yardsticks and the month's choices stored.
+            val t = assertNotNull(first.technical, "the technical picks ran")
+            for (l in t.lists) {
+                println(String.format(java.util.Locale.US, "  %-18s %s -> %.3f  cash %.3f  EGX30 %s  random middle %s  tier %s  picks %d, trades %d",
+                    l.list.name, l.choices.last().setup.id, l.record.rule.multiple, l.record.cash.multiple, l.record.index?.multiple, l.record.randomMiddle, l.verdict.tier, l.run.picks.size, l.run.trades.size))
+                println("    backtest: ${l.backtest?.let { "${it.trades} trades, won ${it.won}, T1 ${it.target1}, stopped ${it.stopped}, average ${it.average}" }}")
+                for (p in l.today) println("    pick ${p.code}: ${p.levels.rounded().let { "${it.entryLow}-${it.entryHigh} stop ${it.stop} T1 ${it.target1} T2 ${it.target2}" }}")
+                assertTrue(l.run.days.size > 200, "${l.list.id} ran a year")
+                assertTrue(l.run.picks.isNotEmpty(), "${l.list.id} picked something in a year")
+                assertEquals(l.run.days.size, db.dao().days(l.list.id, Records.PICKS).size)
+            }
+            println("  market: ${t.market.egx30} above 50 ${t.market.above50} above 200 ${t.market.above200}, ${t.market.uptrend} of ${t.market.counted} in an uptrend")
+            val picks = db.dao().picks().first()
+            assertEquals(t.lists.sumOf { it.run.picks.size }, picks.size)
+            assertEquals(t.lists.sumOf { it.today.size }, picks.count { it.shown })
+
             val stored = db.dao().days(EgxStrategies.calm.id, Records.LEVELS)
             assertEquals(r.strategies.first { it.strategy == EgxStrategies.calm }.runs.getValue(Records.LEVELS).days.size, stored.size)
 
@@ -106,6 +126,7 @@ class FullEveningPassTest {
             val again = pass.run()
             assertTrue(again is PassOutcome.Done)
             assertEquals(stored, db.dao().days(EgxStrategies.calm.id, Records.LEVELS))
+            assertEquals(picks, db.dao().picks().first())
         } finally {
             server.close()
         }

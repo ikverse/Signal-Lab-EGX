@@ -13,6 +13,8 @@ import com.ikverse.signallab.egx.data.EgxTime
 import com.ikverse.signallab.egx.i18n.Tr
 import com.ikverse.signallab.egx.ledger.CallRow
 import com.ikverse.signallab.egx.ledger.PaperFillRow
+import com.ikverse.signallab.egx.ledger.PickEventRow
+import com.ikverse.signallab.engine.egx.PickFamily
 import com.ikverse.signallab.engine.egx.EgxStrategies
 
 /** The texts of the evening's notifications, apart from Android, so a test can read them. */
@@ -46,6 +48,33 @@ object NotificationTexts {
             else -> ""
         }
         if (whenText.isEmpty()) what else "$what · $whenText"
+    }
+
+    /** "Technical picks: 3 short-term, 2 mid-term", or null when the evening made none. */
+    fun picksTitle(t: TechnicalResult, tr: Tr): String? {
+        val shown = t.lists.filter { it.shows && it.today.isNotEmpty() }
+        if (shown.isEmpty()) return null
+        val short = shown.firstOrNull { it.list.family == PickFamily.SHORT }?.today?.size ?: 0
+        val mid = shown.firstOrNull { it.list.family == PickFamily.MID }?.today?.size ?: 0
+        return when {
+            short > 0 && mid > 0 -> tr.t("Technical picks: %1\$d short-term, %2\$d mid-term", short, mid)
+            short > 0 -> tr.t("Technical picks: %1\$d short-term", short)
+            else -> tr.t("Technical picks: %1\$d mid-term", mid)
+        }
+    }
+
+    /** One line a pick: "COMI · CIB: buy 128.20 to 128.82, stop 125.00". */
+    fun pickLines(t: TechnicalResult, names: (String) -> String, tr: Tr): List<String> = t.lists.filter { it.shows }.flatMap { l ->
+        l.today.map { p ->
+            val lv = p.levels.rounded()
+            tr.t("%1\$s: buy %2\$s to %3\$s, stop %4\$s", names(p.code), tr.price(lv.entryLow), tr.price(lv.entryHigh), tr.price(lv.stop))
+        }
+    }
+
+    fun pickReached(e: PickEventRow, names: (String) -> String, tr: Tr): String = when (e.kind) {
+        "target1" -> tr.t("%1\$s reached target 1 at %2\$s: the paper record sells half", names(e.code), tr.price(e.price))
+        "target2" -> tr.t("%1\$s reached target 2 at %2\$s: the paper record sells the rest", names(e.code), tr.price(e.price))
+        else -> tr.t("%1\$s closed below its stop loss: sell at the open", names(e.code))
     }
 
     fun reached(f: PaperFillRow, names: (String) -> String, tr: Tr): String = when (f.exit) {
@@ -85,6 +114,18 @@ class Notifier(private val context: Context, private val tr: () -> Tr, private v
         }
     }
 
+    /** The evening's technical picks, and each shown pick that reached a target or closed under its stop. */
+    fun picks(t: TechnicalResult) {
+        val tr = tr()
+        channel(PICKS, tr.t("Technical picks"), NotificationManager.IMPORTANCE_DEFAULT)
+        channel(LEVELS, tr.t("Targets and stops"), NotificationManager.IMPORTANCE_HIGH)
+        NotificationTexts.picksTitle(t, tr)?.let { title -> post(PICKS, 2, title, NotificationTexts.pickLines(t, names, tr).joinToString("\n")) }
+        for ((i, e) in t.reached.withIndex()) {
+            val list = EgxStrategies.technicalOf(e.list)?.name?.let { tr.t(it) } ?: ""
+            post(LEVELS, 300 + i, list, NotificationTexts.pickReached(e, names, tr))
+        }
+    }
+
     private fun post(channel: String, id: Int, title: String, body: String) {
         val open = PendingIntent.getActivity(context, 0, Intent(context, MainActivity::class.java), PendingIntent.FLAG_IMMUTABLE)
         val n = Notification.Builder(context, channel)
@@ -102,5 +143,6 @@ class Notifier(private val context: Context, private val tr: () -> Tr, private v
         const val PLAN = "plan"
         const val LEVELS = "levels"
         const val DIVIDENDS = "dividends"
+        const val PICKS = "picks"
     }
 }

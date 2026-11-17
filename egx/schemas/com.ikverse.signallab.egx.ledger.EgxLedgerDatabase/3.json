@@ -1,0 +1,910 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "ca4a5c0d4fa70203448239719e407f94",
+    "entities": [
+      {
+        "tableName": "paper_fill",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`strategy` TEXT NOT NULL, `record` TEXT NOT NULL, `day` INTEGER NOT NULL, `code` TEXT NOT NULL, `buy` INTEGER NOT NULL, `shares` REAL NOT NULL, `price` REAL NOT NULL, `exit` TEXT NOT NULL, `cost` REAL NOT NULL, PRIMARY KEY(`strategy`, `record`, `day`, `code`, `buy`, `exit`))",
+        "fields": [
+          {
+            "fieldPath": "strategy",
+            "columnName": "strategy",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "record",
+            "columnName": "record",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buy",
+            "columnName": "buy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shares",
+            "columnName": "shares",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exit",
+            "columnName": "exit",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cost",
+            "columnName": "cost",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "strategy",
+            "record",
+            "day",
+            "code",
+            "buy",
+            "exit"
+          ]
+        }
+      },
+      {
+        "tableName": "paper_day",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`strategy` TEXT NOT NULL, `record` TEXT NOT NULL, `day` INTEGER NOT NULL, `equity` REAL NOT NULL, `held` REAL NOT NULL, `dividends` REAL NOT NULL, PRIMARY KEY(`strategy`, `record`, `day`))",
+        "fields": [
+          {
+            "fieldPath": "strategy",
+            "columnName": "strategy",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "record",
+            "columnName": "record",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "equity",
+            "columnName": "equity",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "held",
+            "columnName": "held",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dividends",
+            "columnName": "dividends",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "strategy",
+            "record",
+            "day"
+          ]
+        }
+      },
+      {
+        "tableName": "yardstick_day",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`strategy` TEXT NOT NULL, `day` INTEGER NOT NULL, `cash` REAL NOT NULL, `egx30` REAL NOT NULL, `randomLow` REAL NOT NULL, `randomMiddle` REAL NOT NULL, `randomHigh` REAL NOT NULL, PRIMARY KEY(`strategy`, `day`))",
+        "fields": [
+          {
+            "fieldPath": "strategy",
+            "columnName": "strategy",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cash",
+            "columnName": "cash",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "egx30",
+            "columnName": "egx30",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "randomLow",
+            "columnName": "randomLow",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "randomMiddle",
+            "columnName": "randomMiddle",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "randomHigh",
+            "columnName": "randomHigh",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "strategy",
+            "day"
+          ]
+        }
+      },
+      {
+        "tableName": "call",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`day` INTEGER NOT NULL, `strategy` TEXT NOT NULL, `code` TEXT NOT NULL, `action` TEXT NOT NULL, `shares` INTEGER NOT NULL, `pounds` REAL NOT NULL, `close` REAL NOT NULL, `entryLow` REAL, `entryHigh` REAL, `stop` REAL, `target1` REAL, `target2` REAL, `timing` TEXT NOT NULL, `lastCumDay` INTEGER, `paymentDay` INTEGER, `reason` TEXT NOT NULL, `monthEnd` INTEGER NOT NULL, `roundTrip` REAL NOT NULL, `atr` REAL NOT NULL, `placed` INTEGER NOT NULL, PRIMARY KEY(`day`, `strategy`, `code`, `action`))",
+        "fields": [
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "strategy",
+            "columnName": "strategy",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "action",
+            "columnName": "action",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shares",
+            "columnName": "shares",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pounds",
+            "columnName": "pounds",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "close",
+            "columnName": "close",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entryLow",
+            "columnName": "entryLow",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "entryHigh",
+            "columnName": "entryHigh",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "stop",
+            "columnName": "stop",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "target1",
+            "columnName": "target1",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "target2",
+            "columnName": "target2",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "timing",
+            "columnName": "timing",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastCumDay",
+            "columnName": "lastCumDay",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "paymentDay",
+            "columnName": "paymentDay",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "reason",
+            "columnName": "reason",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "monthEnd",
+            "columnName": "monthEnd",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "roundTrip",
+            "columnName": "roundTrip",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atr",
+            "columnName": "atr",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "placed",
+            "columnName": "placed",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "day",
+            "strategy",
+            "code",
+            "action"
+          ]
+        }
+      },
+      {
+        "tableName": "copy",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `strategy` TEXT NOT NULL, `code` TEXT NOT NULL, `buy` INTEGER NOT NULL, `day` INTEGER NOT NULL, `shares` INTEGER NOT NULL, `price` REAL NOT NULL, `note` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "strategy",
+            "columnName": "strategy",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "buy",
+            "columnName": "buy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shares",
+            "columnName": "shares",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "pass",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `at` INTEGER NOT NULL, `session` INTEGER, `ok` INTEGER NOT NULL, `message` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "at",
+            "columnName": "at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "session",
+            "columnName": "session",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "ok",
+            "columnName": "ok",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "message",
+            "columnName": "message",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "analyst_answer",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `at` INTEGER NOT NULL, `question` TEXT NOT NULL, `answer` TEXT NOT NULL, `ending` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "at",
+            "columnName": "at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "question",
+            "columnName": "question",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "answer",
+            "columnName": "answer",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ending",
+            "columnName": "ending",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "pick",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`day` INTEGER NOT NULL, `list` TEXT NOT NULL, `version` TEXT NOT NULL, `code` TEXT NOT NULL, `rank` INTEGER NOT NULL, `close` REAL NOT NULL, `atr` REAL NOT NULL, `entryLow` REAL NOT NULL, `entryHigh` REAL NOT NULL, `stop` REAL NOT NULL, `target1` REAL, `target2` REAL, `limit` INTEGER NOT NULL, `exitAverage` INTEGER, `breakout` REAL, `near` REAL NOT NULL, `volumeRatio` REAL NOT NULL, `tightness` REAL NOT NULL, `shown` INTEGER NOT NULL, `hadNews` INTEGER NOT NULL, `flags` TEXT NOT NULL, `lossMaking` INTEGER, PRIMARY KEY(`day`, `list`, `code`))",
+        "fields": [
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "list",
+            "columnName": "list",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "version",
+            "columnName": "version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rank",
+            "columnName": "rank",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "close",
+            "columnName": "close",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "atr",
+            "columnName": "atr",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entryLow",
+            "columnName": "entryLow",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entryHigh",
+            "columnName": "entryHigh",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stop",
+            "columnName": "stop",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "target1",
+            "columnName": "target1",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "target2",
+            "columnName": "target2",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "limit",
+            "columnName": "limit",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exitAverage",
+            "columnName": "exitAverage",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "breakout",
+            "columnName": "breakout",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "near",
+            "columnName": "near",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "volumeRatio",
+            "columnName": "volumeRatio",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tightness",
+            "columnName": "tightness",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "shown",
+            "columnName": "shown",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hadNews",
+            "columnName": "hadNews",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flags",
+            "columnName": "flags",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lossMaking",
+            "columnName": "lossMaking",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "day",
+            "list",
+            "code"
+          ]
+        }
+      },
+      {
+        "tableName": "pick_event",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`day` INTEGER NOT NULL, `list` TEXT NOT NULL, `code` TEXT NOT NULL, `pickDay` INTEGER NOT NULL, `kind` TEXT NOT NULL, `price` REAL NOT NULL, PRIMARY KEY(`day`, `list`, `code`, `pickDay`, `kind`))",
+        "fields": [
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "list",
+            "columnName": "list",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pickDay",
+            "columnName": "pickDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "kind",
+            "columnName": "kind",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "price",
+            "columnName": "price",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "day",
+            "list",
+            "code",
+            "pickDay",
+            "kind"
+          ]
+        }
+      },
+      {
+        "tableName": "pick_choice",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`month` TEXT NOT NULL, `list` TEXT NOT NULL, `version` TEXT NOT NULL, `growth` REAL NOT NULL, `registeredGrowth` REAL NOT NULL, PRIMARY KEY(`month`, `list`))",
+        "fields": [
+          {
+            "fieldPath": "month",
+            "columnName": "month",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "list",
+            "columnName": "list",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "version",
+            "columnName": "version",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "growth",
+            "columnName": "growth",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "registeredGrowth",
+            "columnName": "registeredGrowth",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "month",
+            "list"
+          ]
+        }
+      },
+      {
+        "tableName": "pick_record",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`list` TEXT NOT NULL, `scope` TEXT NOT NULL, `day` INTEGER NOT NULL, `trades` INTEGER NOT NULL, `won` REAL NOT NULL, `target1` REAL NOT NULL, `target2` REAL NOT NULL, `stopped` REAL NOT NULL, `average` REAL NOT NULL, `days` INTEGER NOT NULL, PRIMARY KEY(`list`, `scope`))",
+        "fields": [
+          {
+            "fieldPath": "list",
+            "columnName": "list",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scope",
+            "columnName": "scope",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "trades",
+            "columnName": "trades",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "won",
+            "columnName": "won",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "target1",
+            "columnName": "target1",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "target2",
+            "columnName": "target2",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "stopped",
+            "columnName": "stopped",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "average",
+            "columnName": "average",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "days",
+            "columnName": "days",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "list",
+            "scope"
+          ]
+        }
+      },
+      {
+        "tableName": "market_day",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`day` INTEGER NOT NULL, `egx30` REAL, `above50` INTEGER, `above200` INTEGER, `uptrend` INTEGER NOT NULL, `counted` INTEGER NOT NULL, PRIMARY KEY(`day`))",
+        "fields": [
+          {
+            "fieldPath": "day",
+            "columnName": "day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "egx30",
+            "columnName": "egx30",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "above50",
+            "columnName": "above50",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "above200",
+            "columnName": "above200",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "uptrend",
+            "columnName": "uptrend",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "counted",
+            "columnName": "counted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "day"
+          ]
+        }
+      },
+      {
+        "tableName": "stock_facts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`code` TEXT NOT NULL, `fetched` INTEGER NOT NULL, `peRatio` REAL, `netIncome` REAL, `eps` REAL, `totalDebt` REAL, `debtToEquity` REAL, PRIMARY KEY(`code`))",
+        "fields": [
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fetched",
+            "columnName": "fetched",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "peRatio",
+            "columnName": "peRatio",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "netIncome",
+            "columnName": "netIncome",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "eps",
+            "columnName": "eps",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "totalDebt",
+            "columnName": "totalDebt",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "debtToEquity",
+            "columnName": "debtToEquity",
+            "affinity": "REAL"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "code"
+          ]
+        }
+      },
+      {
+        "tableName": "headline",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`url` TEXT NOT NULL, `code` TEXT NOT NULL, `headline` TEXT NOT NULL, `published` INTEGER, `flags` TEXT NOT NULL, `fetched` INTEGER NOT NULL, PRIMARY KEY(`url`))",
+        "fields": [
+          {
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "code",
+            "columnName": "code",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "headline",
+            "columnName": "headline",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "published",
+            "columnName": "published",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "flags",
+            "columnName": "flags",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fetched",
+            "columnName": "fetched",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "url"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ca4a5c0d4fa70203448239719e407f94')"
+    ]
+  }
+}

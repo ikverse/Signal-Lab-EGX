@@ -71,13 +71,14 @@ object BoardSource {
             val first = calendar.indexOf(s.day[0])
             if (first < 0) continue
             fun nan() = DoubleArray(n) { Double.NaN }
-            val o = nan(); val h = nan(); val l = nan(); val c = nan(); val q = DoubleArray(n)
+            val o = nan(); val h = nan(); val l = nan(); val c = nan(); val q = DoubleArray(n); val v = DoubleArray(n)
             for (i in 0 until s.size) {
                 val k = calendar.indexOf(s.day[i])
                 if (k < 0) continue
                 o[k] = s.open[i]; h[k] = s.high[i]; l[k] = s.low[i]; c[k] = s.close[i]; q[k] = s.turnover[i]
+                v[k] = if (s.traded[i]) s.volume[i] else 0.0
             }
-            stocks[s.code] = Stock(s.code, first, o, h, l, c, q)
+            stocks[s.code] = Stock(s.code, first, o, h, l, c, q, v)
         }
         val board = Board(cal, stocks, holidays)
         val ix = DoubleArray(n) { Double.NaN }

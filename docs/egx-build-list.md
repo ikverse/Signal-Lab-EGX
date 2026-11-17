@@ -102,6 +102,30 @@ in a temporary folder (see item 1).
 45. After the install: one real evening pass on the phone, checked with the owner.
 46. Stop: no push, tag or release without being asked.
 
+## E7. Technical picks (approved 2026-11-16, mid term without targets 2026-11-17; branch `technical`)
+
+47. Done: `tools/egx/technical.py`, the backtest of both lists as whole accounts, walk-forward, against cash, the market
+    and random stocks; results in `docs/egx-research.md` section 4; the tried count grows by 70 to 240.
+48. Done: chart indicators in the engine (`Chart`: prior highs and lows, 20-day average volume, 10-day range and the
+    stock's own tightest fifth and tenth, swing highs); share volume on the board.
+49. Done: `ShortTermSetup` and `MidTermSetup`, 8 versions each, the registered one first; `ChartLevels`.
+50. Done: `PickAccount`, the picks' paper account, with each pick's outcome (bought, target 1, target 2, stop, time
+    limit, exit average, expired) and `PickStats`.
+51. Done: `PickLearning`, the monthly choice from all the history before the month; `MarketState`.
+52. Done: both lists registered in `EgxStrategies.technical` as Testing; `EgxTiers.judge` for a list.
+53. Done: the research run reproduces the script (`--args="egx technical <dir>"`); no-lookahead tests for all 16 versions.
+54. Done: ledger version 3 (picks, their events, the monthly choices, records, the market line, facts and headlines),
+    migrated from version 2 with every row kept.
+55. Done: the evening pass runs the picks after the strategies, from the picks' own start date; a failure never stops
+    the calls.
+56. Done: company facts from stockanalysis.com (read again after a week) and headlines from Arab Finance's company news,
+    only for the evening's shown picks.
+57. Done: Today's "Technical picks" section, the pick page with sharing, the Learn page under Strategies, Settings
+    (amount per pick, each list on or off), notifications (picks ready; a target or a close under the stop), the
+    analyst's `picks` and `headlines` tools.
+58. Done: 88 Arabic rows (to check).
+59. Stop: ask the owner before installing on the Fold 7.
+
 ## Sessions that can run side by side
 
 | Session | Items | Touches |

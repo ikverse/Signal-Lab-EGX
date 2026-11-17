@@ -139,15 +139,76 @@ object ArabFinanceParser {
     }
 }
 
-/** Arab Finance's public dividend news page (the "توزيعات" tag). No account is needed. */
+/** What a company headline is about, read from its wording. */
+enum class NewsFlag { RESULTS, ASSEMBLY, CAPITAL_INCREASE, DIVIDEND }
+
+/** One headline from a company's news list on Arab Finance. */
+data class CompanyHeadline(val code: String, val headline: String, val url: String, val published: Long?, val flags: Set<NewsFlag>)
+
+/**
+ * Reads one company's news list on Arab Finance (`/ar/news/newscompany?key=CODE`): every link to a news item that has
+ * a headline, with the "last updated" date after it. Each item appears twice on the page (picture and headline); it is
+ * kept once. What a headline is about comes from fixed words: results (أرباح, نتائج, القوائم المالية), the general
+ * assembly (الجمعية العامة), a capital increase (زيادة رأس المال), a dividend (توزيع, كوبون).
+ */
+object CompanyNewsParser {
+    private val ITEM_LINK = Regex("""<a\b[^>]*href\s*=\s*["']([^"']*/news/newdetails/[^"']*)["'][^>]*>(.*?)</a>""",
+        setOf(RegexOption.IGNORE_CASE, RegexOption.DOT_MATCHES_ALL))
+    private val TAG = Regex("<[^>]*>")
+    private val SPACE = Regex("\\s+")
+    private val UPDATED = Regex("""تحديث[^0-9]{0,20}(\d{4})/(\d{1,2})/(\d{1,2})""")
+
+    fun parse(code: String, html: String, baseUrl: String = ArabFinanceClient.SITE): List<CompanyHeadline> {
+        val links = ITEM_LINK.findAll(html).toList()
+        val out = LinkedHashMap<String, CompanyHeadline>()
+        for ((i, m) in links.withIndex()) {
+            val headline = SPACE.replace(TAG.replace(m.groupValues[2], " "), " ").trim()
+            if (headline.isEmpty()) continue
+            val href = m.groupValues[1]
+            val url = if (href.startsWith("http")) href else baseUrl.trimEnd('/') + "/" + href.trimStart('/')
+            if (url in out) continue
+            val end = if (i + 1 < links.size) links[i + 1].range.first else minOf(html.length, m.range.last + 1500)
+            val tail = ArabFinanceParser.normalize(TAG.replace(html.substring(m.range.last + 1, maxOf(m.range.last + 1, end)), " "))
+            val published = UPDATED.find(tail)?.let { g ->
+                runCatching { EgxTime.day(g.groupValues[1].toInt(), g.groupValues[2].toInt(), g.groupValues[3].toInt()) }.getOrNull()
+            }
+            out[url] = CompanyHeadline(code, decode(headline), url, published, flags(headline))
+        }
+        return out.values.toList()
+    }
+
+    fun flags(headline: String): Set<NewsFlag> {
+        val h = ArabFinanceParser.normalize(headline)
+        val out = HashSet<NewsFlag>()
+        if (listOf("ارباح", "نتائج", "القوائم المالية", "خسائر", "خسارة").any { it in h }) out.add(NewsFlag.RESULTS)
+        if ("الجمعية العامة" in h || "عمومية" in h) out.add(NewsFlag.ASSEMBLY)
+        if ("زيادة راس المال" in h || "زيادة رأس المال" in h || "اكتتاب" in h) out.add(NewsFlag.CAPITAL_INCREASE)
+        if ("توزيع" in h || "كوبون" in h) out.add(NewsFlag.DIVIDEND)
+        return out
+    }
+
+    private fun decode(s: String): String = s
+        .replace("&nbsp;", " ").replace("&quot;", "\"").replace("&#39;", "'").replace("&lt;", "<").replace("&gt;", ">")
+        .replace("&amp;", "&")
+}
+
+/** Arab Finance's public dividend news page (the "توزيعات" tag) and companies' news lists. No account is needed. */
 class ArabFinanceClient(
     private val http: EgxHttp = EgxHttp(),
     private val url: String = NEWS_URL,
+    private val site: String = SITE,
 ) {
     /** The latest dividend news, newest first (the page shows about two months). */
     suspend fun news(): List<DividendNews> {
         val html = http.get(url.toHttpUrl(), accept = "text/html") ?: return emptyList()
         return kotlinx.coroutines.withContext(http.io) { ArabFinanceParser.parse(html) }
+    }
+
+    /** One company's latest headlines, newest first. */
+    suspend fun companyNews(code: String): List<CompanyHeadline> {
+        val u = "$site/ar/news/newscompany".toHttpUrl().newBuilder().addQueryParameter("key", code).addQueryParameter("page", "1").build()
+        val html = http.get(u, accept = "text/html") ?: return emptyList()
+        return kotlinx.coroutines.withContext(http.io) { CompanyNewsParser.parse(code, html, site) }
     }
 
     companion object {

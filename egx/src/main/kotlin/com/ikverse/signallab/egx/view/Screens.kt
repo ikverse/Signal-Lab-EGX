@@ -215,7 +215,7 @@ fun CallPage(v: CallView, posture: Posture, tr: Tr, onBack: () -> Unit, onCopyAn
 // ---- Strategies and an evidence page (item 32) ----
 
 @Composable
-fun StrategiesPage(views: List<StrategyView>, posture: Posture, tr: Tr, chosen: String?, onChoose: (String?) -> Unit) {
+fun StrategiesPage(views: List<StrategyView>, posture: Posture, tr: Tr, chosen: String?, picks: List<PickEvidenceView> = emptyList(), onChoose: (String?) -> Unit) {
     val c = LocalCalm.current
     val list: @Composable ColumnScope.() -> Unit = {
         Title(tr.t("Strategies"))
@@ -239,12 +239,19 @@ fun StrategiesPage(views: List<StrategyView>, posture: Posture, tr: Tr, chosen: 
                 Text(tr.t("Evidence ›"), style = Type.body, color = c.ink)
             }
         }
+        if (picks.isNotEmpty()) {
+            Text(tr.t("Technical picks · chart setups, on paper"), style = Type.small, color = c.muted, modifier = Modifier.padding(top = 8.dp, start = 4.dp))
+            for (p in picks) PickListRow(p, tr, p.list.id == chosen && posture != Posture.FOLDED) { onChoose(p.list.id) }
+        }
         CalmCard { Note(tr.t("A strategy moves up or down only by its own record against the three yardsticks: cash, the EGX30, and eight random stocks picked the same days. %1\$d versions have been tried in all, so some of any good result is luck.", EgxStrategies.triedCount)) }
     }
+    val pickList = picks.firstOrNull { it.list.id == chosen }
     val pick = views.firstOrNull { it.strategy.id == chosen } ?: views.first()
     when {
+        posture == Posture.FOLDED && pickList != null -> Scroll { PickEvidencePage(pickList, tr) { onChoose(null) } }
         posture == Posture.FOLDED && chosen != null -> Scroll { EvidencePage(pick, tr) { onChoose(null) } }
         posture == Posture.FOLDED -> Scroll(content = list)
+        pickList != null -> Panes(posture, list) { PickEvidencePage(pickList, tr, null) }
         else -> Panes(posture, list) { EvidencePage(pick, tr, null) }
     }
 }
@@ -359,6 +366,15 @@ fun SettingsPage(p: EgxPrefs, posture: Posture, tr: Tr, onChange: ((EgxPrefs) ->
         CalmCard(tr.t("Cash rate")) {
             NumberField(String.format(java.util.Locale.US, "%.1f", 100 * p.cashRate), tr.t("% a year")) { v -> v.toDoubleOrNull()?.takeIf { it in 0.0..100.0 }?.let { r -> onChange { it.copy(cashRate = r / 100) } } }
             Note(tr.t("Money that is not in a stock earns this on paper. Set it to your money-market fund's rate."))
+        }
+        CalmCard(tr.t("Technical picks")) {
+            NumberField(String.format(java.util.Locale.US, "%.0f", p.pickAmount), tr.t("EGP")) { v -> v.toDoubleOrNull()?.takeIf { it > 0 }?.let { m -> onChange { it.copy(pickAmount = m) } } }
+            Note(tr.t("The pounds for one pick: each card's shares come from this. Picks are on paper and never part of the money above."))
+            for (l in EgxStrategies.technical) {
+                Toggle(tr.t(l.name), tr.t("Testing · on paper"), l.id in p.picksOn, true) { on ->
+                    onChange { it.copy(picksOn = if (on) it.picksOn + l.id else it.picksOn - l.id) }
+                }
+            }
         }
         CalmCard(tr.t("Strategies that give calls")) {
             for (s in EgxStrategies.all.filter { !it.silent }) {

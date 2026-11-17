@@ -149,6 +149,29 @@ Accepted mockup: https://claude.ai/artifact/6qDLTnGJke5fcWiXXXjPhX
 Left out of the first version: the futures data, the leverage and delisting vetoes, the Binance button, hourly
 strategies and the AI analyst.
 
+### 8. Technical picks (added 2026-11-16 at the owner's request; built on branch `technical`)
+
+Channel-style recommendations, as the Telegram channels EGX Analyzer reads give them, from chart rules the research
+tested first (`docs/egx-research.md` section 4). Up to five picks each evening, on paper, in their own record:
+
+- **Short-term picks**, up to three: a new 20-day high on at least the 20-day average volume, in an uptrend (above the
+  50 and 200-day averages), never the day after a jump of 8%. The card has the channel format: an entry range, target 1
+  (half), target 2 (the rest) and a stop loss, all from the chart. Held up to 20 sessions.
+- **Mid-term picks**, up to two: a tight 10-day range inside the full trend template. An entry range and a stop loss,
+  **no targets** (the owner's choice on 2026-11-17: targets sold the winners too early); held until a close under the
+  stop or the 50-day average, or 120 sessions.
+- Each card also shows the shares for the owner's amount per pick, why it was picked, the list's record in the
+  backtest and live, three company facts (price to earnings, profit or loss over twelve months, debt to equity, from
+  stockanalysis.com), the company's latest headlines from Arab Finance with flags (results, general assembly, capital
+  increase, dividend, a loss), and a "share as text" button for the owner's own notes.
+- Today shows the market line (the EGX30 against its 50 and 200-day averages, and how many of the 80 busiest stocks are
+  in an uptrend) above the two lists, then the picks still open. The market line is information only: as a filter it
+  did not help.
+- **Learning**: on the first evening of each month each list uses the version of its rule (8 each) that did best over
+  all the history before that month. After 12 months live, a list behind both cash and the EGX30, or behind nine in ten
+  random twins, is switched off: still recorded, no longer shown.
+- The picks are never part of "money I trade with"; their paper account is eight slots of the amount per pick.
+
 ## Build order (branch `egx`; each milestone committed when its tests pass; never pushed unasked)
 
 | # | Lands | You get |
@@ -184,3 +207,5 @@ needs a regulator's licence in Egypt.
 - Is buying near the close worth what the hourly prices say?
 - Does the fast Breakout keep failing, and does the slow one earn a place on Today?
 - Is 0.5% the real cost of a round trip in the stocks you actually trade?
+- Do the technical picks beat random stocks on the same days with the same levels, live, as they did in the backtest?
+- Does the learning step's month-by-month choice beat simply keeping the registered version?

@@ -549,9 +549,15 @@ object PickLearning {
     /** The choice for each month from the month of session [from] to the board's last. */
     fun choices(
         versions: List<Setup>, ctx: Context, from: Int, historyStart: Int, cost: (String, Int) -> Double, cashPerSession: DoubleArray,
-    ): List<Choice> {
-        val board = ctx.board
-        val curves = versions.map { v -> PickAccount.run({ v }, ctx, historyStart, cost, cashPerSession).days }
+    ): List<Choice> = choices(versions, history(versions, ctx, historyStart, cost, cashPerSession), ctx.board, from, historyStart)
+
+    /** Each version's paper account over all the history from [historyStart]: what the choices are made from. */
+    fun history(versions: List<Setup>, ctx: Context, historyStart: Int, cost: (String, Int) -> Double, cashPerSession: DoubleArray): List<PickRun> =
+        versions.map { v -> PickAccount.run({ v }, ctx, historyStart, cost, cashPerSession) }
+
+    /** The choices from [runs], one per version as [history] makes them. */
+    fun choices(versions: List<Setup>, runs: List<PickRun>, board: Board, from: Int, historyStart: Int): List<Choice> {
+        val curves = runs.map { it.days }
         val out = ArrayList<Choice>()
         var k = from
         while (k < board.size) {

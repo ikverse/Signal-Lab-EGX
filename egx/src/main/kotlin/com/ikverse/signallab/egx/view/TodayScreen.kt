@@ -18,9 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
@@ -151,7 +148,8 @@ val LocalDividendsLink = androidx.compose.runtime.staticCompositionLocalOf<Pair<
 enum class Posture { FOLDED, UNFOLDED, TABLETOP }
 
 @Composable
-fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit, bottom: PaddingValues, onMonthEnd: () -> Unit = {}, onDividends: () -> Unit = {}) {
+fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit, bottom: PaddingValues, onMonthEnd: () -> Unit = {}, onDividends: () -> Unit = {},
+    picks: PicksView? = null, onPick: (PickCardView) -> Unit = {}) {
     val c = LocalCalm.current
     androidx.compose.runtime.CompositionLocalProvider(LocalMonthEndLink provides (tr.t("Month-end list") + " ›" to onMonthEnd), LocalDividendsLink provides (tr.t("Dividend calendar ›") to onDividends)) {
     when (posture) {
@@ -166,6 +164,7 @@ fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> 
                 Dots(pager, v.cards.size)
             }
             Tiles(v, tr, Modifier.padding(start = 22.dp, end = 22.dp, top = 18.dp))
+            if (picks != null) PicksSection(picks, tr, Modifier.padding(start = 22.dp, end = 22.dp, top = 18.dp), onPick)
         }
         Posture.UNFOLDED -> Row(Modifier.fillMaxSize()) {
             Column(Modifier.weight(1f).fillMaxHeight().padding(22.dp)) {
@@ -173,9 +172,11 @@ fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> 
                 Spacer(Modifier.weight(1f))
                 Tiles(v, tr, Modifier.padding(bottom = 70.dp))
             }
-            if (v.cards.isEmpty()) Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 40.dp), contentAlignment = Alignment.Center) { Empty(tr) }
+            if (v.cards.isEmpty() && picks == null) Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 40.dp), contentAlignment = Alignment.Center) { Empty(tr) }
             else Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                if (v.cards.isEmpty()) Empty(tr)
                 for (card in v.cards) SmallCard(card, onPlaced, onOpen)
+                if (picks != null) PicksSection(picks, tr, onPick = onPick)
                 Spacer(Modifier.height(70.dp))
             }
         }
@@ -186,11 +187,14 @@ fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> 
             }
             Box(Modifier.fillMaxWidth().height(1.dp).background(c.line))
             Box(Modifier.weight(1f)) {
-                if (v.cards.isEmpty()) Empty(tr, Modifier.padding(22.dp))
-                else LazyVerticalGrid(GridCells.Fixed(3), Modifier.padding(horizontal = 22.dp, vertical = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp),
-                    contentPadding = PaddingValues(bottom = 80.dp)) {
-                    items(v.cards) { SmallCard(it, onPlaced, onOpen) }
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    if (v.cards.isEmpty()) Empty(tr)
+                    for (row in v.cards.chunked(3)) Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        for (card in row) Box(Modifier.weight(1f)) { SmallCard(card, onPlaced, onOpen) }
+                        repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                    }
+                    if (picks != null) PicksSection(picks, tr, onPick = onPick)
+                    Spacer(Modifier.height(80.dp))
                 }
             }
         }

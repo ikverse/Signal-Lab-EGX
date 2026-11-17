@@ -24,6 +24,7 @@ class ArabicTableTest {
             }
         }
         for (s in EgxStrategies.all) { out.add(s.name); out.add(s.summary) }
+        for (l in EgxStrategies.technical) { out.add(l.name); out.add(l.summary) }
         out.addAll(PAGES)
         for (v in listOf("buy", "sell")) out.addAll(listOf("$v one", "$v two", "$v %1\$d", "$v %1\$d (11+)"))
         return out

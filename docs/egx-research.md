@@ -149,7 +149,8 @@ until the stop, a close under the 50-day average or 120 sessions).
 4.94 with its levels and 4.67 and 2.90 by the rule alone, the research's figures exactly. The mid-term list without
 targets gives 5.89 and 3.93 (rule alone 7.18 and 2.90) against the research's 5.62 and 3.93 (7.37 and 2.90): the
 script let a pick wait with no time limit when the account had no cash for it, while the engine drops every pick after
-three sessions, as the card says; the script with that one change gives the engine's figures. The monthly learning step
+three sessions, as the card says; the script with that one change gives the engine's figures. Random stocks on the same
+days with the same levels and exits (10 draws, middle): short term 1.41 and 2.23, mid term 1.58 and 3.23. The monthly learning step
 (each month the version that did best over all the history before it) from 2015: short term 2.83 and 3.77, mid term
 5.78 and 3.50.
 

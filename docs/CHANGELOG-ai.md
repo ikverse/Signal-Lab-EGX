@@ -755,3 +755,36 @@ widget, and the AI analyst through the PC host.
 - A pairing failure that is not the host's own refusal now also writes its stack trace to the phone's log
   (`adb logcat -s SignalLabEgx`), so the next fault like this shows its line.
 
+### EGX: technical picks (approved 2026-11-16; mid term without targets and the volume filter, 2026-11-17)
+
+- Stage 1 (`f4a9cb9`): `tools/egx/technical.py` and `docs/egx-research.md` section 4. The owner chose both lists, the
+  mid-term one without targets. The short-term version keeps "volume at least its 20-day average": without it 2015-22
+  fell from 5.59 to 2.89 (the first list sent for approval wrongly said "no volume filter").
+- The engine's re-run gives the script's short-term figures exactly. Mid term gives 5.89 against 5.62 in 2015-22: the
+  script kept a pick waiting with no time limit when the account had no cash for it; the engine drops every pick after
+  three sessions, as the card says. The script with that one change gives the engine's figures.
+- The learning step is monthly (the plan said monthly; the research's walk-forward was yearly): each month uses the
+  version with the best account over all the history before it, from 2010; the registered version until a year of
+  history exists, and on ties. From 2015 that gives short term 2.83 and 3.77, mid term 5.78 and 3.50.
+- "Re-weight the ranking" (plan item 7) is the version choice itself: the ranking inside a version is the research's and
+  stays fixed, so nothing untested is used.
+- Switching off follows the strategies' rule: after 12 months live, behind cash and the EGX30, or under the tenth
+  percentile of 20 random twins. A switched-off list is still recorded.
+- The picks have their own start date (`picksStart`, the first evening after the update), so no picks are written for
+  evenings the owner never saw. Their paper account is eight slots of the amount per pick (10,000 pounds to start),
+  never part of "money I trade with".
+- Fundamentals: stockanalysis.com's statistics page is server-rendered and has P/E, net income, EPS, total debt and debt
+  to equity for the EGX stocks tried (COMI, ELKA, NEDA; "n/a" where it has none). Read only for the evening's shown
+  picks, at most once a week a stock; shown on the card, never used to choose (the loss filter could not be tested).
+- News: Arab Finance's company news list (`/ar/news/newscompany?key=CODE`) is server-rendered; its events calendar is
+  filled in by script, so the results, assembly, capital-increase and dividend flags come from the stock's own
+  headlines of the last 10 days. Each pick row keeps whether it had news, for a later test of news against no news.
+- Share volume comes from Yahoo's daily volume (0 on a session without trades); a board without it estimates it as
+  turnover over the close.
+- Today: the section sits under the paper-account tiles folded, under the calls unfolded, and under the calls in
+  tabletop, where the three-column grid became rows of three so the picks can follow in one scroll.
+- A pick card's "backtest" record is the trades of each month's chosen version before the list went live; "live" is
+  the picks' own account.
+- Notifications: one for the evening's picks; one for each shown pick that reached a target or closed under its stop.
+- The pass takes about 14 seconds on the PC with the picks (`FullEveningPassTest` on the recorded data). Not tried on the
+  Fold. The 88 Arabic rows are to check.

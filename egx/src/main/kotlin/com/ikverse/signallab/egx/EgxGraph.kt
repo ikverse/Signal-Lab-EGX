@@ -32,7 +32,8 @@ class EgxGraph(context: Context) {
     val sync = EgxSync(store, YahooClient(http), stocks)
     val dividends = EgxDividendRepository(store, ArabFinanceClient(http))
     val ledger = EgxLedgerDatabase.open(app)
-    val pass = EveningPass(store, sync, dividends, ledger.dao(), settings)
+    val pass = EveningPass(store, sync, dividends, ledger.dao(), settings,
+        facts = com.ikverse.signallab.egx.data.StockAnalysisClient(http), companyNews = ArabFinanceClient(http))
 
     private val arabic: Map<String, String> by lazy {
         Tr.parse(app.assets.open("egx/strings_ar.tsv").bufferedReader(Charsets.UTF_8).use { it.readText() })
@@ -76,6 +77,11 @@ class EgxGraph(context: Context) {
         override fun prefs() = settings.value
         override fun name(code: String) = stocks[code]?.let { "${it.nameEn}${it.nameAr?.let { a -> " · $a" } ?: ""}" }
         override fun today() = com.ikverse.signallab.egx.data.EgxTime.today(System.currentTimeMillis())
+        override suspend fun picksSince(day: Long) = dao.picksSince(day)
+        override suspend fun pickEvents() = dao.pickEvents().first()
+        override suspend fun pickRecords() = dao.pickRecords().first()
+        override suspend fun headlines(code: String) = dao.headlines(code)
+        override suspend fun facts(code: String) = dao.facts(code)
     }
 
     val analyst = com.ikverse.signallab.egx.analyst.EgxAnalyst(

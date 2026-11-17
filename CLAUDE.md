@@ -73,6 +73,7 @@ Wrap every adb call in `timeout N`.
 ./gradlew :engine:test :egx:testDebugUnitTest :egx:assembleDebug 2>&1 | grep -E "^e:|^w:|FAILED|BUILD"
 python -I tools/egx/export.py research/data/egx/data_typical <dbn2.json> research/data/egx/raw
 ./gradlew :research:run --args="egx research/data/egx/data_typical"        # the research's table, re-made (add "wait")
+./gradlew :research:run --args="egx technical research/data/egx/data_typical"   # the technical picks, re-made
 ```
 
 - Texts are written in English in the code (`tr.t("...")`) and looked up by that exact English in
@@ -82,6 +83,10 @@ python -I tools/egx/export.py research/data/egx/data_typical <dbn2.json> researc
   closed weekdays, the fixed public holidays, and the owner's list in Settings for the Eids and moved holidays).
 - The ledger is append-only: each evening re-runs every strategy from the ledger's start and stores only new sessions.
 - `FullEveningPassTest` runs a whole pass on the research's recorded downloads when `research/data/egx/` is present.
+- Technical picks (`docs/egx-plan.md` part 8): the engine's `Technical.kt` (chart indicators, `ShortTermSetup`,
+  `MidTermSetup`, `ChartLevels`, `PickAccount`, `PickLearning`, `MarketState`), registered in `EgxStrategies.technical`;
+  the app's `pass/TechnicalEvening.kt`, `view/Picks.kt`. Company facts come from stockanalysis.com and headlines from
+  Arab Finance's company news, only for the evening's picks. The picks are never part of "money I trade with".
 - Not built from the build list without the owner's word: an install, a push, a tag or release, deleting user data.
 
 ## The engine's rules

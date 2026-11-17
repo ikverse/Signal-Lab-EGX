@@ -8,7 +8,12 @@ import com.ikverse.signallab.egx.data.EgxTime
 import com.ikverse.signallab.egx.ledger.CallRow
 import com.ikverse.signallab.egx.ledger.CopyRow
 import com.ikverse.signallab.egx.ledger.PaperDayRow
+import com.ikverse.signallab.egx.ledger.FactsRow
+import com.ikverse.signallab.egx.ledger.HeadlineRow
 import com.ikverse.signallab.egx.ledger.PaperFillRow
+import com.ikverse.signallab.egx.ledger.PickEventRow
+import com.ikverse.signallab.egx.ledger.PickRecordRow
+import com.ikverse.signallab.egx.ledger.PickRow
 import com.ikverse.signallab.egx.ledger.Records
 import com.ikverse.signallab.egx.ledger.YardstickRow
 import com.ikverse.signallab.egx.view.Evidence
@@ -32,6 +37,15 @@ interface EgxAnalystData {
     fun prefs(): EgxPrefs
     fun name(code: String): String?
     fun today(): Long
+
+    /** The technical picks since [day], newest first, with their events and the lists' records. */
+    suspend fun picksSince(day: Long): List<PickRow> = emptyList()
+    suspend fun pickEvents(): List<PickEventRow> = emptyList()
+    suspend fun pickRecords(): List<PickRecordRow> = emptyList()
+
+    /** A company's latest headlines kept by the app, and its facts. */
+    suspend fun headlines(code: String): List<HeadlineRow> = emptyList()
+    suspend fun facts(code: String): FactsRow? = null
 }
 
 /** One tool the phone offers Claude Code through the PC host. */
@@ -41,7 +55,7 @@ class EgxTool(val name: String, val description: String, val schema: JSONObject)
 class ToolOutput(val text: String, val isError: Boolean = false)
 
 /**
- * The analyst's five read-only tools, run on the phone on its own data. Each answers in JSON with dates as yyyy-mm-dd and
+ * The analyst's seven read-only tools, run on the phone on its own data. Each answers in JSON with dates as yyyy-mm-dd and
  * money in Egyptian pounds.
  */
 class EgxAnalystTools(private val data: EgxAnalystData) {
@@ -51,6 +65,10 @@ class EgxAnalystTools(private val data: EgxAnalystData) {
         EgxTool("stock", "One stock by its EGX ticker (such as COMI): its name, its last closes, its dividends and every paper trade the strategies made on it.", obj("code" to prop("string", "The EGX ticker, such as COMI."), "sessions" to prop("integer", "Optional: how many recent closes, 1 to 500; 60 if absent."), required = listOf("code"))),
         EgxTool("dividends", "Upcoming cash dividends with their last day to hold and cash date, and those announced with no date yet.", obj()),
         EgxTool("research", "What the research behind each strategy found (2015-2022 and 2023-2026, what 1.00 became, costs included), the yardsticks over the same years, and how many versions were tried in all.", obj()),
+        EgxTool("picks", "The technical picks (chart setups on paper: short term with entry range, two targets and a stop; mid term with entry range and stop, no targets) of the latest evening or of the last days_back calendar days, each with its levels, why it was picked and how it stands, and each list's record of finished trades in the backtest and live.",
+            obj("days_back" to prop("integer", "Optional: calendar days to look back; 0 or absent for the latest evening only."))),
+        EgxTool("headlines", "One stock's latest company headlines from Arab Finance as the app last read them (Arabic), with what each is about, and the company's facts (price to earnings, net income over the last twelve months, debt to equity).",
+            obj("code" to prop("string", "The EGX ticker, such as COMI."), required = listOf("code"))),
     )
 
     suspend fun run(name: String, input: JSONObject): ToolOutput = try {
@@ -60,6 +78,8 @@ class EgxAnalystTools(private val data: EgxAnalystData) {
             "stock" -> stock(input.optString("code").trim().uppercase(), input.optInt("sessions", 60).coerceIn(1, 500))
             "dividends" -> ToolOutput(dividends().toString())
             "research" -> ToolOutput(research().toString())
+            "picks" -> ToolOutput(picks(input.optInt("days_back", 0)).toString())
+            "headlines" -> headlines(input.optString("code").trim().uppercase())
             else -> ToolOutput("There is no tool called $name.", isError = true)
         }
     } catch (e: kotlinx.coroutines.CancellationException) {
@@ -140,6 +160,45 @@ class EgxAnalystTools(private val data: EgxAnalystData) {
     private fun dividend(d: EgxDividend) = JSONObject().put("code", d.code).putOpt("name", data.name(d.code)).putOpt("egp_a_share", d.amount)
         .putOpt("last_day_to_hold", d.lastCumDay?.let(::iso)).putOpt("cash_date", d.paymentDay?.let(::iso)).putOpt("assembly", d.assemblyDay?.let(::iso))
         .put("last_day_estimated", d.lastCumEstimated).put("checked_on_yahoo", d.check.name.lowercase()).put("by_hand", d.byHand)
+
+    private suspend fun picks(back: Int): JSONObject {
+        val all = data.picksSince(if (back <= 0) 0 else data.today() - back * EgxTime.DAY_MS)
+        val latest = all.maxOfOrNull { it.day }
+        val chosen = if (back <= 0) all.filter { it.day == latest } else all
+        val events = data.pickEvents()
+        return JSONObject()
+            .put("picks", JSONArray().apply {
+                for (p in chosen) put(JSONObject()
+                    .put("made_after_session", iso(p.day)).put("list", p.list).put("version", p.version).put("code", p.code).putOpt("name", data.name(p.code))
+                    .put("rank", p.rank).put("shown_on_today", p.shown).put("last_close", p.close)
+                    .put("entry_low", p.entryLow).put("entry_high", p.entryHigh).put("stop", p.stop).putOpt("target1", p.target1).putOpt("target2", p.target2)
+                    .put("max_sessions", p.limit).putOpt("exit_under_average", p.exitAverage).putOpt("breakout_level", p.breakout)
+                    .put("close_over_year_high", p.near).put("volume_over_average", p.volumeRatio).put("ten_day_range", p.tightness)
+                    .put("had_news_10_days", p.hadNews).put("news_flags", p.flags).putOpt("loss_making", p.lossMaking)
+                    .put("events", JSONArray().apply {
+                        for (e in events.filter { it.list == p.list && it.code == p.code && it.pickDay == p.day }) put(JSONObject().put("day", iso(e.day)).put("kind", e.kind).put("price", e.price))
+                    }))
+            })
+            .put("records", JSONArray().apply {
+                for (r in data.pickRecords()) put(JSONObject().put("list", r.list).put("scope", r.scope).put("trades", r.trades).put("won", r.won)
+                    .put("reached_target1", r.target1).put("reached_target2", r.target2).put("stopped", r.stopped).put("average_after_costs", r.average).put("median_sessions", r.days))
+            })
+            .put("note", "Paper only. Events: bought, target1 (half sold), target2, stop, time, rule (close under the exit average), expired (never bought), and sell_* decided at a close for the next open. Shares are fractions: 0.51 is 51%.")
+    }
+
+    private suspend fun headlines(code: String): ToolOutput {
+        if (code.isEmpty()) return ToolOutput("Give the stock's ticker as code.", isError = true)
+        val f = data.facts(code)
+        val o = JSONObject().put("code", code).putOpt("name", data.name(code))
+            .put("headlines", JSONArray().apply {
+                for (h in data.headlines(code)) put(JSONObject().put("headline", h.headline).putOpt("published", h.published?.let(::iso)).put("about", h.flags).put("url", h.url))
+            })
+            .putOpt("facts", f?.let {
+                JSONObject().put("read_on", iso(it.fetched)).putOpt("price_to_earnings", it.peRatio).putOpt("net_income_12m_egp", it.netIncome)
+                    .putOpt("eps", it.eps).putOpt("total_debt_egp", it.totalDebt).putOpt("debt_to_equity", it.debtToEquity)
+            })
+        return ToolOutput(o.toString())
+    }
 
     private suspend fun research(): JSONObject = JSONObject()
         .put("strategies", JSONArray().apply {

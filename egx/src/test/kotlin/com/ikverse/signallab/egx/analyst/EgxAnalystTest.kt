@@ -163,7 +163,7 @@ class EgxAnalystTest {
         val spec = host.spec!!
         assertEquals(EgxAnalystPrompt.MODEL, spec.getString("model"))
         assertTrue(spec.getString("system").contains("Egyptian Arabic"))
-        assertEquals(listOf("ledger", "calls", "stock", "dividends", "research"), (0 until spec.getJSONArray("tools").length()).map { spec.getJSONArray("tools").getJSONObject(it).getString("name") })
+        assertEquals(listOf("ledger", "calls", "stock", "dividends", "research", "picks", "headlines"), (0 until spec.getJSONArray("tools").length()).map { spec.getJSONArray("tools").getJSONObject(it).getString("name") })
         assertEquals(listOf(Triple("How is CIB doing?", "CIB closed at 97.90.", "done")), saved)
         assertEquals(2, analyst.conversation.size)
         analyst.newConversation()
@@ -190,5 +190,8 @@ class EgxAnalystTest {
         assertEquals(EgxStrategies.triedCount, JSONObject(tools.run("research", JSONObject()).text).getInt("versions_tried"))
         assertTrue(tools.run("stock", JSONObject().put("code", "NOPE")).isError)
         assertTrue(tools.run("place_order", JSONObject()).isError)
+        assertEquals(0, JSONObject(tools.run("picks", JSONObject()).text).getJSONArray("picks").length())
+        assertTrue(tools.run("headlines", JSONObject()).isError)
+        assertEquals("COMI", JSONObject(tools.run("headlines", JSONObject().put("code", "comi")).text).getString("code"))
     }
 }

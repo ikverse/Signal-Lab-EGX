@@ -74,6 +74,7 @@ class EveningWorker(context: Context, params: WorkerParameters) : CoroutineWorke
         when (val outcome = graph.pass.run()) {
             is PassOutcome.Done -> {
                 graph.notifier.evening(outcome.result, graph.settings.value)
+                outcome.technical?.let { graph.notifier.picks(it) }
                 com.ikverse.signallab.egx.widget.TodayWidget.refresh(applicationContext)
             }
             PassOutcome.NotYet, is PassOutcome.Failed -> if (attempt < Schedule.RETRIES) Schedule.runNow(applicationContext, attempt + 1, Schedule.RETRY_MINUTES)
