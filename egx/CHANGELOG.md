@@ -1,5 +1,29 @@
 # Signal Lab EGX: changes
 
+## 0.4.0
+
+A new look, and Arabic in standard Arabic. Every call is still on paper, and nothing here is financial advice.
+
+- **A new look.** A warm stone page by day and a near-black navy at night, with one indigo-to-teal button on each
+  screen. Each strategy has its own colour and mark wherever it appears. Cards arrive with a little motion, figures count
+  up and lines draw themselves in; all of it stays still when Android's animations are off.
+- **The pages along the top.** Today, Strategies, Ledger, Analyst and Settings are now a row of names at the top: the
+  page you are on in large letters. Swipe or tap to change page.
+- **Made for the Fold.** Folded, unfolded and half-folded each get their own layout. Unfolded, Today shows what to do
+  tomorrow beside how things stand. Half-folded, the upper half is for reading and the lower half for tapping.
+- **Charts on every call.** A call or a pick now shows the stock's chart with its levels drawn across it and every price in
+  a column on the right. The four levels sit on a ladder drawn to scale, so the gain to the target and the loss to the
+  stop show as lengths, with the reward against the risk in one figure.
+- **The order of the day.** On the open screen, Today lists what to sell at the open and what to buy near the close.
+- **Standard Arabic.** Every Arabic text was rewritten from Egyptian into Modern Standard Arabic. Dividends are now
+  التوزيعات, cash is النقد, and amounts are written ج.م.
+- **Also new:**
+  - The strategy cards each show a small line of their record.
+  - The ledger's bars slide when you switch between pounds, dollars and gold.
+  - The home-screen widget has the new colours.
+
+Not verified yet: not tried on the phone, and the Arabic has not been read by the owner.
+
 ## 0.3.0
 
 Technical picks. Every pick is on paper, and nothing here is financial advice.
