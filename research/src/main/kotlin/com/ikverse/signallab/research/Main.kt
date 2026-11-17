@@ -72,6 +72,9 @@ private fun pct(x: Double) = String.format(Locale.US, "%+.2f%%", 100 * x)
 private fun year(t: Long) = LocalDate.ofEpochDay(t / DAY).year
 
 fun main(args: Array<String>) {
+    if (args.firstOrNull() == "egx" && "technical" in args) {
+        return egxTechnical(File(args.drop(1).firstOrNull { it != "technical" } ?: "research/data/egx/data_typical"))
+    }
     if (args.firstOrNull() == "egx") {
         return egxMain(File(args.getOrNull(1)?.takeIf { it != "wait" } ?: "research/data/egx/data_typical"), buysWait = "wait" in args)
     }

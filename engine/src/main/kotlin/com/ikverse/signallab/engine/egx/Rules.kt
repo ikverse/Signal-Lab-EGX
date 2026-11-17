@@ -202,8 +202,11 @@ class EgxStrategy(
  * versions on the same history before choosing these; every one counts toward the multiple-testing denominator.
  */
 object EgxStrategies {
-    /** Rule versions tried by the research of 2026-11-14 (six passes and the levels test). */
-    const val RESEARCH_VERSIONS = 170
+    /**
+     * Rule versions tried by the research: 170 by the six passes and the levels test of 2026-11-14, and 70 by the
+     * technical picks of 2026-11-16 (44 account versions and 26 event-study setups).
+     */
+    const val RESEARCH_VERSIONS = 240
 
     val dividendRun = EgxStrategy(
         DividendRun(), "Dividend run", Tier.PROMISING,
@@ -236,4 +239,41 @@ object EgxStrategies {
 
     /** Everything ever tried: the research's versions, plus any rule registered later that was not among them (none yet). */
     val triedCount: Int get() = RESEARCH_VERSIONS
+
+    /**
+     * Short-term picks (stage 1 of the technical picks, 2026-11-16): the 8 versions tested, the registered one first
+     * (a new 20-day high on at least average volume, held up to 20 sessions).
+     */
+    val shortTerm = TechnicalList(
+        PickFamily.SHORT, "Short-term picks",
+        "A new 20-day high on at least its average volume, in an uptrend; never the day after a jump of 8%. Held up to 20 sessions.",
+        listOf(20, 55).flatMap { e -> listOf(1.0, 1.5).flatMap { v -> listOf(20, 10).map { d -> ShortTermSetup(e, v, d) } } }
+            .sortedBy { if (it.enter == 20 && it.volume == 1.0 && it.limit == 20) 0 else 1 },
+    )
+
+    /**
+     * Mid-term picks: the 8 versions with the 50-day exit and no targets, the registered one first (the full trend
+     * template, the tightest fifth, held up to 120 sessions).
+     */
+    val midTerm = TechnicalList(
+        PickFamily.MID, "Mid-term picks",
+        "A tight 10-day range inside a strong uptrend. No targets: held until the stop, a close under the 50-day average, or 120 sessions.",
+        listOf(true, false).flatMap { t -> listOf(false, true).flatMap { tenth -> listOf(120, 60).map { d -> MidTermSetup(t, tenth, d, 50) } } },
+    )
+
+    val technical: List<TechnicalList> = listOf(shortTerm, midTerm)
+
+    fun technicalOf(id: String): TechnicalList? = technical.firstOrNull { it.id == id }
+}
+
+/** A list of technical picks: its setup's versions (the first is the one registered from the research), and where it starts. */
+class TechnicalList(
+    val family: PickFamily,
+    val name: String,
+    val summary: String,
+    val versions: List<Setup>,
+    val launchTier: Tier = Tier.TESTING,
+) {
+    val id: String get() = "egx_${family.name.lowercase()}_term"
+    val registered: Setup get() = versions.first()
 }

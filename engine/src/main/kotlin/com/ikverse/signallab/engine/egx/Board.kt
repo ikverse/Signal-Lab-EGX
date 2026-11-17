@@ -21,12 +21,24 @@ class Stock(
     val close: DoubleArray,
     /** Turnover in pounds; 0 on a session it did not trade. */
     val turnover: DoubleArray,
+    /** Shares traded; 0 on a session it did not trade. Null estimates it as the turnover over the close. */
+    private val shares: DoubleArray? = null,
 ) {
     fun alive(k: Int): Boolean = k in close.indices && !close[k].isNaN()
 
     fun traded(k: Int): Boolean = alive(k) && turnover[k] > 0
 
-    internal fun cut(n: Int) = Stock(code, first, open.copyOf(n), high.copyOf(n), low.copyOf(n), close.copyOf(n), turnover.copyOf(n))
+    /** Shares traded at session [k]: 0 when it did not trade. */
+    fun volume(k: Int): Double = when {
+        shares != null -> shares[k].takeIf { !it.isNaN() } ?: 0.0
+        traded(k) && close[k] > 0 -> turnover[k] / close[k]
+        else -> 0.0
+    }
+
+    internal fun cut(n: Int) = Stock(code, first, open.copyOf(n), high.copyOf(n), low.copyOf(n), close.copyOf(n), turnover.copyOf(n), shares?.copyOf(n))
+
+    /** Its chart indicators (the technical picks), computed once. */
+    val chart: Chart by lazy { Chart(this) }
 
     /** Turnover over the 30 sessions ending at each one. */
     val turnover30: DoubleArray by lazy {

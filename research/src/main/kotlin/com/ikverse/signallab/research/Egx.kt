@@ -2,6 +2,11 @@ package com.ikverse.signallab.research
 
 import com.ikverse.signallab.engine.Markets
 import com.ikverse.signallab.engine.egx.Board
+import com.ikverse.signallab.engine.egx.EgxStrategies
+import com.ikverse.signallab.engine.egx.PickAccount
+import com.ikverse.signallab.engine.egx.PickLearning
+import com.ikverse.signallab.engine.egx.PickStats
+import com.ikverse.signallab.engine.egx.TechnicalList
 import com.ikverse.signallab.engine.egx.Breakout
 import com.ikverse.signallab.engine.egx.CalmStocks
 import com.ikverse.signallab.engine.egx.Context
@@ -51,12 +56,12 @@ private fun loadEgx(dir: File): Egx {
         if (code == "BTCUSDT") continue
         val r = rows(f)
         fun nan() = DoubleArray(n) { Double.NaN }
-        val o = nan(); val h = nan(); val l = nan(); val c = nan(); val q = DoubleArray(n)
+        val o = nan(); val h = nan(); val l = nan(); val c = nan(); val q = DoubleArray(n); val v = DoubleArray(n)
         for (row in r) {
             val k = pos.getValue(row[0].toLong())
-            o[k] = row[1].toDouble(); h[k] = row[2].toDouble(); l[k] = row[3].toDouble(); c[k] = row[4].toDouble(); q[k] = row[7].toDouble()
+            o[k] = row[1].toDouble(); h[k] = row[2].toDouble(); l[k] = row[3].toDouble(); c[k] = row[4].toDouble(); v[k] = row[5].toDouble(); q[k] = row[7].toDouble()
         }
-        stocks[code] = Stock(code, pos.getValue(r[0][0].toLong()), o, h, l, c, q)
+        stocks[code] = Stock(code, pos.getValue(r[0][0].toLong()), o, h, l, c, q, v)
     }
     val board = Board(calendar, stocks, Board.holidaysOf(calendar))
     val rates = rows(File(dir, "cash.csv")).associate { it[0] to it[1].toDouble() }
@@ -215,4 +220,46 @@ fun egxMain(dir: File, buysWait: Boolean = false) {
             100 * gap, if (abs(gap) > 0.2) "  MORE THAN A FIFTH" else ""))
     }
     println(String.format(Locale.US, "\nLargest gap from the research: %.1f%%%s", 100 * worst, if (worst > 0.2) " (more than a fifth: stop and tell the owner)" else " (within a fifth)"))
+}
+
+/**
+ * The technical picks (docs/egx-research.md section 4) as the engine follows them, against `technical.py`'s figures:
+ * the registered version of each list with its levels and without, and the monthly learning step from 2015 on.
+ *
+ *     gradlew :research:run --args="egx technical research/data/egx/data_typical"
+ */
+fun egxTechnical(dir: File) {
+    val e = loadEgx(dir)
+    val cost: (String, Int) -> Double = { code, k -> Markets.EGX.roundTrip(e.board.rank(k, code)) }
+    fun show(label: String, days: List<SlotDay>, extra: String = "") {
+        val ys = e.yearly(days)
+        println(String.format(Locale.ROOT, "%-58s %6.2fx %6.2fx  %s", label, span(ys, 2015, 2022), span(ys, 2023, 2026), extra))
+    }
+    fun stats(s: PickStats?) = if (s == null) "" else String.format(Locale.ROOT, "win %3.0f%%  T1 %3.0f%%  stop %3.0f%%  avg %+5.1f%%  %dd",
+        100 * s.won, 100 * s.target1, 100 * s.stopped, 100 * s.average, s.days)
+    println(String.format(Locale.ROOT, "%-58s %7s %7s", "", "2015-22", "2023-26"))
+    show("Cash", Yardsticks.cash(e.board, e.start, e.cash))
+    val research = mapOf(EgxStrategies.shortTerm to "research 5.59, 4.94; rule alone 4.67, 2.90", EgxStrategies.midTerm to "research 5.62, 3.93; rule alone 7.37, 2.90")
+    for (list in EgxStrategies.technical) {
+        val v = list.registered
+        println("${list.name}: ${v.id}   (${research[list]})")
+        val main = PickAccount.run({ v }, e.ctx, e.start, cost, e.cash)
+        show("  with its levels", main.days, stats(PickStats.of(main.trades)))
+        show("  by the rule alone", PickAccount.run({ v }, e.ctx, e.start, cost, e.cash, useRange = false, useStop = false, useTargets = false).days)
+        val twins = (0 until 10).map { e.yearly(PickAccount.run({ v }, e.ctx, e.start, cost, e.cash, twin = it).days) }
+        for ((a, b) in listOf(2015 to 2022, 2023 to 2026)) {
+            val m = twins.map { span(it, a, b) }.sorted()
+            println(String.format(Locale.ROOT, "  random stocks %d-%d: low %.2fx middle %.2fx high %.2fx", a, b, m.first(), m[m.size / 2], m.last()))
+        }
+        learning(e, list, cost)
+    }
+}
+
+private fun learning(e: Egx, list: TechnicalList, cost: (String, Int) -> Double) {
+    val from = (0 until e.board.size).first { e.board.date(it).year >= 2015 }
+    val choices = PickLearning.choices(list.versions, e.ctx, from, e.start, cost, e.cash)
+    val run = PickAccount.run(PickLearning.setupAt(e.board, choices, list.registered), e.ctx, e.start, cost, e.cash)
+    val ys = e.yearly(run.days)
+    println(String.format(Locale.ROOT, "  %-56s %6.2fx %6.2fx", "monthly learning step from 2015", span(ys, 2015, 2022), span(ys, 2023, 2026)))
+    println("    chosen: " + choices.filter { it.month.monthValue == 1 && it.month.year % 4 == 3 }.joinToString { "${it.month}: ${it.setup.id}" })
 }

@@ -49,7 +49,7 @@ re-run of the results. The scripts are in `tools/egx/` (see its README); the dat
 alone changed little; the entry range alone changed almost nothing. The owner chose the range, a stop at four moves and
 targets at five and ten, knowing the cost, and a second record "by the rule alone".
 
-About 170 rule versions were tried in all. That count is the multiple-testing denominator (`EgxStrategies.RESEARCH_VERSIONS`).
+About 170 rule versions were tried in all (240 with the technical picks of section 4). That count is the multiple-testing denominator (`EgxStrategies.RESEARCH_VERSIONS`).
 
 ## 3. The engine's re-run (build item 12)
 
@@ -132,14 +132,26 @@ The levels, on the version each list would register now (best through 2025):
 Findings:
 
 - **Short term works on paper since 2023 and beats random stocks in both periods**, but chosen from the past only it
-  lost to cash in 2015-22. The volume filter did not help; the version that leads is a plain new 20-day high in an
-  uptrend, never the day after an 8% jump, held up to 20 sessions. Half the trades win; 13% reach target 1, 21% are
-  stopped.
+  lost to cash in 2015-22. A stricter volume filter (1.5 times the 20-day average) did not help; volume at least its
+  20-day average stays: without it the same version made 2.89 and 4.72 instead of 5.59 and 4.94. The version that
+  leads is a new 20-day high on at least average volume, in an uptrend, never the day after an 8% jump, held up to 20
+  sessions. Half the trades win; 13% reach target 1, 21% are stopped.
 - **Mid term with chart targets does not beat random stocks.** Its targets sell the winners early: without them it
   makes 5.62 and 3.93. This is the same cost the levels test found for the monthly rules.
 - **The market filter did not help** either list.
 - **The loss-making filter cannot be tested**: the free data has no history of company results.
-- About 44 more account versions and 26 event-study setups were tried; the multiple-testing count grows by 70.
+- About 44 more account versions and 26 event-study setups were tried; the multiple-testing count grows by 70, to 240.
+
+**The owner's choice (2026-11-17):** both lists, the mid-term one without targets (entry range and stop only, held
+until the stop, a close under the 50-day average or 120 sessions).
+
+**The engine's re-run** (`gradlew :research:run --args="egx technical <data dir>"`): the short-term list gives 5.59 and
+4.94 with its levels and 4.67 and 2.90 by the rule alone, the research's figures exactly. The mid-term list without
+targets gives 5.89 and 3.93 (rule alone 7.18 and 2.90) against the research's 5.62 and 3.93 (7.37 and 2.90): the
+script let a pick wait with no time limit when the account had no cash for it, while the engine drops every pick after
+three sessions, as the card says; the script with that one change gives the engine's figures. The monthly learning step
+(each month the version that did best over all the history before it) from 2015: short term 2.83 and 3.77, mid term
+5.78 and 3.50.
 
 ## 5. Limits
 

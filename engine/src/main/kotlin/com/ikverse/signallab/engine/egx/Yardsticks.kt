@@ -135,4 +135,22 @@ object EgxTiers {
         }
         return Verdict(s.launchTier, "Recorded without calls; it has not yet beaten all three yardsticks for $PROMOTE_MONTHS months.")
     }
+
+    /**
+     * A list of technical picks shows its picks while it is Testing. After [MIN_MONTHS] months live it is switched off
+     * (Watch: recorded, not shown) when it trails both cash and the EGX30, or ends below nine in ten of its random twins.
+     */
+    fun judge(list: TechnicalList, live: YardstickRecord?): Verdict {
+        if (live == null || live.months < MIN_MONTHS) return Verdict(list.launchTier, "On paper: too early for its live record to say more.")
+        val r = live.rule.multiple
+        val behindCash = r < live.cash.multiple
+        val behindIndex = live.index != null && r < live.index.multiple
+        val low = live.randomLow
+        if (behindCash && (live.index == null || behindIndex)) return Verdict(Tier.WATCH, "Switched off: behind cash and the EGX30 over ${live.months} months live.")
+        if (low != null && r < low) return Verdict(Tier.WATCH, "Switched off: behind nine in ten random picks over ${live.months} months live.")
+        return Verdict(list.launchTier, "Holding up against cash, the EGX30 and random picks over ${live.months} months live.")
+    }
+
+    /** Whether a list of technical picks puts its picks on Today. */
+    fun shows(v: Verdict): Boolean = v.tier != Tier.WATCH && v.tier != Tier.FAILING
 }

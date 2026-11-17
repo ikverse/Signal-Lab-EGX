@@ -51,7 +51,7 @@ class RulesTest {
         val all = EgxStrategies.all
         assertEquals(6, all.size)
         assertEquals(all.size, all.map { it.id }.toSet().size)
-        assertEquals(170, EgxStrategies.triedCount)
+        assertEquals(240, EgxStrategies.triedCount)
         assertEquals(listOf("Dividend run", "Calm stocks", "Dividend payers"), all.filter { it.launchTier.makesCalls }.map { it.name })
         assertEquals(listOf("Slow breakout", "Low-risk formula"), all.filter { it.launchTier == Tier.WATCH }.map { it.name })
         assertEquals(listOf(EgxStrategies.fastBreakout), all.filter { it.silent })
