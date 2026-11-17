@@ -127,7 +127,12 @@ drop it. Every strategy and the 170 versions tried are counted, as the app alrea
 - Today the app's texts are written inside its code, in English only. For this they move into language tables in the
   parts both apps share, so the crypto app keeps working in English and could get Arabic later at little cost.
 
-### 7. Design: Calm with cards (chosen 2026-11-14)
+### 7. Design: Calm with cards (chosen 2026-11-14, replaced 2026-11-17)
+
+Replaced by "Bright board" (mockup https://claude.ai/artifact/K9XwUp8835BSXzWxPKGtZ4): Paper and stone by day and a
+near-black navy at night, an indigo-to-teal gradient on the one thing to press, the page names along the top as in EGX
+Analyzer, EGX Analyzer's stock-sheet chart on the call, pick and stock pages, a price ladder drawn to scale, motion on
+arrival, and a layout of its own for folded, unfolded and half-folded. What follows is the old design, for the record.
 
 Accepted mockup: https://claude.ai/artifact/6qDLTnGJke5fcWiXXXjPhX
 

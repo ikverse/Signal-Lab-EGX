@@ -53,6 +53,8 @@ data class StrategyView(
     val equity: Double?,
     val calls: Int,
     val holds: Int,
+    /** Its paper account (with the levels) session by session since the ledger started, for its little line. */
+    val curve: List<Double> = emptyList(),
 )
 
 fun dayText(d: LocalDate, tr: Tr): String {
@@ -89,7 +91,7 @@ fun strategyViews(days: List<PaperDayRow>, yard: List<YardstickRow>, fills: List
                 BarRow("EGX30", y?.egx30?.takeIf { !it.isNaN() }?.minus(1)),
                 BarRow(tr.t("8 random stocks"), y?.randomMiddle?.takeIf { !it.isNaN() }?.minus(1)),
             ),
-            mine.lastOrNull()?.equity, myFills.count { it.buy }, held,
+            mine.lastOrNull()?.equity, myFills.count { it.buy }, held, mine.map { it.equity },
         )
     }
 

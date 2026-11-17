@@ -64,7 +64,7 @@ Wrap every adb call in `timeout N`.
   `docs/egx-build-list.md`, evidence `docs/egx-research.md`): evening paper calls for the Egyptian Exchange, copied by hand
   on Thndr. Depends on `:engine` only; the crypto app is never touched by it. `data/` (Yahoo, Arab Finance, the store),
   `pass/` (the board, the evening pass, schedule, notifications), `ledger/` (Room, append-only), `i18n/` (language
-  tables), `view/` (Compose, "Calm with cards"). Its rules live in the engine's `egx/` package.
+  tables), `view/` (Compose, "Bright board": `Theme.kt`, `Motion.kt`, `Charts.kt`). Its rules live in the engine's `egx/` package.
 - `tools/` — one-off scripts, not part of the build. `tools/egx/` holds the EGX research scripts.
 
 ## Signal Lab EGX

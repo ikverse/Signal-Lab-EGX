@@ -6,6 +6,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.runtime.getValue
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -66,6 +70,12 @@ data class TodayView(
     val ordersLeft: String,
     /** True on the evening a month ended: Today links to the month-end list. */
     val monthEnd: Boolean = false,
+    /** Session by session since the ledger started, as growth shares: the paper account, the EGX30 and cash. */
+    val youCurve: List<Double> = emptyList(),
+    val indexCurve: List<Double> = emptyList(),
+    val cashCurve: List<Double> = emptyList(),
+    /** The EGX30's last closes, for the market chip's little line. */
+    val marketCurve: List<Double> = emptyList(),
 )
 
 /** Thndr's Trader plan waives commission on this many orders a month. */
@@ -129,10 +139,18 @@ fun todayView(
     fun signed(x: Double?) = x?.let { (if (it >= 0) "+" else "") + tr.percent(it, 0) } ?: "–"
     val month = today.withDayOfMonth(1)
     val used = fills.count { it.record == Records.LEVELS && it.strategy in on && !EgxTime.date(it.day).isBefore(month) }
+    // The curves: the account summed over the strategies that are on, and the yardsticks, on the same sessions.
+    val byDay = days.filter { it.record == Records.LEVELS && it.strategy in on }.groupBy { it.day }.toSortedMap()
+    val yardByDay = yardsticks.filter { it.strategy in on }.groupBy { it.day }
+    val sessions = byDay.keys.toList()
+    val youCurve = sessions.map { d -> byDay.getValue(d).sumOf { it.equity } / start - 1 }
+    val indexCurve = sessions.map { d -> yardByDay[d]?.firstOrNull()?.egx30?.takeIf { !it.isNaN() }?.minus(1) ?: Double.NaN }
+    val cashCurve = sessions.map { d -> yardByDay[d]?.firstOrNull()?.cash?.minus(1) ?: Double.NaN }
     return TodayView(
         dateLine, market, NotificationTexts.sentence(calls, tr), cards, tr.t("EGP %1\$s", tr.pounds(account)), you, index, cash,
         Triple(tr.t("You %1\$s", signed(you)), tr.t("EGX30 %1\$s", signed(index)), tr.t("Cash %1\$s", signed(cash))),
         used, tr.t("%1\$d left this month", maxOf(0, FREE_ORDERS - used)), calls.any { it.monthEnd },
+        youCurve, indexCurve, cashCurve, egx30.takeLast(20).map { it.second },
     )
 }
 
@@ -150,185 +168,219 @@ enum class Posture { FOLDED, UNFOLDED, TABLETOP }
 @Composable
 fun TodayScreen(v: TodayView, posture: Posture, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit, bottom: PaddingValues, onMonthEnd: () -> Unit = {}, onDividends: () -> Unit = {},
     picks: PicksView? = null, onPick: (PickCardView) -> Unit = {}) {
-    val c = LocalCalm.current
+    val b = LocalBoard.current
     androidx.compose.runtime.CompositionLocalProvider(LocalMonthEndLink provides (tr.t("Month-end list") + " ›" to onMonthEnd), LocalDividendsLink provides (tr.t("Dividend calendar ›") to onDividends)) {
     when (posture) {
-        Posture.FOLDED -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = bottom.calculateBottomPadding() + 80.dp)) {
-            Head(v, Modifier.padding(start = 22.dp, end = 22.dp, top = 22.dp))
+        Posture.FOLDED -> Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(bottom = bottom.calculateBottomPadding() + 28.dp)) {
+            Head(v, Modifier.padding(start = 20.dp, end = 20.dp, top = 6.dp))
             Spacer(Modifier.height(12.dp))
-            if (v.cards.isEmpty()) Empty(tr, Modifier.padding(horizontal = 22.dp)) else {
+            if (v.cards.isEmpty()) Empty(tr, Modifier.padding(horizontal = 20.dp)) else {
                 val pager = rememberPagerState { v.cards.size }
-                HorizontalPager(pager, contentPadding = PaddingValues(horizontal = 22.dp), pageSpacing = 12.dp) { i ->
-                    BigCard(v.cards[i], tr, onPlaced, onOpen)
+                HorizontalPager(pager, contentPadding = PaddingValues(horizontal = 20.dp), pageSpacing = 12.dp) { i ->
+                    BigCard(v.cards[i], tr, onPlaced, onOpen, i)
                 }
-                Dots(pager, v.cards.size)
+                if (v.cards.size > 1) Dots(pager, v.cards.size)
             }
-            Tiles(v, tr, Modifier.padding(start = 22.dp, end = 22.dp, top = 18.dp))
-            if (picks != null) PicksSection(picks, tr, Modifier.padding(start = 22.dp, end = 22.dp, top = 18.dp), onPick)
+            Tiles(v, tr, Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp))
+            Links(v, Modifier.padding(start = 20.dp, end = 20.dp, top = 10.dp))
+            if (picks != null) PicksSection(picks, tr, Modifier.padding(start = 20.dp, end = 20.dp, top = 16.dp), onPick)
         }
-        Posture.UNFOLDED -> Row(Modifier.fillMaxSize()) {
-            Column(Modifier.weight(1f).fillMaxHeight().padding(22.dp)) {
-                Head(v)
-                Spacer(Modifier.weight(1f))
-                Tiles(v, tr, Modifier.padding(bottom = 70.dp))
-            }
-            if (v.cards.isEmpty() && picks == null) Box(Modifier.weight(1f).fillMaxHeight().padding(horizontal = 40.dp), contentAlignment = Alignment.Center) { Empty(tr) }
-            else Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(22.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                if (v.cards.isEmpty()) Empty(tr)
-                for (card in v.cards) SmallCard(card, onPlaced, onOpen)
-                if (picks != null) PicksSection(picks, tr, onPick = onPick)
-                Spacer(Modifier.height(70.dp))
-            }
-        }
-        Posture.TABLETOP -> Column(Modifier.fillMaxSize()) {
-            Row(Modifier.fillMaxWidth().weight(1f)) {
-                Head(v, Modifier.weight(1f).padding(22.dp))
-                Box(Modifier.weight(1f).fillMaxHeight().padding(22.dp), contentAlignment = Alignment.Center) { Tiles(v, tr) }
-            }
-            Box(Modifier.fillMaxWidth().height(1.dp).background(c.line))
-            Box(Modifier.weight(1f)) {
-                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Posture.UNFOLDED -> Column(Modifier.fillMaxSize()) {
+            Head(v, Modifier.padding(start = 22.dp, end = 22.dp, top = 6.dp), large = true)
+            Row(Modifier.fillMaxSize()) {
+                Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(start = 22.dp, end = 10.dp, top = 14.dp, bottom = 28.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Note(tr.t("What to do tomorrow"))
                     if (v.cards.isEmpty()) Empty(tr)
-                    for (row in v.cards.chunked(3)) Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        for (card in row) Box(Modifier.weight(1f)) { SmallCard(card, onPlaced, onOpen) }
-                        repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
-                    }
-                    if (picks != null) PicksSection(picks, tr, onPick = onPick)
-                    Spacer(Modifier.height(80.dp))
+                    for ((i, card) in v.cards.withIndex()) if (i < 2) BigCard(card, tr, onPlaced, onOpen, i) else SmallCard(card, tr, onPlaced, onOpen, i)
+                    OrderStrip(v, tr, v.cards.size)
                 }
+                Column(Modifier.weight(1f).fillMaxHeight().verticalScroll(rememberScrollState()).padding(start = 10.dp, end = 22.dp, top = 14.dp, bottom = 28.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Note(tr.t("How things stand"))
+                    AccountCard(v, tr, 1, chartHeight = 120.dp)
+                    RingCard(v, tr, 2, Modifier.fillMaxWidth())
+                    Links(v)
+                    if (picks != null) PicksSection(picks, tr, onPick = onPick)
+                }
+            }
+        }
+        Posture.TABLETOP -> Tabletop({
+            Row(Modifier.fillMaxSize().padding(horizontal = 22.dp, vertical = 12.dp), horizontalArrangement = Arrangement.spacedBy(18.dp)) {
+                Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Head(v, large = true)
+                    OrderStrip(v, tr, 0, card = false)
+                }
+                Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    AccountCard(v, tr, 0, chartHeight = 110.dp, ring = true)
+                }
+            }
+        }) {
+            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 22.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (v.cards.isEmpty()) Empty(tr)
+                for (row in v.cards.chunked(3)) Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    for ((i, card) in row.withIndex()) Box(Modifier.weight(1f)) { SmallCard(card, tr, onPlaced, onOpen, i, tall = true) }
+                    repeat(3 - row.size) { Spacer(Modifier.weight(1f)) }
+                }
+                Links(v)
+                if (picks != null) PicksSection(picks, tr, onPick = onPick)
             }
         }
     }
     }
 }
 
+/** The date of the plan, the market chip with the EGX30's little line, and the sentence. */
 @Composable
-private fun Head(v: TodayView, modifier: Modifier = Modifier) {
-    val c = LocalCalm.current
+private fun Head(v: TodayView, modifier: Modifier = Modifier, large: Boolean = false) {
+    val b = LocalBoard.current
     Column(modifier) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text(v.dateLine, style = Type.small, color = c.muted)
-            if (v.market != null) Text(v.market, style = Type.small, color = c.ink,
-                modifier = Modifier.clip(RoundedCornerShape(100)).background(c.dock).border(1.dp, c.line, RoundedCornerShape(100)).padding(horizontal = 12.dp, vertical = 4.dp))
+            Text(v.dateLine, style = Type.small, color = b.muted)
+            if (v.market != null) Row(Modifier.clip(Pill).background(b.chip).border(1.dp, b.line, Pill).padding(horizontal = 12.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(v.market, style = Type.small, color = b.ink)
+                if (v.marketCurve.size > 1) Sparkline(v.marketCurve, if (v.marketCurve.last() >= v.marketCurve.first()) b.buy else b.sell, Modifier.width(34.dp).height(14.dp), width = 2.dp)
+            }
         }
-        Text(v.sentence, style = Type.sentence, color = c.ink, modifier = Modifier.padding(top = 10.dp, bottom = 2.dp))
-        if (v.monthEnd) Text(LocalMonthEndLink.current.first, style = Type.body, color = c.ink,
-            modifier = Modifier.padding(top = 4.dp).clickable(role = Role.Button, onClick = LocalMonthEndLink.current.second))
-        Text(LocalDividendsLink.current.first, style = Type.small, color = c.muted,
-            modifier = Modifier.padding(top = 6.dp).clickable(role = Role.Button, onClick = LocalDividendsLink.current.second))
+        Text(v.sentence, style = if (large) Type.sentenceLarge else Type.sentence, color = b.ink, modifier = Modifier.padding(top = 8.dp).arrive(0))
+        if (v.monthEnd) Text(LocalMonthEndLink.current.first, style = Type.bodyStrong, color = b.violet,
+            modifier = Modifier.padding(top = 4.dp).clip(Pill).clickable(role = Role.Button, onClick = LocalMonthEndLink.current.second).heightIn(min = 40.dp).padding(vertical = 8.dp))
     }
+}
+
+@Composable
+private fun Links(v: TodayView, modifier: Modifier = Modifier) {
+    val b = LocalBoard.current
+    Text(LocalDividendsLink.current.first, style = Type.bodyStrong, color = b.ink,
+        modifier = modifier.clip(Pill).clickable(role = Role.Button, onClick = LocalDividendsLink.current.second).heightIn(min = 40.dp).padding(vertical = 10.dp))
 }
 
 @Composable
 private fun Empty(tr: Tr, modifier: Modifier = Modifier) {
-    Text(tr.t("When a strategy fires at the close, its call shows here with what to do, and a notification says so. Most days nothing does, and then there is nothing to do."),
-        style = Type.body, color = LocalCalm.current.muted, modifier = modifier)
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun Chips(chips: List<String>) {
-    val c = LocalCalm.current
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        for (chip in chips) Text(chip, style = Type.chip, color = c.ink,
-            modifier = Modifier.border(1.dp, c.muted, RoundedCornerShape(100)).padding(horizontal = 11.dp, vertical = 4.dp))
+    BoardCard(modifier = modifier) {
+        Text(tr.t("When a strategy fires at the close, its call shows here with what to do, and a notification says so. Most days nothing does, and then there is nothing to do."),
+            style = Type.body, color = LocalBoard.current.muted)
     }
 }
 
+/** A call, large: what to do in big type, the stock, the chips, and the button that marks the order placed. */
 @Composable
-private fun BigCard(card: CardView, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit) {
-    val c = LocalCalm.current
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(34.dp)).background(if (card.buy) c.buyCard else c.sellCard)
-            .clickable(role = Role.Button) { onOpen(card) }.padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Text(card.action, style = Type.action, color = if (card.buy) c.up else c.down)
-        Text(card.name, style = Type.name, color = c.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
-        Text(card.line, style = Type.small, color = c.muted)
-        Spacer(Modifier.height(6.dp))
-        Chips(card.chips)
-        Spacer(Modifier.height(10.dp))
-        Text(
-            if (card.placed) "✓ " + tr.t("Placed the order") else tr.t("Placed the order"),
-            style = Type.body, color = c.actionInk,
-            modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(100)).background(c.action)
-                .clickable(role = Role.Checkbox) { onPlaced(card) }.padding(12.dp),
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-        )
+private fun BigCard(card: CardView, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit, order: Int) {
+    val b = LocalBoard.current
+    BoardCard(brush = if (card.buy) b.buyBrush else b.sellBrush, order = order, onClick = { onOpen(card) }) {
+        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(card.action, style = Type.action, color = if (card.buy) b.buy else b.sell, modifier = Modifier.weight(1f))
+            EgxStrategies.of(card.call.strategy)?.let { Chip(tr.t(it.name), glyph = it.id) }
+        }
+        Text(card.name, style = Type.name, color = b.ink, maxLines = 2, overflow = TextOverflow.Ellipsis)
+        Text(card.line, style = Type.small, color = b.muted)
+        Chips(card.chips, gold = card.chips.lastOrNull().takeIf { card.call.timing.isNotEmpty() })
+        Spacer(Modifier.height(2.dp))
+        if (card.placed) Row(Modifier.fillMaxWidth().clip(Pill).border(2.dp, if (card.buy) b.buy else b.sell, Pill)
+            .clickable(role = Role.Checkbox) { onPlaced(card) }.heightIn(min = 48.dp).padding(horizontal = 14.dp),
+            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+            Box(Modifier.stamped(rememberStamp(true))) { TickGlyph(if (card.buy) b.buy else b.sell, size = 22.dp) }
+            Spacer(Modifier.width(8.dp))
+            Text(tr.t("Placed the order"), style = Type.bodyStrong, color = if (card.buy) b.buy else b.sell)
+        } else PrimaryButton(tr.t("Placed the order")) { onPlaced(card) }
     }
 }
 
+/** A call, compact: name and what to do on one line, the chips, and the round mark for the order. */
 @Composable
-private fun SmallCard(card: CardView, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit) {
-    val c = LocalCalm.current
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(28.dp)).background(if (card.buy) c.buyCard else c.sellCard)
-            .clickable(role = Role.Button) { onOpen(card) }.padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
+private fun SmallCard(card: CardView, tr: Tr, onPlaced: (CardView) -> Unit, onOpen: (CardView) -> Unit, order: Int, tall: Boolean = false) {
+    val b = LocalBoard.current
+    BoardCard(brush = if (card.buy) b.buyBrush else b.sellBrush, order = order, onClick = { onOpen(card) }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(card.name, style = Type.nameSmall, color = c.ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(card.line, style = Type.small, color = c.muted, maxLines = 2)
+                if (tall) Text(card.action, style = Type.actionSmall, color = if (card.buy) b.buy else b.sell)
+                Text(card.name, style = Type.nameSmall, color = b.ink, maxLines = if (tall) 2 else 1, overflow = TextOverflow.Ellipsis)
+                Text(card.line, style = Type.small, color = b.muted, maxLines = 2)
             }
-            Text(card.action, style = Type.actionSmall, color = if (card.buy) c.up else c.down)
+            if (!tall) Text(card.action, style = Type.actionSmall, color = if (card.buy) b.buy else b.sell)
+            Spacer(Modifier.width(10.dp))
+            PlacedMark(card.placed, if (card.buy) b.buy else b.sell, tr) { onPlaced(card) }
         }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(Modifier.weight(1f)) { Chips(card.chips) }
-            Box(
-                Modifier.size(30.dp).clip(CircleShape).border(2.dp, c.muted, CircleShape)
-                    .background(if (card.placed) c.action else androidx.compose.ui.graphics.Color.Transparent)
-                    .clickable(role = Role.Checkbox) { onPlaced(card) },
-                contentAlignment = Alignment.Center,
-            ) { if (card.placed) Text("✓", color = c.actionInk, style = Type.chip) }
+        Chips(card.chips, gold = card.chips.lastOrNull().takeIf { card.call.timing.isNotEmpty() })
+    }
+}
+
+/**
+ * Tomorrow in the order it happens: what sells at the open, then what buys near the close. Shown only when both happen,
+ * or when the screen has room for it.
+ */
+@Composable
+private fun OrderStrip(v: TodayView, tr: Tr, order: Int, card: Boolean = true) {
+    val b = LocalBoard.current
+    val opens = v.cards.filter { it.call.timing == "open" || (!it.buy && it.call.timing.isEmpty()) }.map { it.call.code }
+    val closes = v.cards.filter { it.call.timing == "close" }.map { it.call.code }
+    if (opens.isEmpty() && closes.isEmpty()) return
+    val body: @Composable ColumnScope.() -> Unit = {
+        Note(tr.t("Tomorrow's order"))
+        if (opens.isNotEmpty()) Step(tr.ltr("10:00"), b.sellBrush, tr.t("At the open: sell %1\$s", opens.joinToString("، ".takeIf { tr.isArabic } ?: ", ")))
+        if (opens.isNotEmpty() && closes.isNotEmpty()) Box(Modifier.padding(start = 34.dp).width(2.dp).height(10.dp).background(b.line))
+        if (closes.isNotEmpty()) Step(tr.ltr("2:00–2:30"), b.buyBrush, tr.t("Near the close: buy %1\$s", closes.joinToString("، ".takeIf { tr.isArabic } ?: ", ")))
+    }
+    if (card) BoardCard(order = order, content = body) else Column(verticalArrangement = Arrangement.spacedBy(6.dp), content = body)
+}
+
+@Composable
+private fun Step(time: String, brush: androidx.compose.ui.graphics.Brush, text: String) {
+    val b = LocalBoard.current
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Box(Modifier.width(70.dp).clip(Pill).background(brush).border(1.dp, b.line, Pill).padding(vertical = 3.dp), contentAlignment = Alignment.Center) {
+            Text(time, style = Type.chip, color = b.ink)
         }
+        Text(text, style = Type.body, color = b.ink)
     }
 }
 
 @Composable
 private fun Dots(pager: PagerState, n: Int) {
-    val c = LocalCalm.current
+    val b = LocalBoard.current
     Row(Modifier.fillMaxWidth().padding(top = 10.dp, bottom = 2.dp), horizontalArrangement = Arrangement.Center) {
         repeat(n) { i ->
-            Box(Modifier.padding(horizontal = 3.dp).height(7.dp).width(if (i == pager.currentPage) 22.dp else 7.dp).clip(RoundedCornerShape(7.dp))
-                .background(if (i == pager.currentPage) c.ink else c.line))
+            val on = i == pager.currentPage
+            val w by androidx.compose.animation.core.animateDpAsState(if (on) 22.dp else 7.dp, Motion.slide, label = "dot")
+            Box(Modifier.padding(horizontal = 3.dp).height(7.dp).width(w).clip(Pill).background(if (on) b.accent else androidx.compose.ui.graphics.SolidColor(b.line)))
         }
     }
 }
 
+/** The account card and the free orders, side by side under the calls. */
 @Composable
 private fun Tiles(v: TodayView, tr: Tr, modifier: Modifier = Modifier) {
-    val c = LocalCalm.current
-    Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Column(Modifier.weight(1.5f).clip(RoundedCornerShape(28.dp)).background(c.surface).padding(horizontal = 16.dp, vertical = 14.dp)) {
-            Text(tr.t("Paper account"), style = Type.small, color = c.muted)
-            // The pound sign (ج) hangs well below the line: room under it, so it never touches the next line.
-            Text(v.account, style = Type.tile, color = c.ink, modifier = Modifier.padding(bottom = 6.dp))
-            if (v.you == null) Text(tr.t(Tr.NOT_YET), style = Type.small, color = c.muted) else {
-                val top = listOfNotNull(v.you, v.index, v.cash).maxOfOrNull { kotlin.math.abs(it) }?.takeIf { it > 0 } ?: 1.0
-                Bar(v.barsText.first, v.you, top, 1f)
-                Bar(v.barsText.second, v.index, top, 0.55f)
-                Bar(v.barsText.third, v.cash, top, 0.3f)
+    Row(modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        Box(Modifier.weight(1.55f).fillMaxHeight()) { AccountCard(v, tr, v.cards.size) }
+        RingCard(v, tr, v.cards.size + 1, Modifier.weight(1f).fillMaxHeight())
+    }
+}
+
+/** The paper account: its line against the EGX30 and cash, and the three figures. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AccountCard(v: TodayView, tr: Tr, order: Int, chartHeight: androidx.compose.ui.unit.Dp = 70.dp, ring: Boolean = false) {
+    val b = LocalBoard.current
+    BoardCard(tr.t("Paper account"), order = order, trailing = if (ring) ({ OrdersRing(v.ordersUsed, FREE_ORDERS, tr, size = 58.dp) }) else null) {
+        // The pound sign hangs well below the line: room under it, so it never touches the next line.
+        Text(v.account, style = Type.figure, color = b.ink, modifier = Modifier.padding(bottom = 2.dp))
+        if (v.you == null) Note(tr.t(Tr.NOT_YET)) else {
+            AccountChart(v.youCurve, v.indexCurve, v.cashCurve, height = chartHeight)
+            androidx.compose.foundation.layout.FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(v.barsText.first, style = Type.small.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold), color = b.buy)
+                Text(v.barsText.second, style = Type.small, color = b.violet)
+                Text(v.barsText.third, style = Type.small, color = b.muted)
             }
-        }
-        Column(Modifier.weight(1f).clip(RoundedCornerShape(28.dp)).background(c.surface).padding(horizontal = 16.dp, vertical = 14.dp)) {
-            Text(tr.t("Free orders"), style = Type.small, color = c.muted)
-            Text(tr.digits("${v.ordersUsed} / $FREE_ORDERS"), style = Type.tile, color = c.ink)
-            Text(v.ordersLeft, style = Type.small, color = c.muted)
         }
     }
 }
 
 @Composable
-private fun Bar(label: String, value: Double?, top: Double, alpha: Float) {
-    val c = LocalCalm.current
-    Row(Modifier.padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-        val share = ((value ?: 0.0).coerceAtLeast(0.0) / top).toFloat().coerceIn(0.02f, 1f)
-        Box(Modifier.weight(1f).height(6.dp)) {
-            Box(Modifier.fillMaxWidth(share).height(6.dp).clip(RoundedCornerShape(6.dp)).background(c.up.copy(alpha = alpha)))
-        }
-        Spacer(Modifier.width(6.dp))
-        Text(label, style = Type.small, color = c.muted)
+private fun RingCard(v: TodayView, tr: Tr, order: Int, modifier: Modifier = Modifier) {
+    val b = LocalBoard.current
+    BoardCard(tr.t("Free orders"), modifier = modifier, order = order) {
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { OrdersRing(v.ordersUsed, FREE_ORDERS, tr) }
+        Text(v.ordersLeft, style = Type.small, color = b.muted, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
     }
 }

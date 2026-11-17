@@ -1,9 +1,18 @@
 package com.ikverse.signallab.egx.view
 
 import android.app.Activity
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -70,9 +79,9 @@ fun EgxRoot(graph: EgxGraph) {
     val context = LocalContext.current
     // A change of language, money or tonight's calls shows on the home-screen widget too.
     androidx.compose.runtime.LaunchedEffect(prefs, calls) { com.ikverse.signallab.egx.widget.TodayWidget.refresh(context) }
-    CalmTheme {
+    BoardTheme {
         CompositionLocalProvider(LocalLayoutDirection provides if (tr.isArabic) LayoutDirection.Rtl else LayoutDirection.Ltr) {
-            CalmPage {
+            BoardPage {
                 val pages = rememberPagerState { PAGES.size }
                 val bottom = androidx.compose.foundation.layout.PaddingValues(0.dp) // the page already keeps clear of the bars
                 var open by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
@@ -101,7 +110,7 @@ fun EgxRoot(graph: EgxGraph) {
                         val held = trades(code, fills, tr).any { it.closed == null }
                         val levelsOf = if (held) history.firstOrNull { it.action == "buy" } else null
                         StockPage(stockView(code, stockName(code), rows, divs, history, fills, levelsOf, range, tr), posture, tr, range, { range = it },
-                            onDividends = { stock = null; dividendsOpen = true }) { stock = null }
+                            onDividends = { stock = null; dividendsOpen = true }, callDays = history.map { it.day }.toSet()) { stock = null }
                     }
                     dividendsOpen -> {
                         androidx.activity.compose.BackHandler { dividendsOpen = false }
@@ -121,14 +130,14 @@ fun EgxRoot(graph: EgxGraph) {
                         androidx.activity.compose.BackHandler { pickOpen = null }
                         val card = pickCard(openPick, pickEvents, pickRecords, facts.firstOrNull { it.code == openPick.code }, headlines, pickCloses[openPick.code], prefs, tr, stockName(openPick.code))
                         PickPage(card, posture, tr, onBack = { pickOpen = null }, onStock = { pickOpen = null; stock = openPick.code },
-                            onShare = { sharePick(context, card.shareText, tr.t("Share as text")) })
+                            onShare = { sharePick(context, card.shareText, tr.t("Share as text")) }, chart = chartData(graph, openPick.code))
                     }
                     openCall != null -> {
                         androidx.activity.compose.BackHandler { open = null }
                         CallPage(callView(openCall, stockName(openCall.code), prefs, tr), posture, tr, onBack = { open = null },
                             onCopyAndOpen = { Thndr.copyAndOpen(context, openCall.shares.toString()) },
                             onTook = { price, shares -> scope.launch { dao.addCopy(CopyRow(strategy = openCall.strategy, code = openCall.code, buy = openCall.action == "buy", day = EgxTime.today(System.currentTimeMillis()), shares = shares, price = price)) } },
-                            onStock = { stock = openCall.code })
+                            onStock = { stock = openCall.code }, chart = chartData(graph, openCall.code))
                     }
                     monthEnd -> {
                         androidx.activity.compose.BackHandler { monthEnd = false }
@@ -136,7 +145,11 @@ fun EgxRoot(graph: EgxGraph) {
                             scope.launch { dao.setPlaced(call.day, call.strategy, call.code, call.action, !call.placed) }
                         }
                     }
-                    else -> HorizontalPager(pages, Modifier.fillMaxSize(), beyondViewportPageCount = 0) { page ->
+                    else -> Column(Modifier.fillMaxSize()) {
+                    val tabs: @Composable () -> Unit = { HeaderTabs(tr, pages) { i -> scope.launch { pages.animateScrollToPage(i) } } }
+                    if (posture != Posture.TABLETOP) Box(Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp)) { tabs() }
+                    CompositionLocalProvider(LocalTabRow provides if (posture == Posture.TABLETOP) tabs else null) {
+                    HorizontalPager(pages, Modifier.fillMaxWidth().weight(1f), beyondViewportPageCount = 0) { page ->
                         when (page) {
                             0 -> TodayScreen(today, posture, tr,
                                 onPlaced = { card -> scope.launch { dao.setPlaced(card.call.day, card.call.strategy, card.call.code, card.call.action, !card.placed) } },
@@ -185,23 +198,63 @@ fun EgxRoot(graph: EgxGraph) {
                             }
                         }
                     }
+                    }
+                    }
                 }
-                if (stock == null && !dividendsOpen && openCall == null && openPick == null && !monthEnd) Dock(tr, pages.currentPage, Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) { i -> scope.launch { pages.animateScrollToPage(i) } }
             }
         }
     }
 }
 
-/** The floating pill menu, within thumb reach. */
+/** A stock's stored closes and the days a strategy made a call on it, for a call's or a pick's chart. */
 @Composable
-private fun Dock(tr: Tr, current: Int, modifier: Modifier, onPick: (Int) -> Unit) {
-    val c = LocalCalm.current
-    Row(modifier.shadow(10.dp, RoundedCornerShape(100)).clip(RoundedCornerShape(100)).background(c.dock).border(1.dp, c.dockEdge, RoundedCornerShape(100)).padding(6.dp)) {
+private fun chartData(graph: EgxGraph, code: String): ChartData? {
+    val rows by produceState(initialValue = emptyList<com.ikverse.signallab.egx.data.DailyRow>(), code) { value = graph.store.daily(code) }
+    val calls by androidx.compose.runtime.remember(code) { graph.ledger.dao().callsFor(code) }.collectAsState(initial = emptyList())
+    if (rows.size < 2) return null
+    return ChartData(rows.map { it.day }, rows.map { it.close }, calls.map { it.day }.toSet())
+}
+
+/**
+ * The page names along the top, after EGX Analyzer's header: the current page's name large and in ink, the other four
+ * small and grey beside it. **A change of page is the emphasis moving along the row**, following the finger during a swipe,
+ * and the row scrolls so the name before the current one still shows at its start. It is the pages' title too.
+ */
+@Composable
+fun HeaderTabs(tr: Tr, pager: androidx.compose.foundation.pager.PagerState, onPick: (Int) -> Unit) {
+    val b = LocalBoard.current
+    val scroll = androidx.compose.foundation.rememberScrollState()
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val starts = androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateMapOf<Int, Int>() }
+    var rowWidth by androidx.compose.runtime.remember { mutableStateOf(0) }
+    androidx.compose.runtime.LaunchedEffect(pager.currentPage, starts.size) {
+        val target = starts[(pager.currentPage - 1).coerceAtLeast(0)] ?: return@LaunchedEffect
+        scroll.animateScrollTo(target)
+    }
+    Row(
+        Modifier.fillMaxWidth().horizontalScroll(scroll).selectableGroup()
+            .onSizeChanged { rowWidth = it.width },
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
+        verticalAlignment = Alignment.Bottom,
+    ) {
+        val pos = pager.currentPage + pager.currentPageOffsetFraction
         for ((i, p) in PAGES.withIndex()) {
-            val on = i == current
-            Text(tr.t(p), style = Type.menu, color = if (on) c.actionInk else c.muted,
-                modifier = Modifier.clip(RoundedCornerShape(100)).background(if (on) c.action else androidx.compose.ui.graphics.Color.Transparent)
-                    .clickable(role = Role.Tab) { onPick(i) }.padding(horizontal = 11.dp, vertical = 9.dp))
+            val e = (1f - kotlin.math.abs(pos - i)).coerceIn(0f, 1f)
+            Text(
+                tr.t(p),
+                style = androidx.compose.ui.text.lerp(Type.tabSmall, Type.tabLarge, e),
+                color = androidx.compose.ui.graphics.lerp(b.muted, b.ink, e),
+                maxLines = 1,
+                modifier = Modifier
+                    .onPlaced { c ->
+                        val x = c.positionInParent().x.toInt()
+                        starts[i] = if (rtl) (rowWidth - x - c.size.width).coerceAtLeast(0) else x
+                    }
+                    .then(if (i == pager.currentPage) Modifier.semantics { heading() } else Modifier)
+                    .selectable(selected = i == pager.currentPage, role = Role.Tab) { onPick(i) }
+                    .heightIn(min = 44.dp)
+                    .padding(vertical = 2.dp),
+            )
         }
     }
 }

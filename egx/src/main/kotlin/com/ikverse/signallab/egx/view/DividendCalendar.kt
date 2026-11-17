@@ -114,12 +114,12 @@ fun addToCalendar(context: Context, e: DividendEntry) {
 
 @Composable
 fun DividendPage(v: DividendMonth, posture: Posture, tr: Tr, onMonth: (YearMonth) -> Unit, onStock: (String) -> Unit, onAdd: (DividendEntry) -> Unit, onBack: () -> Unit) {
-    val c = LocalCalm.current
+    val c = LocalBoard.current
     val grid: @Composable ColumnScope.() -> Unit = {
         Back(tr.t("Back"), onBack)
         Title(tr.t("Dividends"))
         Lead(tr.t("Each dividend's last day to hold and the day its cash arrives."))
-        CalmCard {
+        BoardCard {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text("‹", style = Type.name, color = c.ink, modifier = Modifier.clickable(role = Role.Button) { onMonth(v.month.minusMonths(1)) }.padding(horizontal = 12.dp))
                 Text(v.title, style = Type.nameSmall, color = c.ink, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
@@ -130,8 +130,8 @@ fun DividendPage(v: DividendMonth, posture: Posture, tr: Tr, onMonth: (YearMonth
                 for (d in week) Box(Modifier.weight(1f).aspectRatio(1f).padding(2.dp), contentAlignment = Alignment.Center) {
                     if (d != null) {
                         val on = d in v.marked
-                        Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(100)).background(if (on) c.buyCard else androidx.compose.ui.graphics.Color.Transparent), contentAlignment = Alignment.Center) {
-                            Text(tr.digits(d.dayOfMonth.toString()), style = Type.small, color = if (on) c.up else c.ink)
+                        Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(100)).background(if (on) c.buyTop else androidx.compose.ui.graphics.Color.Transparent), contentAlignment = Alignment.Center) {
+                            Text(tr.digits(d.dayOfMonth.toString()), style = Type.small, color = if (on) c.buy else c.ink)
                         }
                     }
                 }
@@ -139,8 +139,8 @@ fun DividendPage(v: DividendMonth, posture: Posture, tr: Tr, onMonth: (YearMonth
         }
     }
     val list: @Composable ColumnScope.() -> Unit = {
-        if (v.entries.isEmpty()) CalmCard { Note(tr.t("No dividend dates this month.")) }
-        for (e in v.entries) CalmCard {
+        if (v.entries.isEmpty()) BoardCard { Note(tr.t("No dividend dates this month.")) }
+        for (e in v.entries) BoardCard {
             Note("${dayText(EgxTime.date(e.day), tr)} · ${e.title}")
             Text(e.name, style = Type.nameSmall, color = c.ink, modifier = Modifier.clickable(role = Role.Button) { onStock(e.code) })
             Note("${e.code} · ${e.line}")

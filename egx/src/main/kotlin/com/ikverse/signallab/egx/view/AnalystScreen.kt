@@ -52,29 +52,29 @@ fun AnalystPage(
     onStop: () -> Unit,
     onNew: () -> Unit,
 ) {
-    val c = LocalCalm.current
+    val c = LocalBoard.current
     val scope = rememberCoroutineScope()
     var question by remember { mutableStateOf("") }
     val ask: @Composable ColumnScope.() -> Unit = {
-        Title(tr.t("Analyst"))
+
         Lead(tr.t("Ask about your strategies, calls and stocks. Claude answers on your PC, from this phone's own numbers."))
         if (paired == null) PairCard(tr, onProbe, onConfirm, onScan, scope)
         else {
-            CalmCard {
+            BoardCard {
                 OutlinedTextField(question, { question = it }, label = { Text(tr.t("Your question")) }, modifier = Modifier.fillMaxWidth(), minLines = 2)
-                if (state is AskState.Running) SecondButton(tr.t("Stop"), onStop)
+                if (state is AskState.Running) SecondButton(tr.t("Stop"), onClick = onStop)
                 else PrimaryButton(tr.t("Ask")) { if (question.isNotBlank()) { onAsk(question.trim()); question = "" } }
                 if (hasConversation && state !is AskState.Running) Text(tr.t("New conversation"), style = Type.small, color = c.muted, modifier = Modifier.clickable(role = Role.Button, onClick = onNew))
             }
             if (state is AskState.Idle && !hasConversation) for (s in starterQuestions(tr)) Text("› $s", style = Type.body, color = c.ink, modifier = Modifier.clickable(role = Role.Button) { onAsk(s) })
             when (state) {
-                is AskState.Running -> CalmCard(state.question) {
+                is AskState.Running -> BoardCard(state.question) {
                     Note(state.working?.let { tr.t("Working: %1\$s", it) } ?: tr.t("Thinking on your PC…"))
                     if (state.text.isNotEmpty()) Text(plain(state.text), style = Type.body, color = c.ink)
                 }
-                is AskState.Done -> CalmCard(state.question) { Text(plain(state.answer), style = Type.body, color = c.ink) }
-                is AskState.Failed -> CalmCard(state.question) {
-                    Text(tr.t("The analyst could not answer."), style = Type.body, color = c.down)
+                is AskState.Done -> BoardCard(state.question) { Text(plain(state.answer), style = Type.body, color = c.ink) }
+                is AskState.Failed -> BoardCard(state.question) {
+                    Text(tr.t("The analyst could not answer."), style = Type.body, color = c.sell)
                     // The host's own words stay as they come, left to right.
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) { Note(state.message) }
                 }
@@ -86,31 +86,31 @@ fun AnalystPage(
         if (answers.isNotEmpty()) Text(tr.t("Earlier answers"), style = Type.small, color = c.muted)
         for (a in answers.take(20)) {
             var open by remember(a.id) { mutableStateOf(false) }
-            CalmCard {
+            BoardCard {
                 Text(a.question, style = Type.nameSmall, color = c.ink, modifier = Modifier.clickable(role = Role.Button) { open = !open })
                 Note(dayYear(com.ikverse.signallab.egx.data.EgxTime.today(a.at), tr))
                 if (open) Text(plain(a.answer), style = Type.body, color = c.ink)
             }
         }
-        if (paired != null) CalmCard(tr.t("Your PC")) {
+        if (paired != null) BoardCard(tr.t("Your PC")) {
             Kv(tr.t("Address"), paired.address)
             Kv(tr.t("Fingerprint ends"), paired.pin.takeLast(6))
-            SecondButton(tr.t("Forget this PC"), onForget)
+            SecondButton(tr.t("Forget this PC"), onClick = onForget)
         }
-        CalmCard { Note(tr.t("The analyst only reads. It cannot place, change or delete anything. Not financial advice.")) }
+        BoardCard { Note(tr.t("The analyst only reads. It cannot place, change or delete anything. Not financial advice.")) }
     }
     Panes(posture, ask, past)
 }
 
 @Composable
 private fun PairCard(tr: Tr, onProbe: suspend (String, String) -> HostProbe, onConfirm: (HostProbe) -> Unit, onScan: suspend () -> Unit, scope: kotlinx.coroutines.CoroutineScope) {
-    val c = LocalCalm.current
+    val c = LocalBoard.current
     var address by remember { mutableStateOf("") }
     var code by remember { mutableStateOf("") }
     var probe by remember { mutableStateOf<HostProbe?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
-    CalmCard(tr.t("Pair with your PC")) {
+    BoardCard(tr.t("Pair with your PC")) {
         Note(tr.t("On the PC, open ClaudeIn and choose \"Pair a device…\" in its tray menu. Scan the QR code it shows, or type the address and code."))
         val p = probe
         if (p == null) {
@@ -132,7 +132,7 @@ private fun PairCard(tr: Tr, onProbe: suspend (String, String) -> HostProbe, onC
                 }
             }
             error?.let { e ->
-                Text(tr.t("Could not pair."), style = Type.body, color = c.down)
+                Text(tr.t("Could not pair."), style = Type.body, color = c.sell)
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) { Note(e) }
             }
         } else {

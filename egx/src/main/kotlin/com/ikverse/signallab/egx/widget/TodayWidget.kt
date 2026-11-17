@@ -97,11 +97,11 @@ class TodayWidget : GlanceAppWidget() {
         val SMALL = DpSize(110.dp, 110.dp)
         val WIDE = DpSize(250.dp, 110.dp)
 
-        // The design's colours ("Calm with cards"): light page and text, then dark.
-        private val PAGE = ColorProvider(day = Color(0xFFF3F6F4), night = Color(0xFF181C1B))
-        private val INK = ColorProvider(day = Color(0xFF0F1513), night = Color(0xFFEEF2F0))
-        private val MUTED = ColorProvider(day = Color(0xFF64706B), night = Color(0xFF8C9692))
-        private val BUY = ColorProvider(day = Color(0xFF0B8F63), night = Color(0xFF3DD9A0))
+        // The design's colours ("Bright board"): Paper and stone by day, near-black navy at night.
+        private val PAGE = ColorProvider(day = Color(0xFFE4E0D8), night = Color(0xFF172131))
+        private val INK = ColorProvider(day = Color(0xFF1D1C1A), night = Color(0xFFE9EEF6))
+        private val MUTED = ColorProvider(day = Color(0xFF57534C), night = Color(0xFF93A0B5))
+        private val BUY = ColorProvider(day = Color(0xFF0B5C43), night = Color(0xFF3DDC9F))
 
         /** Redraws every placed widget; called after each evening pass. Harmless when none is placed. */
         suspend fun refresh(context: Context) {

@@ -788,3 +788,27 @@ widget, and the AI analyst through the PC host.
 - Notifications: one for the evening's picks; one for each shown pick that reached a target or closed under its stop.
 - The pass takes about 14 seconds on the PC with the picks (`FullEveningPassTest` on the recorded data). Not tried on the
   Fold. The 88 Arabic rows are to check.
+
+## Signal Lab EGX: "Bright board" redesign and standard Arabic (branch `egx-redesign`, 2026-11-17)
+
+Approved by the owner as one plan after a mockup round (https://claude.ai/artifact/K9XwUp8835BSXzWxPKGtZ4). Decisions made
+while building:
+
+- The theme is a new `Board` palette in `Theme.kt`; the old `Calm` class is gone rather than kept beside it, since every
+  screen was rewritten anyway. Headlines use IBM Plex Sans Arabic (semibold and bold files only, about 490 KB); body text
+  stays Readex Pro. Licence in `assets/licences/IBMPlexSansArabic-OFL.txt`.
+- Motion is off when Android's animator scale is 0 (`LocalReduceMotion`), checked once per theme.
+- The page names along the top follow the pager's scroll position, so a swipe moves the emphasis with the finger. On a
+  half-folded phone the row sits at the top of the lower half (`LocalTabRow`, drawn by `Tabletop`).
+- The call and pick pages read the stock's stored closes for their chart (`chartData` in `EgxRoot.kt`), the same rows the
+  stock page reads. The chart scales to the price range grown by at most 40% to take the levels in; a level beyond is
+  pinned to the edge with an arrow, as in EGX Analyzer.
+- View models gained fields only, with defaults: `StrategyView.curve`, and on `TodayView` the account, EGX30 and cash
+  curves and the EGX30's last 20 closes. No existing number or text changed, and their tests still pass unchanged.
+- The ladder's reward-to-risk is the far target over the stop, both from the top of the entry range.
+- "Order of the day" lists the sells at the open, then the buys near the close; it shows when there is room (unfolded,
+  half-folded), not on the cover screen.
+- The Arabic table was rewritten into Modern Standard Arabic (408 rows changed; column 1 and every placeholder unchanged,
+  checked by script). Coupon wording became توزيعات, cash became النقد, EGP became ج.م. Counting nouns stay سهم and يوم
+  after numbers, as the screens wrote before. 16 rows added for the new texts. The owner reads the Arabic before an install.
+- Not done: the full-screen chart from EGX Analyzer, and touch scrubbing on the chart. Not tried on the Fold.
