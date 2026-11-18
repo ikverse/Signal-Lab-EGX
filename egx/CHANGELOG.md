@@ -1,5 +1,14 @@
 # Signal Lab EGX: changes
 
+## 0.4.1
+
+A fix. Every call is still on paper, and nothing here is financial advice.
+
+- **Ledger and Settings no longer crash.** Swiping or tapping to either page closed the app since 0.4.0; the
+  pounds/dollars/gold, targets and language switches now draw. Opening a call's or a pick's chart no longer crashes either.
+
+Not verified yet: not tried on the phone.
+
 ## 0.4.0
 
 A new look, and Arabic in standard Arabic. Every call is still on paper, and nothing here is financial advice.
