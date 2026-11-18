@@ -9,7 +9,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -252,12 +252,18 @@ fun Bars(rows: List<BarRow>, tr: Tr, mine: Color = LocalBoard.current.buy) {
     }
 }
 
-/** A choice of a few, whose highlight slides to the option pressed. */
+/**
+ * A choice of a few, whose highlight slides to the option pressed. A plain Box that measures its own width: the height
+ * comes from the options (IntrinsicSize.Min), which a BoxWithConstraints cannot answer, and asking it crashed the page.
+ */
 @Composable
 fun Seg(options: List<String>, selected: Int, onPick: (Int) -> Unit) {
     val b = LocalBoard.current
-    BoxWithConstraints(Modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(Pill).background(b.chip).border(1.dp, b.line, Pill).padding(4.dp)) {
-        val w = maxWidth / options.size
+    val density = androidx.compose.ui.platform.LocalDensity.current
+    var widthPx by remember { mutableStateOf(0) }
+    Box(Modifier.fillMaxWidth().height(IntrinsicSize.Min).clip(Pill).background(b.chip).border(1.dp, b.line, Pill).padding(4.dp)
+        .onSizeChanged { widthPx = it.width }) {
+        val w = with(density) { widthPx.toDp() } / options.size
         val x by animateDpAsState(w * selected, Motion.slide, label = "seg")
         Box(Modifier.offset(x = x).width(w).fillMaxHeight().clip(Pill).background(b.accent))
         Row(Modifier.fillMaxWidth()) {
